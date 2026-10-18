@@ -8,21 +8,41 @@ import { bannerSlides } from "@/config/banners";
 import { trendingGames, trendingSports, type Sport } from "@/config/lobby";
 import { GameCover } from "@/components/lobby/GameCover";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
+import { LobbyLink } from "@/components/lobby/LobbyLink";
+import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { fill, localeChoices } from "@/i18n";
 import { animate, reduceMotion } from "@/lib/motion";
 
-const PAGE_SIZE = 8;
+const PREVIEW_COUNT = 8;
+const HOME_SCROLL_KEY = "lobby-home-scroll";
 
-export function LobbyScreen() {
+
+export type LobbyFocus = "home" | "games" | "sports";
+
+export function LobbyScreen({ focus = "home" }: { focus?: LobbyFocus }) {
   const [query, setQuery] = useState("");
-  const [gameLimit, setGameLimit] = useState(PAGE_SIZE);
-  const [sportLimit, setSportLimit] = useState(PAGE_SIZE);
   const [languageOpen, setLanguageOpen] = useState(false);
   const { locale, setLocale, t } = useI18n();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [signInOpen, setSignInOpen] = useState(false);
   const [authView, setAuthView] = useState<AuthView>("login");
   const [cookiesOn, setCookiesOn] = useState(true);
+  const [provider, setProvider] = useState<string | null>(null);
+
+  // The router may keep the lobby mounted while a "View all" page is open and
+  // show it again on the way back. Put the scroll position where it was before
+  // leaving, in the same commit as the swap, so the cross-fade lands on it.
+  const returning = useRef(false);
+  useLayoutEffect(() => {
+    if (focus !== "home") return;
+    if (!returning.current) {
+      returning.current = true;
+      window.sessionStorage.removeItem(HOME_SCROLL_KEY);
+      return;
+    }
+    const saved = Number(window.sessionStorage.getItem(HOME_SCROLL_KEY));
+    if (saved > 0) window.scrollTo({ top: saved, behavior: "instant" });
+  }, [focus]);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -57,14 +77,15 @@ export function LobbyScreen() {
     [needle, t],
   );
   const sections = [
-    { id: "games", kind: "games" as const, title: t.lobby.trendingGames },
-    { id: "sports", kind: "sports" as const, title: t.lobby.trendingSports },
-  ];
+    { id: "games", kind: "games" as const, title: t.lobby.trendingGames, href: "/games" },
+    { id: "sports", kind: "sports" as const, title: t.lobby.trendingSports, href: "/sports" },
+  ].filter((section) => focus === "home" || section.kind === focus);
+  const preview = focus === "home" && !needle;
 
   return (
     <div className="min-h-full bg-lobby text-ink">
       <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} initialView={authView} />
-      <header className="sticky top-0 z-40 grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-white/10 bg-lobby px-3">
+      <header style={{ viewTransitionName: "lobby-header" }} className="sticky top-0 z-40 grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-white/10 bg-lobby px-3">
         <div>
           <button
             type="button"
@@ -146,9 +167,20 @@ export function LobbyScreen() {
           </aside>
         </div>
 
-        <main id="content" className="min-w-0 flex-1 px-3 py-4 sm:px-5">
-          <Hero />
-          <label className="relative mt-4 block">
+        <main id="content" data-route={focus === "home" ? "/" : `/${focus}`} className="min-w-0 flex-1 px-3 py-4 sm:px-5">
+          <div className="lobby-vt-top">
+            {focus === "home" ? <Hero /> : (
+              <LobbyLink
+                href="/"
+                scroll={false}
+                className="inline-flex items-center text-sm font-semibold text-muted hover:text-white"
+              >
+                <span aria-hidden="true" className="mr-1">‹</span>
+                {t.lobby.back}
+              </LobbyLink>
+            )}
+          </div>
+          <label className="lobby-vt-search relative mt-4 block">
             <span className="sr-only">{t.lobby.search}</span>
             <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted">
               <SearchIcon />
@@ -165,6 +197,8 @@ export function LobbyScreen() {
             </kbd>
           </label>
 
+          <div className="lobby-vt-content">
+          {focus === "games" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
           <div className="mt-6 space-y-8">
             {sections.map((section) =>
               section.kind === "games" ? (
@@ -172,10 +206,9 @@ export function LobbyScreen() {
                   key={section.id}
                   title={section.title}
                   count={games.length}
-                  limit={needle ? games.length : gameLimit}
-                  onMore={() => setGameLimit((limit) => limit + PAGE_SIZE)}
+                  href={focus === "home" ? section.href : undefined}
                 >
-                  {games.slice(0, needle ? games.length : gameLimit).map((game) => (
+                  {(preview ? games.slice(0, PREVIEW_COUNT) : games).map((game) => (
                     <GameCover key={game.id} game={game} fluid />
                   ))}
                 </CardRow>
@@ -184,10 +217,9 @@ export function LobbyScreen() {
                   key={section.id}
                   title={section.title}
                   count={sports.length}
-                  limit={needle ? sports.length : sportLimit}
-                  onMore={() => setSportLimit((limit) => limit + PAGE_SIZE)}
+                  href={focus === "home" ? section.href : undefined}
                 >
-                  {sports.slice(0, needle ? sports.length : sportLimit).map((sport) => (
+                  {(preview ? sports.slice(0, PREVIEW_COUNT) : sports).map((sport) => (
                     <SportCard key={sport.id} sport={sport} />
                   ))}
                 </CardRow>
@@ -195,6 +227,7 @@ export function LobbyScreen() {
             )}
           </div>
           <LobbyFooter />
+          </div>
         </main>
       </div>
 
@@ -336,38 +369,40 @@ function Hero() {
 function CardRow({
   title,
   count,
-  limit,
-  onMore,
+  href,
   children,
 }: {
   title: string;
   count: number;
-  limit: number;
-  onMore: () => void;
+  href?: string;
   children: ReactNode;
 }) {
   const { t } = useI18n();
 
   return (
     <section aria-label={title}>
-      <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-        {title}
-        <span aria-hidden="true" className="text-brand">›</span>
-      </h2>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="text-lg font-semibold">{title}</h2>
+        {href ? (
+          <LobbyLink
+            href={href}
+            onGo={() => window.sessionStorage.setItem(HOME_SCROLL_KEY, String(Math.round(window.scrollY)))}
+            className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-brand hover:underline"
+          >
+            {t.lobby.viewAll}
+            <span aria-hidden="true">›</span>
+          </LobbyLink>
+        ) : null}
+      </div>
       {count === 0 ? (
         <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-8 text-center text-sm text-muted">
           {t.lobby.noMatches}
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">{children}</div>
-      )}
-      {count > limit ? (
-        <div className="mt-4 text-center">
-          <button type="button" onClick={onMore} className="text-sm font-semibold text-brand hover:underline">
-            {t.lobby.loadMore}
-          </button>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
+          {children}
         </div>
-      ) : null}
+      )}
     </section>
   );
 }

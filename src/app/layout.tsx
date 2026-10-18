@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import { BootLoader } from "@/components/BootLoader";
 import { I18nProvider } from "@/components/I18nProvider";
+import { LobbyTransitionBoot } from "@/components/LobbyTransitionBoot";
 import { SkipLink } from "@/components/SkipLink";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <I18nProvider>
           <BootLoader />
+          <LobbyTransitionBoot />
           <div id="app-shell">
             <SkipLink />
             {children}

@@ -51,6 +51,95 @@ body {
   border: 0;
 }
 
+/* Lobby <-> "View all" page transitions (see src/lib/lobbyTransition.ts).
+   The header and the rest of the page stay put, the search bar glides to its
+   new place, and the hero/back row and the content below cross-fade with a
+   short slide of the incoming page (rising going forward, dropping when going
+   back). Only the visible page has boxes, so the shared names never collide. */
+.lobby-vt-top {
+  view-transition-name: lobby-top;
+}
+
+.lobby-vt-search {
+  view-transition-name: lobby-search;
+}
+
+.lobby-vt-content {
+  view-transition-name: lobby-content;
+}
+
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(lobby-header) {
+  animation: none;
+  z-index: 100;
+}
+
+::view-transition-old(lobby-header) {
+  display: none;
+}
+
+::view-transition-new(lobby-header) {
+  animation: none;
+}
+
+::view-transition-group(lobby-search) {
+  animation-duration: 260ms;
+  animation-timing-function: cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+::view-transition-group(lobby-top),
+::view-transition-group(lobby-content) {
+  animation: none;
+}
+
+::view-transition-old(lobby-top),
+::view-transition-old(lobby-content) {
+  animation: 140ms ease-in both lobby-fade reverse;
+}
+
+::view-transition-new(lobby-top),
+::view-transition-new(lobby-content) {
+  --lobby-rise: 12px;
+  animation:
+    240ms ease-out 40ms both lobby-fade,
+    260ms cubic-bezier(0.22, 0.8, 0.3, 1) 40ms both lobby-rise;
+}
+
+html[data-lobby-dir="back"]::view-transition-new(lobby-top),
+html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
+  --lobby-rise: -12px;
+}
+
+@keyframes lobby-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lobby-rise {
+  from {
+    translate: 0 var(--lobby-rise, 12px);
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
 .no-scrollbar {
   scrollbar-width: none;
 }

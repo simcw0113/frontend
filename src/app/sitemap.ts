@@ -8,5 +8,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 1,
     },
+    {
+      url: `${siteConfig.url}/games`,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${siteConfig.url}/sports`,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
   ];
 }
