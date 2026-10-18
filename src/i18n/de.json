@@ -1,0 +1,93 @@
+{
+  "siteName": "Game Lobby",
+  "brand": "Lobby",
+  "skip": "Zum Inhalt springen",
+  "menu": {
+    "hide": "Menü ausblenden",
+    "show": "Menü anzeigen"
+  },
+  "auth": {
+    "signIn": "Anmelden",
+    "register": "Registrieren",
+    "back": "Zurück zur Lobby",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "pending": "Anmeldung läuft…",
+    "intro": "Nach der Anmeldung bleibt das Sitzungstoken in diesem Browser und wird mit späteren API-Anfragen gesendet."
+  },
+  "language": {
+    "label": "Sprache",
+    "en": "English",
+    "es": "Spanish",
+    "de": "German",
+    "zh": "Chinese"
+  },
+  "lobby": {
+    "search": "Suche",
+    "searchPlaceholder": "{name} suchen",
+    "casino": "Casino",
+    "sports": "Sport",
+    "playing": "{count} spielen",
+    "betting": "{count} wetten",
+    "trendingGames": "Beliebte Spiele",
+    "trendingSports": "Beliebte Sportarten",
+    "loadMore": "Mehr laden",
+    "noMatches": "Nichts passt zu dieser Suche.",
+    "promotions": "Aktionen",
+    "showBanner": "Banner {n} anzeigen",
+    "previous": "Vorheriges Bild",
+    "next": "Nächstes Bild",
+    "bannerAlt": "Aktionsbanner {n}"
+  },
+  "cookies": {
+    "title": "Wir verwenden Cookies",
+    "body": "Cookies halten die Seite am Laufen. Dieser Hinweis speichert kein Konto.",
+    "accept": "Akzeptieren"
+  },
+  "footer": {
+    "payment": "Zahlungsmethode",
+    "follow": "Folgen Sie uns",
+    "licenses": "Lizenzen",
+    "fair": "fair",
+    "check": "PRÜFUNG",
+    "secure": "Sicher",
+    "legal1": "{name} ist eine Vorschau. Name, Registrierung und Adresse des Betreibers erscheinen in dieser Zeile.",
+    "legal2": "Lizenz- und Aufsichtsangaben werden ergänzt, sobald sie vorliegen.",
+    "legal3": "Ein Support-Kontakt erscheint hier.",
+    "columns": [
+      {
+        "title": "Allgemein",
+        "items": ["AGB", "Datenschutz", "Partnerprogramm", "Blog"]
+      },
+      {
+        "title": "Spiele",
+        "items": ["Live-Casino", "Sport", "Slots"]
+      },
+      {
+        "title": "Info",
+        "items": ["Verantwortungsvolles Spielen", "Faires Spiel", "Selbstsperre", "KYC-Richtlinie"]
+      }
+    ]
+  },
+  "sports": {
+    "football": "American Football",
+    "soccer": "Fußball",
+    "tennis": "Tennis",
+    "cricket": "Cricket",
+    "baseball": "Baseball",
+    "mma": "MMA",
+    "cs2": "CS2",
+    "racing": "Pferderennen",
+    "boxing": "Boxen",
+    "golf": "Golf",
+    "basketball": "Basketball",
+    "formula": "Formel"
+  },
+  "errors": {
+    "unreachable": "Die API ist nicht erreichbar.",
+    "api_unconfigured": "Die API-Adresse ist noch nicht konfiguriert.",
+    "api_unexpected": "Die API hat eine unerwartete Antwort geliefert.",
+    "api_failed": "Die Anfrage konnte nicht abgeschlossen werden.",
+    "token_missing": "Die Anmeldeantwort enthielt kein Token."
+  }
+}

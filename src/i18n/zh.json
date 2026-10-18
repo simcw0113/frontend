@@ -1,0 +1,93 @@
+{
+  "siteName": "Game Lobby",
+  "brand": "Lobby",
+  "skip": "跳到内容",
+  "menu": {
+    "hide": "隐藏菜单",
+    "show": "显示菜单"
+  },
+  "auth": {
+    "signIn": "登录",
+    "register": "注册",
+    "back": "返回大厅",
+    "email": "邮箱",
+    "password": "密码",
+    "pending": "正在登录…",
+    "intro": "登录成功后，会话令牌会保存在此浏览器中，并在之后的 API 请求里发送。"
+  },
+  "language": {
+    "label": "语言",
+    "en": "English",
+    "es": "Spanish",
+    "de": "German",
+    "zh": "Chinese"
+  },
+  "lobby": {
+    "search": "搜索",
+    "searchPlaceholder": "搜索 {name}",
+    "casino": "娱乐场",
+    "sports": "体育",
+    "playing": "{count} 人在玩",
+    "betting": "{count} 人在投注",
+    "trendingGames": "热门游戏",
+    "trendingSports": "热门体育",
+    "loadMore": "加载更多",
+    "noMatches": "没有符合的结果。",
+    "promotions": "优惠",
+    "showBanner": "显示横幅 {n}",
+    "previous": "上一张",
+    "next": "下一张",
+    "bannerAlt": "优惠横幅 {n}"
+  },
+  "cookies": {
+    "title": "我们使用 Cookie",
+    "body": "Cookie 用于维持网站运行。此提示不会保存账户。",
+    "accept": "接受"
+  },
+  "footer": {
+    "payment": "支付方式",
+    "follow": "关注我们",
+    "licenses": "牌照",
+    "fair": "公平",
+    "check": "核验",
+    "secure": "安全",
+    "legal1": "{name} 目前是预览。运营商名称、注册信息和地址会写在这里。",
+    "legal2": "牌照和监管信息确定后会补充在这里。",
+    "legal3": "客服联系方式会显示在这里。",
+    "columns": [
+      {
+        "title": "常规",
+        "items": ["条款", "隐私政策", "联盟计划", "博客"]
+      },
+      {
+        "title": "游戏",
+        "items": ["真人娱乐场", "体育", "老虎机"]
+      },
+      {
+        "title": "信息",
+        "items": ["责任博彩", "公平游戏", "自我排除", "KYC 政策"]
+      }
+    ]
+  },
+  "sports": {
+    "football": "美式足球",
+    "soccer": "足球",
+    "tennis": "网球",
+    "cricket": "板球",
+    "baseball": "棒球",
+    "mma": "综合格斗",
+    "cs2": "CS2",
+    "racing": "赛马",
+    "boxing": "拳击",
+    "golf": "高尔夫",
+    "basketball": "篮球",
+    "formula": "一级方程式"
+  },
+  "errors": {
+    "unreachable": "无法连接 API。",
+    "api_unconfigured": "尚未配置 API 地址。",
+    "api_unexpected": "API 返回了无法识别的响应。",
+    "api_failed": "请求未能完成。",
+    "token_missing": "登录响应中没有令牌。"
+  }
+}

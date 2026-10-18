@@ -1,0 +1,93 @@
+{
+  "siteName": "Game Lobby",
+  "brand": "Lobby",
+  "skip": "Skip to content",
+  "menu": {
+    "hide": "Hide menu",
+    "show": "Show menu"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "register": "Register",
+    "back": "Back to lobby",
+    "email": "Email",
+    "password": "Password",
+    "pending": "Signing in…",
+    "intro": "After a successful sign-in, the session token stays in this browser and is sent with later API requests."
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "es": "Spanish",
+    "de": "German",
+    "zh": "Chinese"
+  },
+  "lobby": {
+    "search": "Search",
+    "searchPlaceholder": "Search {name}",
+    "casino": "Casino",
+    "sports": "Sports",
+    "playing": "{count} playing",
+    "betting": "{count} betting",
+    "trendingGames": "Trending games",
+    "trendingSports": "Trending sports",
+    "loadMore": "Load more",
+    "noMatches": "Nothing matches that search.",
+    "promotions": "Promotions",
+    "showBanner": "Show banner {n}",
+    "previous": "Previous slide",
+    "next": "Next slide",
+    "bannerAlt": "Promotion banner {n}"
+  },
+  "cookies": {
+    "title": "We use cookies",
+    "body": "Cookies keep the site working. This notice does not store an account.",
+    "accept": "Accept"
+  },
+  "footer": {
+    "payment": "Payment Method",
+    "follow": "Follow us",
+    "licenses": "Licenses",
+    "fair": "fair",
+    "check": "CHECK",
+    "secure": "Secure",
+    "legal1": "{name} is a preview. The operator name, registration, and address will be published in this line.",
+    "legal2": "License and regulator details will be added when they are available.",
+    "legal3": "A support contact will appear here.",
+    "columns": [
+      {
+        "title": "General",
+        "items": ["T&C", "Privacy Policy", "Affiliate Program", "Blog"]
+      },
+      {
+        "title": "Games",
+        "items": ["Live Casino", "Sports", "Slots"]
+      },
+      {
+        "title": "Info",
+        "items": ["Responsible Gaming", "Fairness Gaming", "Self-Exclusion", "KYC Policy"]
+      }
+    ]
+  },
+  "sports": {
+    "football": "American Football",
+    "soccer": "Soccer",
+    "tennis": "Tennis",
+    "cricket": "Cricket",
+    "baseball": "Baseball",
+    "mma": "MMA",
+    "cs2": "CS2",
+    "racing": "Horse Racing",
+    "boxing": "Boxing",
+    "golf": "Golf",
+    "basketball": "Basketball",
+    "formula": "Formula"
+  },
+  "errors": {
+    "unreachable": "Could not reach the API.",
+    "api_unconfigured": "The API address is not configured yet.",
+    "api_unexpected": "The API returned an unexpected response.",
+    "api_failed": "The request could not be completed.",
+    "token_missing": "The sign-in response did not include a token."
+  }
+}

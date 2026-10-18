@@ -1,0 +1,93 @@
+{
+  "siteName": "Game Lobby",
+  "brand": "Lobby",
+  "skip": "Saltar al contenido",
+  "menu": {
+    "hide": "Ocultar menú",
+    "show": "Mostrar menú"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "register": "Registrarse",
+    "back": "Volver al lobby",
+    "email": "Correo",
+    "password": "Contraseña",
+    "pending": "Iniciando sesión…",
+    "intro": "Tras iniciar sesión, el token de la sesión permanece en este navegador y se envía con las siguientes solicitudes a la API."
+  },
+  "language": {
+    "label": "Idioma",
+    "en": "English",
+    "es": "Spanish",
+    "de": "German",
+    "zh": "Chinese"
+  },
+  "lobby": {
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar {name}",
+    "casino": "Casino",
+    "sports": "Deportes",
+    "playing": "{count} jugando",
+    "betting": "{count} apostando",
+    "trendingGames": "Juegos en tendencia",
+    "trendingSports": "Deportes en tendencia",
+    "loadMore": "Cargar más",
+    "noMatches": "Nada coincide con esa búsqueda.",
+    "promotions": "Promociones",
+    "showBanner": "Mostrar banner {n}",
+    "previous": "Diapositiva anterior",
+    "next": "Diapositiva siguiente",
+    "bannerAlt": "Banner de promoción {n}"
+  },
+  "cookies": {
+    "title": "Usamos cookies",
+    "body": "Las cookies mantienen el sitio en funcionamiento. Este aviso no guarda una cuenta.",
+    "accept": "Aceptar"
+  },
+  "footer": {
+    "payment": "Método de pago",
+    "follow": "Síguenos",
+    "licenses": "Licencias",
+    "fair": "justo",
+    "check": "REVISIÓN",
+    "secure": "Seguro",
+    "legal1": "{name} es una vista previa. El nombre del operador, el registro y la dirección se publicarán en esta línea.",
+    "legal2": "Los datos de la licencia y del regulador se añadirán cuando estén disponibles.",
+    "legal3": "Aquí aparecerá un contacto de soporte.",
+    "columns": [
+      {
+        "title": "General",
+        "items": ["Términos", "Política de privacidad", "Programa de afiliados", "Blog"]
+      },
+      {
+        "title": "Juegos",
+        "items": ["Casino en vivo", "Deportes", "Tragamonedas"]
+      },
+      {
+        "title": "Información",
+        "items": ["Juego responsable", "Juego justo", "Autoexclusión", "Política KYC"]
+      }
+    ]
+  },
+  "sports": {
+    "football": "Fútbol americano",
+    "soccer": "Fútbol",
+    "tennis": "Tenis",
+    "cricket": "Críquet",
+    "baseball": "Béisbol",
+    "mma": "MMA",
+    "cs2": "CS2",
+    "racing": "Carreras de caballos",
+    "boxing": "Boxeo",
+    "golf": "Golf",
+    "basketball": "Baloncesto",
+    "formula": "Fórmula"
+  },
+  "errors": {
+    "unreachable": "No se pudo conectar con la API.",
+    "api_unconfigured": "La dirección de la API aún no está configurada.",
+    "api_unexpected": "La API devolvió una respuesta inesperada.",
+    "api_failed": "No se pudo completar la solicitud.",
+    "token_missing": "La respuesta de inicio de sesión no incluía un token."
+  }
+}
