@@ -1,15 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import type { AuthView } from "@/components/auth/AuthFormPanel";
+import { SignInDialog } from "@/components/SignInDialog";
 import { useI18n } from "@/components/I18nProvider";
 import { bannerSlides } from "@/config/banners";
 import { trendingGames, trendingSports, type Sport } from "@/config/lobby";
 import { GameCover } from "@/components/lobby/GameCover";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
 import { fill, htmlLang, localeChoices } from "@/i18n";
-import { spring } from "animejs";
-import { animate, createTimeline, reduceMotion, stagger } from "@/lib/motion";
+import { animate, reduceMotion } from "@/lib/motion";
 
 const PAGE_SIZE = 8;
 
@@ -23,9 +23,9 @@ export function LobbyScreen() {
   const [languageOpen, setLanguageOpen] = useState(false);
   const { locale, setLocale, t } = useI18n();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [signInOpen, setSignInOpen] = useState(false);
+  const [authView, setAuthView] = useState<AuthView>("login");
   const [cookiesOn, setCookiesOn] = useState(true);
-  const asideRef = useRef<HTMLElement>(null);
-  const menuIconRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -44,48 +44,7 @@ export function LobbyScreen() {
   }
 
   function toggleSidebar() {
-    const aside = asideRef.current;
-    const opening = !sidebarOpen;
-    setSidebarOpen(opening);
-    if (!aside) return;
-
-    if (reduceMotion()) {
-      aside.style.width = opening ? "16rem" : "0px";
-      return;
-    }
-
-    const items = aside.querySelectorAll<HTMLElement>("[data-nav-item]");
-    const timeline = createTimeline();
-    timeline.add(aside, {
-      width: opening ? 256 : 0,
-      duration: 700,
-      ease: spring({ bounce: opening ? 0.2 : 0.04, duration: 700 }),
-      onComplete: () => {
-        aside.style.width = opening ? "16rem" : "0px";
-      },
-    });
-    timeline.add(
-      items,
-      {
-        opacity: opening ? [0, 1] : [1, 0],
-        x: opening ? [-32, 0] : [0, -18],
-        delay: stagger(24, { from: opening ? "first" : "last" }),
-        duration: opening ? 480 : 220,
-        ease: opening ? "outCubic" : "inQuad",
-      },
-      opening ? 80 : 0,
-    );
-    if (menuIconRef.current) {
-      timeline.add(
-        menuIconRef.current,
-        {
-          rotate: opening ? 0 : 180,
-          duration: 520,
-          ease: spring({ bounce: 0.45, duration: 520 }),
-        },
-        0,
-      );
-    }
+    setSidebarOpen((open) => !open);
   }
 
   function dismissCookies() {
@@ -124,6 +83,7 @@ export function LobbyScreen() {
 
   return (
     <div className="min-h-full bg-lobby text-ink">
+      <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} initialView={authView} />
       <header className="sticky top-0 z-40 grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-white/10 bg-lobby px-3">
         <div>
           <button
@@ -133,30 +93,43 @@ export function LobbyScreen() {
             onClick={toggleSidebar}
             className="grid size-10 place-items-center rounded-lg hover:bg-white/10"
           >
-            <MenuIcon iconRef={menuIconRef} />
+            <MenuIcon />
           </button>
         </div>
         <h1 className="font-serif text-3xl tracking-tight italic">
           {t.brand}
         </h1>
         <div className="flex items-center justify-end gap-2">
-          <Link href="/login" className="rounded-lg px-3 py-2 text-sm font-semibold hover:bg-white/10">
+          <button
+            type="button"
+            onClick={() => {
+              setAuthView("login");
+              setSignInOpen(true);
+            }}
+            className="rounded-lg px-3 py-2 text-sm font-semibold hover:bg-white/10"
+          >
             {t.auth.signIn}
-          </Link>
-          <Link href="/login" className="rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-lobby">
-            {t.auth.register}
-          </Link>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setAuthView("register");
+              setSignInOpen(true);
+            }}
+            className="join-glow rounded-lg bg-brand px-3.5 py-2 text-sm font-extrabold tracking-wide whitespace-nowrap text-lobby uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            {t.auth.joinUs}
+          </button>
         </div>
       </header>
 
-      <div className="flex">
-        <aside
-          ref={asideRef}
-          aria-hidden={!sidebarOpen}
-          inert={!sidebarOpen}
-          className="sticky top-16 h-[calc(100vh-4rem)] w-64 shrink-0 overflow-hidden border-r border-white/10 bg-lobby"
-        >
-          <div className="flex w-64 flex-col p-3">
+      <div className={`lobby-shell flex${sidebarOpen ? " is-open" : ""}`}>
+        <div className="lobby-slot sticky top-16 h-[calc(100vh-4rem)] self-start">
+          <aside
+            aria-hidden={!sidebarOpen}
+            inert={!sidebarOpen}
+            className="lobby-aside flex h-full w-64 flex-col border-r border-white/10 bg-lobby p-3"
+          >
             <div className="relative" data-nav-item>
               <button
                 type="button"
@@ -190,8 +163,8 @@ export function LobbyScreen() {
                 </div>
               </Collapse>
             </div>
-          </div>
-        </aside>
+          </aside>
+        </div>
 
         <main id="content" className="min-w-0 flex-1 px-3 py-4 sm:px-5">
           <Hero />
@@ -291,13 +264,24 @@ function Hero() {
     const track = trackRef.current;
     const frame = track?.parentElement;
     if (!track || !frame) return;
-    const x = -index * frame.clientWidth;
+
+    const xFor = () => -index * frame.clientWidth;
     if (!placed.current || reduceMotion()) {
       placed.current = true;
-      track.style.transform = `translateX(${x}px)`;
-      return;
+      track.style.transform = `translateX(${xFor()}px)`;
+    } else {
+      animate(track, { x: xFor(), duration: 780, ease: "outQuint" });
     }
-    animate(track, { x, duration: 780, ease: "outQuint" });
+
+    let width = frame.clientWidth;
+    const observer = new ResizeObserver(() => {
+      const next = frame.clientWidth;
+      if (next === width) return;
+      width = next;
+      track.style.transform = `translateX(${-index * next}px)`;
+    });
+    observer.observe(frame);
+    return () => observer.disconnect();
   }, [index]);
 
   useEffect(() => {
@@ -485,16 +469,9 @@ function StatButton({
   );
 }
 
-function MenuIcon({ iconRef }: { iconRef: RefObject<SVGSVGElement | null> }) {
+function MenuIcon() {
   return (
-    <svg
-      ref={iconRef}
-      viewBox="0 0 24 24"
-      className="size-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
+    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M4 7 H20 M4 12 H20 M4 17 H20" />
     </svg>
   );
@@ -503,6 +480,9 @@ function MenuIcon({ iconRef }: { iconRef: RefObject<SVGSVGElement | null> }) {
 function Collapse({ open, children }: { open: boolean; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const first = useRef(true);
+  const [resting, setResting] = useState<{ height: number | "auto"; opacity: number }>(
+    open ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 },
+  );
 
   useLayoutEffect(() => {
     const panel = ref.current;
@@ -512,8 +492,7 @@ function Collapse({ open, children }: { open: boolean; children: ReactNode }) {
       return;
     }
     if (reduceMotion()) {
-      panel.style.height = open ? "auto" : "0px";
-      panel.style.opacity = open ? "1" : "0";
+      setResting(open ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 });
       return;
     }
     if (open) {
@@ -525,9 +504,7 @@ function Collapse({ open, children }: { open: boolean; children: ReactNode }) {
         opacity: [0, 1],
         duration: 380,
         ease: "outCubic",
-        onComplete: () => {
-          panel.style.height = "auto";
-        },
+        onComplete: () => setResting({ height: "auto", opacity: 1 }),
       });
       return;
     }
@@ -536,6 +513,7 @@ function Collapse({ open, children }: { open: boolean; children: ReactNode }) {
       opacity: [1, 0],
       duration: 240,
       ease: "inQuad",
+      onComplete: () => setResting({ height: 0, opacity: 0 }),
     });
   }, [open]);
 
@@ -543,7 +521,7 @@ function Collapse({ open, children }: { open: boolean; children: ReactNode }) {
     <div
       ref={ref}
       className="overflow-hidden"
-      style={first.current ? { height: open ? "auto" : 0, opacity: open ? 1 : 0 } : undefined}
+      style={{ height: resting.height, opacity: resting.opacity }}
       inert={!open}
       aria-hidden={!open}
     >

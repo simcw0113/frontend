@@ -9,4 +9,5 @@ export const siteConfig = {
 export const apiConfig = {
   baseUrl: (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, ""),
   loginPath: "/auth/login",
+  registerPath: "/auth/register",
 };

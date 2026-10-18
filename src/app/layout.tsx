@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
+import { BootLoader } from "@/components/BootLoader";
 import { I18nProvider } from "@/components/I18nProvider";
 import { SkipLink } from "@/components/SkipLink";
 import { siteConfig } from "@/config/site";
@@ -49,8 +50,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <I18nProvider>
-          <SkipLink />
-          {children}
+          <BootLoader />
+          <div id="app-shell">
+            <SkipLink />
+            {children}
+          </div>
         </I18nProvider>
       </body>
     </html>
