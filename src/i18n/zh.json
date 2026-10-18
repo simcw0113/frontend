@@ -65,10 +65,7 @@
   "lobby": {
     "search": "搜索",
     "searchPlaceholder": "搜索 {name}",
-    "casino": "娱乐场",
-    "sports": "体育",
     "playing": "{count} 人在玩",
-    "betting": "{count} 人在投注",
     "trendingGames": "热门游戏",
     "trendingSports": "热门体育",
     "loadMore": "加载更多",

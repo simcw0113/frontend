@@ -8,15 +8,12 @@ import { bannerSlides } from "@/config/banners";
 import { trendingGames, trendingSports, type Sport } from "@/config/lobby";
 import { GameCover } from "@/components/lobby/GameCover";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
-import { fill, htmlLang, localeChoices } from "@/i18n";
+import { fill, localeChoices } from "@/i18n";
 import { animate, reduceMotion } from "@/lib/motion";
 
 const PAGE_SIZE = 8;
 
-type Area = "casino" | "sports";
-
 export function LobbyScreen() {
-  const [area, setArea] = useState<Area>("casino");
   const [query, setQuery] = useState("");
   const [gameLimit, setGameLimit] = useState(PAGE_SIZE);
   const [sportLimit, setSportLimit] = useState(PAGE_SIZE);
@@ -37,11 +34,6 @@ export function LobbyScreen() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-
-  function pickArea(next: Area) {
-    if (next === area) return;
-    setArea(next);
-  }
 
   function toggleSidebar() {
     setSidebarOpen((open) => !open);
@@ -64,22 +56,10 @@ export function LobbyScreen() {
       }),
     [needle, t],
   );
-  const playing = trendingGames.reduce((sum, game) => sum + game.playing, 0);
-  const betting = 25400;
-
-  const sections = (area === "casino"
-    ? [
-        { id: "games", kind: "games" as const },
-        { id: "sports", kind: "sports" as const },
-      ]
-    : [
-        { id: "sports", kind: "sports" as const },
-        { id: "games", kind: "games" as const },
-      ]
-  ).map((section) => ({
-    ...section,
-    title: section.kind === "games" ? t.lobby.trendingGames : t.lobby.trendingSports,
-  }));
+  const sections = [
+    { id: "games", kind: "games" as const, title: t.lobby.trendingGames },
+    { id: "sports", kind: "sports" as const, title: t.lobby.trendingSports },
+  ];
 
   return (
     <div className="min-h-full bg-lobby text-ink">
@@ -168,21 +148,6 @@ export function LobbyScreen() {
 
         <main id="content" className="min-w-0 flex-1 px-3 py-4 sm:px-5">
           <Hero />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <StatButton
-              label={t.lobby.casino}
-              value={fill(t.lobby.playing, { count: playing.toLocaleString(htmlLang(locale)) })}
-              active={area === "casino"}
-              onClick={() => pickArea("casino")}
-            />
-            <StatButton
-              label={t.lobby.sports}
-              value={fill(t.lobby.betting, { count: betting.toLocaleString(htmlLang(locale)) })}
-              active={area === "sports"}
-              onClick={() => pickArea("sports")}
-            />
-          </div>
-
           <label className="relative mt-4 block">
             <span className="sr-only">{t.lobby.search}</span>
             <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted">
@@ -438,34 +403,6 @@ function SportMark({ id }: { id: string }) {
         <rect x="24" y="20" width="32" height="32" rx="8" fill="white" fillOpacity="0.9" />
       ) : null}
     </svg>
-  );
-}
-
-function StatButton({
-  label,
-  value,
-  active,
-  onClick,
-}: {
-  label: string;
-  value: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex h-14 items-center justify-between rounded-xl border bg-white/5 px-4 text-left ${
-        active ? "border-brand" : "border-white/10"
-      }`}
-    >
-      <span className="font-semibold">{label}</span>
-      <span className="flex items-center gap-2 text-sm text-muted">
-        <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />
-        {value}
-      </span>
-    </button>
   );
 }
 

@@ -65,10 +65,7 @@
   "lobby": {
     "search": "Buscar",
     "searchPlaceholder": "Buscar {name}",
-    "casino": "Casino",
-    "sports": "Deportes",
     "playing": "{count} jugando",
-    "betting": "{count} apostando",
     "trendingGames": "Juegos en tendencia",
     "trendingSports": "Deportes en tendencia",
     "loadMore": "Cargar más",
