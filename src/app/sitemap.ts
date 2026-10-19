@@ -6,6 +6,7 @@ import { languageAlternates, localeSlugs, localizedPath } from "@/i18n/routing";
 const pages = [
   { path: "/", priority: 1 },
   ...casinoCategories.map(({ slug }) => ({ path: `/casino/${slug}`, priority: 0.8 })),
+  { path: "/promotions", priority: 0.7 },
 ];
 
 // One entry per language and page, each listing its translations.

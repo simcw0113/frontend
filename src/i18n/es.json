@@ -5,6 +5,7 @@
   "skip": "Saltar al contenido",
   "menu": {
     "home": "Inicio",
+    "promotions": "Promociones",
     "hide": "Ocultar menú",
     "show": "Mostrar menú"
   },
@@ -90,6 +91,16 @@
   },
   "partners": {
     "title": "Nuestros socios"
+  },
+  "promotions": {
+    "title": "Promociones",
+    "learnMore": "Más info",
+    "joinNow": "Únete ya",
+    "close": "Cerrar",
+    "terms": "Condiciones clave",
+    "period": "{start} – {end}",
+    "empty": "No hay promociones ahora mismo.",
+    "meta": "Promociones y bonos actuales."
   },
   "howTo": {
     "title": "Cómo registrarse",

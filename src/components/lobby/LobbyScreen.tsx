@@ -11,6 +11,7 @@ import { HOME_SCROLL_KEY, HomeGameContent } from "@/components/lobby/HomeGameCon
 import { HowToRegister } from "@/components/lobby/HowToRegister";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
+import { GiftIcon, PromotionsGrid, PromotionsHeader, PromotionsSkeleton } from "@/components/lobby/Promotions";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { SearchModal } from "@/components/lobby/SearchModal";
 import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
@@ -18,6 +19,7 @@ import { fill, localeChoices } from "@/i18n";
 import { toSlug } from "@/i18n/routing";
 import type { CategoryGamesResult } from "@/lib/games";
 import type { PartnersResult } from "@/lib/partners";
+import type { PromotionsResult } from "@/lib/promotions";
 import type { TopWinsResult } from "@/lib/topWins";
 import { animate, reduceMotion } from "@/lib/motion";
 import { setSidebarOpen, useSidebarOpen } from "@/lib/sidebarState";
@@ -26,7 +28,7 @@ const NAV_ITEM =
   "flex h-11 w-full items-center rounded-lg px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 
-export type LobbyFocus = "home" | "casino";
+export type LobbyFocus = "home" | "casino" | "promotions";
 
 // `games` holds one promise per category slug, started on the server (lib/games.ts)
 // and read here with use() inside <Suspense>, so the page shell shows at once.
@@ -36,12 +38,14 @@ export function LobbyScreen({
   games,
   topWins,
   partners,
+  promotions,
 }: {
   focus?: LobbyFocus;
   category?: string;
   games: Record<string, Promise<CategoryGamesResult>>;
   topWins?: Promise<TopWinsResult>; // home only
   partners?: Promise<PartnersResult>; // home only
+  promotions?: Promise<PromotionsResult>; // promotions page only
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
@@ -103,7 +107,11 @@ export function LobbyScreen({
   }
 
   const casino = (category && findCasinoCategory(category)) || defaultCasinoCategory;
-  const route = focus === "home" ? "/" : `/casino/${casino.slug}`;
+  const route = focus === "home" ? "/" : focus === "promotions" ? "/promotions" : `/casino/${casino.slug}`;
+  const openRegister = () => {
+    setAuthView("register");
+    setSignInOpen(true);
+  };
 
   return (
     <div className="min-h-full bg-lobby text-ink">
@@ -178,6 +186,15 @@ export function LobbyScreen({
               <HomeIcon />
               {t.menu.home}
             </LobbyLink>
+            <LobbyLink
+              href="/promotions"
+              onGo={closeSidebarOnSmallScreens}
+              aria-current={focus === "promotions" ? "page" : undefined}
+              className={`${NAV_ITEM} mb-1 gap-3 ${focus === "promotions" ? "bg-brand/15 text-brand" : "hover:bg-white/10"}`}
+            >
+              <GiftIcon />
+              {t.menu.promotions}
+            </LobbyLink>
             <div className="relative" data-nav-item>
               <button
                 type="button"
@@ -220,7 +237,7 @@ export function LobbyScreen({
 
         <main id="content" data-route={route} data-lang={toSlug(locale)} className="min-w-0 flex-1 px-3 py-4 sm:px-5">
           <div className="lobby-vt-top">
-            {focus === "home" ? <Hero /> : (
+            {focus === "home" ? <Hero /> : focus === "promotions" ? <PromotionsHeader /> : (
               <LobbyLink
                 href="/"
                 scroll={false}
@@ -253,6 +270,7 @@ export function LobbyScreen({
               </div>
             ) : null}
           </div>
+          {focus !== "promotions" ? (
           <label className="lobby-vt-search relative mt-4 block">
             <span className="sr-only">{t.lobby.search}</span>
             <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted">
@@ -280,10 +298,21 @@ export function LobbyScreen({
               Ctrl K
             </kbd>
           </label>
+          ) : null}
 
           <div className="lobby-vt-content">
-          {focus === "casino" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
-          <HomeGameContent focus={focus} category={casino} games={games} partners={partners} />
+          {focus === "promotions" ? (
+            promotions ? (
+              <Suspense fallback={<PromotionsSkeleton />}>
+                <PromotionsGrid promise={promotions} onJoin={openRegister} />
+              </Suspense>
+            ) : null
+          ) : (
+            <>
+              {focus === "casino" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
+              <HomeGameContent focus={focus} category={casino} games={games} partners={partners} />
+            </>
+          )}
           <LobbyFooter />
           </div>
         </main>

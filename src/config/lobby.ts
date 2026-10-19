@@ -39,6 +39,7 @@ export type Game = {
   from: string;
   to: string;
   symbol: GameSymbol;
+  image?: string; // cover image URL; without it GameCover draws the gradient + symbol
 };
 
 export type CategoryId = "lobby" | GameTag;
@@ -142,10 +143,17 @@ export const slotsGames: Game[] = [
   { id: "neon-sevens", title: "Neon Sevens", provider: "Evolution", playing: 33, tags: ["slots"], from: "#a855f7", to: "#3b0764", symbol: "seven" },
 ];
 
+// TEMPORARY test cover (public/games/test-cover.jpg) shown on every static game of the home
+// rows and category pages. Remove it from withTestCover (or the constant) to get the drawn
+// covers back; a game's own `image` (e.g. from the API mapper) always wins.
+export const TEST_GAME_COVER = "/games/test-cover.jpg";
+
+const withTestCover = (games: Game[]): Game[] => games.map((game) => ({ ...game, image: game.image ?? TEST_GAME_COVER }));
+
 // Games of each casino category, keyed by slug (see config/categories.ts).
 export const categoryGames: Record<string, Game[]> = {
-  "trending-games": trendingGames,
-  slots: slotsGames,
+  "trending-games": withTestCover(trendingGames),
+  slots: withTestCover(slotsGames),
 };
 
 export const sideNav: { id: string; label: string; items?: string[] }[] = [

@@ -72,6 +72,34 @@ for (const path of ["/en/casino/slots", "/en/casino/trending-games"]) {
   check(`${path} has no How to Register`, !html.includes('id="how-to-register-title"'));
   check(`${path} has no Partners`, !html.includes('class="partners"') && !html.includes('data-skeleton="partners"'));
 }
+// Promotions: sidebar entry right below Home, the page in every language, 9 cards with
+// Learn More, unknown sub-routes 404. (The detail pop-up is checked in a browser.)
+const promoText = {
+  en: ["Promotions", "Learn More"],
+  cn: ["优惠活动", "了解更多"],
+  de: ["Aktionen", "Mehr erfahren"],
+  es: ["Promociones", "Más info"],
+};
+for (const [lang, [title, more]] of Object.entries(promoText)) {
+  const home = await page(`/${lang}`);
+  const aside = home.html.slice(home.html.indexOf('id="lobby-sidebar"'));
+  const homeLink = aside.indexOf(`href="/${lang}"`);
+  const promoLink = aside.indexOf(`href="/${lang}/promotions"`);
+  check(`/${lang} sidebar has Promotions right below Home`, homeLink > -1 && promoLink > homeLink && !aside.slice(homeLink, promoLink).includes("<button"));
+  const { status, html } = await page(`/${lang}/promotions`);
+  const cards = (html.match(/class="promo-card"/g) ?? []).length;
+  const buttons = (html.match(new RegExp(`>${more}</button>`, "g")) ?? []).length;
+  check(`/${lang}/promotions responds 200 with 9 cards, each with ${more} (${title})`, status === 200 && cards === 9 && buttons === 9 && html.includes(title));
+  check(`/${lang}/promotions marks Promotions as the current page`, /aria-current="page"[^>]*href="\/[a-z]+\/promotions"|href="\/[a-z]+\/promotions"[^>]*aria-current="page"/.test(html));
+  check(`/${lang}/promotions has no Top wins or search bar`, !html.includes('id="top-wins-heading"') && !html.includes('id="lobby-search"'));
+}
+for (const path of ["/en/promotions/nope", "/en/promotion"]) {
+  const { status } = await page(path);
+  check(`${path} is 404`, status === 404);
+}
+const sitemap = await page("/sitemap.xml");
+check("sitemap lists /en/promotions", sitemap.html.includes("/en/promotions</loc>"));
+
 const search = await page("/api/games/search?q=dragon");
 check("/api/games/search?q=dragon returns games", search.status === 200 && search.html.includes("Dragon Lantern"));
 const bad = await page("/api/games/search?page=0");

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useI18n } from "@/components/I18nProvider";
 import type { Game, GameSymbol } from "@/config/lobby";
 import { fill, htmlLang } from "@/i18n";
@@ -169,6 +170,9 @@ export function SymbolMark({ symbol, className }: { symbol: GameSymbol; classNam
 
 export function GameCover({ game, fluid = false }: { game: Game; fluid?: boolean }) {
   const { locale, t } = useI18n();
+  // A cover image that fails (also before hydration) falls back to the drawn cover.
+  const [failed, setFailed] = useState(false);
+  const image = game.image && !failed ? game.image : null;
 
   return (
     <article className={`game-card ${fluid ? "min-w-0" : "w-[132px] shrink-0 sm:w-[148px]"}`}>
@@ -176,13 +180,38 @@ export function GameCover({ game, fluid = false }: { game: Game; fluid?: boolean
         className="game-cover relative aspect-[3/4] overflow-hidden rounded-xl"
         style={{ background: `linear-gradient(180deg, ${game.from}, ${game.to})` }}
       >
-        <p className="absolute top-2 right-2 left-2 truncate text-[9px] font-semibold tracking-[0.14em] text-white/75 uppercase">
-          {game.provider}
-        </p>
-        <div className="game-art absolute inset-0 flex items-center justify-center pt-2">
-          <SymbolMark symbol={game.symbol} />
-        </div>
-        <h3 className="absolute inset-x-2 bottom-3 text-[15px] leading-[0.95] font-black tracking-tight text-white uppercase drop-shadow-md">
+        {image ? (
+          // eslint-disable-next-line @next/next/no-img-element -- covers may come from any API host
+          <img
+            ref={(img) => {
+              if (img && img.complete && img.naturalWidth === 0) setFailed(true);
+            }}
+            src={image}
+            alt={game.title}
+            width={330}
+            height={440}
+            loading="lazy"
+            decoding="async"
+            onError={() => setFailed(true)}
+            className="game-art absolute inset-0 size-full object-cover"
+          />
+        ) : (
+          <>
+            <p className="absolute top-2 right-2 left-2 truncate text-[9px] font-semibold tracking-[0.14em] text-white/75 uppercase">
+              {game.provider}
+            </p>
+            <div className="game-art absolute inset-0 flex items-center justify-center pt-2">
+              <SymbolMark symbol={game.symbol} />
+            </div>
+          </>
+        )}
+        <h3
+          className={
+            image
+              ? "sr-only"
+              : "absolute inset-x-2 bottom-3 text-[15px] leading-[0.95] font-black tracking-tight text-white uppercase drop-shadow-md"
+          }
+        >
           {game.title}
         </h3>
         <span

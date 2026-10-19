@@ -5,6 +5,7 @@
   "skip": "Zum Inhalt springen",
   "menu": {
     "home": "Startseite",
+    "promotions": "Aktionen",
     "hide": "Menü ausblenden",
     "show": "Menü anzeigen"
   },
@@ -90,6 +91,16 @@
   },
   "partners": {
     "title": "Unsere Partner"
+  },
+  "promotions": {
+    "title": "Aktionen",
+    "learnMore": "Mehr erfahren",
+    "joinNow": "Jetzt mitmachen",
+    "close": "Schließen",
+    "terms": "Wichtige Bedingungen",
+    "period": "{start} – {end}",
+    "empty": "Gerade keine Aktionen.",
+    "meta": "Aktuelle Aktionen und Boni."
   },
   "howTo": {
     "title": "So registrierst du dich",

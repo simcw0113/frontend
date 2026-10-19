@@ -22,6 +22,8 @@ export const apiConfig = {
   useStaticTopWins: !apiBaseUrl,
   // Same switch for "Our Partners" (src/lib/partners.ts).
   useStaticPartners: !apiBaseUrl,
+  // Same switch for the promotions page (src/lib/promotions.ts).
+  useStaticPromotions: !apiBaseUrl,
   loginPath: "/auth/login",
   registerPath: "/auth/register",
   // TODO(API): placeholder. {category} is replaced by the slug ("slots", "trending-games");
@@ -33,4 +35,6 @@ export const apiConfig = {
   topWinsPath: "/wins/top-month",
   // TODO(API): placeholder for the partner list (id, name, logo URL); lang is sent as a query parameter.
   partnersPath: "/partners",
+  // TODO(API): placeholder for the promotions list (already localized); lang is sent as a query parameter.
+  promotionsPath: "/promotions",
 };

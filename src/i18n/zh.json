@@ -5,6 +5,7 @@
   "skip": "跳到内容",
   "menu": {
     "home": "首页",
+    "promotions": "优惠活动",
     "hide": "隐藏菜单",
     "show": "显示菜单"
   },
@@ -90,6 +91,16 @@
   },
   "partners": {
     "title": "合作伙伴"
+  },
+  "promotions": {
+    "title": "优惠活动",
+    "learnMore": "了解更多",
+    "joinNow": "立即加入",
+    "close": "关闭",
+    "terms": "主要条款",
+    "period": "{start} – {end}",
+    "empty": "暂无优惠活动。",
+    "meta": "当前的优惠活动和奖金。"
   },
   "howTo": {
     "title": "如何注册",

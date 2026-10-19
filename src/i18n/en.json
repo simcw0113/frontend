@@ -5,6 +5,7 @@
   "skip": "Skip to content",
   "menu": {
     "home": "Home",
+    "promotions": "Promotions",
     "hide": "Hide menu",
     "show": "Show menu"
   },
@@ -90,6 +91,16 @@
   },
   "partners": {
     "title": "Our Partners"
+  },
+  "promotions": {
+    "title": "Promotions",
+    "learnMore": "Learn More",
+    "joinNow": "Join now",
+    "close": "Close",
+    "terms": "Key terms",
+    "period": "{start} – {end}",
+    "empty": "No promotions right now.",
+    "meta": "Current promotions and bonuses."
   },
   "howTo": {
     "title": "How to Register",

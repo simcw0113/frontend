@@ -34,7 +34,7 @@ export type GameDto = {
   provider?: string | { name?: string };
   players?: number;
   tags?: string[];
-  image?: string; // not rendered yet; GameCover draws a gradient + symbol
+  image?: string; // cover URL, rendered by GameCover (gradient + symbol without it)
 };
 
 // TODO(API): shape of the list response. Adjust to the real envelope.
@@ -78,9 +78,8 @@ function hash(text: string) {
   return h;
 }
 
-// TODO(API): map the real response onto Game. The cover is a gradient + symbol,
-// picked from the id until the API provides images (add `image` to Game and
-// GameCover then).
+// TODO(API): map the real response onto Game. `image` is the cover; without one the
+// card draws a gradient + symbol picked from the id.
 export function mapGame(dto: GameDto): Game {
   const id = String(dto.id);
   const [from, to] = PALETTE[hash(id) % PALETTE.length];
@@ -93,6 +92,7 @@ export function mapGame(dto: GameDto): Game {
     from,
     to,
     symbol: SYMBOLS[hash(id) % SYMBOLS.length],
+    image: dto.image || undefined, // the API cover; GameCover falls back to gradient + symbol
   };
 }
 
