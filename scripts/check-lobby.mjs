@@ -2,7 +2,7 @@
 //   npm run dev   (or build && start), then:  npm run check:lobby
 //   BASE_URL=http://localhost:3115 npm run check:lobby
 // With no NEXT_PUBLIC_API_BASE_URL the home page must show "Top wins of the month"
-// (static sample data) in every language, below the search bar, and the category
+// (static sample data) in every language, above the search bar, and the category
 // pages must not. Exits 1 on any failure.
 const base = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 const headings = { en: "Top wins of the month", cn: "本月最高赢奖", de: "Top-Gewinne des Monats", es: "Mayores premios del mes" };
@@ -23,7 +23,10 @@ for (const [lang, heading] of Object.entries(headings)) {
   const wins = html.indexOf('id="top-wins-heading"');
   check(`/${lang} responds 200`, status === 200);
   check(`/${lang} has the Top wins section (${heading})`, wins > -1 && html.includes(heading));
-  check(`/${lang} Top wins is below the search bar`, search > -1 && wins > search);
+  // The shell holds the Top wins skeleton (data-skeleton) and the content streams in later,
+  // so the first skeleton marks where the section sits.
+  const slot = html.indexOf("data-skeleton");
+  check(`/${lang} Top wins is above the search bar`, search > -1 && slot > -1 && slot < search);
   check(`/${lang} Top wins shows amounts (MYR)`, (html.match(/MYR/g) ?? []).length >= 6);
   check(`/${lang} masks player ids`, html.includes("••••••") && !html.includes("20481937"));
 }

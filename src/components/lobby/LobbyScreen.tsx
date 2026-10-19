@@ -225,6 +225,16 @@ export function LobbyScreen({
                 {t.lobby.back}
               </LobbyLink>
             )}
+            {/* Home only: banner -> Top wins -> search bar. Part of the "top" transition group so it
+                fades with the banner. The wrapper collapses (empty:hidden) when the section hides
+                itself (no data / error), so no gap is left behind. */}
+            {focus === "home" && topWins ? (
+              <div className="pt-6 pb-2 empty:hidden">
+                <Suspense fallback={<TopWinsSkeleton />}>
+                  <TopWins promise={topWins} />
+                </Suspense>
+              </div>
+            ) : null}
           </div>
           <label className="lobby-vt-search relative mt-4 block">
             <span className="sr-only">{t.lobby.search}</span>
@@ -257,11 +267,6 @@ export function LobbyScreen({
           <div className="lobby-vt-content">
           {focus === "casino" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
           <div className="mt-6 space-y-8">
-            {focus === "home" && topWins ? (
-              <Suspense fallback={<TopWinsSkeleton />}>
-                <TopWins promise={topWins} />
-              </Suspense>
-            ) : null}
             {sections.map((section) => (
               <CardRow key={section.id} title={section.title} href={focus === "home" ? section.href : undefined}>
                 {section.games ? (

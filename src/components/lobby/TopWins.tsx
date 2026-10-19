@@ -145,9 +145,11 @@ export function TopWinsSkeleton() {
   return (
     <div className="@container" aria-hidden="true" data-skeleton="">
       <div className="mb-3 h-5 w-48 rounded bg-white/5 motion-safe:animate-pulse" />
+      {/* Heights match the real section (podium 141 / 185 px stacked, 214 px beside the list;
+          list 214 px) so the search bar below does not jump when the data arrives. */}
       <div className="grid gap-3 @3xl:grid-cols-2">
-        <div className="h-44 rounded-2xl bg-white/5 motion-safe:animate-pulse" />
-        <div className="hidden h-44 rounded-xl bg-white/5 motion-safe:animate-pulse @3xl:block" />
+        <div className="h-[141px] rounded-2xl bg-white/5 motion-safe:animate-pulse @md:h-[185px] @3xl:h-[214px]" />
+        <div className="h-[214px] rounded-xl bg-white/5 motion-safe:animate-pulse" />
       </div>
     </div>
   );
