@@ -4,8 +4,8 @@ import { useI18n } from "@/components/I18nProvider";
 import type { Game, GameSymbol } from "@/config/lobby";
 import { fill, htmlLang } from "@/i18n";
 
-function SymbolMark({ symbol }: { symbol: GameSymbol }) {
-  const common = "h-24 w-24 drop-shadow-lg";
+export function SymbolMark({ symbol, className }: { symbol: GameSymbol; className?: string }) {
+  const common = className ?? "h-24 w-24 drop-shadow-lg";
   switch (symbol) {
     case "crown":
       return (

@@ -10,9 +10,11 @@ import { GameCover } from "@/components/lobby/GameCover";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
+import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
 import { fill, localeChoices } from "@/i18n";
 import { toSlug } from "@/i18n/routing";
 import type { CategoryGamesResult } from "@/lib/games";
+import type { TopWinsResult } from "@/lib/topWins";
 import { animate, reduceMotion } from "@/lib/motion";
 import { setSidebarOpen, useSidebarOpen } from "@/lib/sidebarState";
 
@@ -33,10 +35,12 @@ export function LobbyScreen({
   focus = "home",
   category,
   games,
+  topWins,
 }: {
   focus?: LobbyFocus;
   category?: string;
   games: Record<string, Promise<CategoryGamesResult>>;
+  topWins?: Promise<TopWinsResult>; // home only
 }) {
   const [query, setQuery] = useState("");
   const [languageOpen, setLanguageOpen] = useState(false);
@@ -228,6 +232,11 @@ export function LobbyScreen({
           <div className="lobby-vt-content">
           {focus === "casino" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
           <div className="mt-6 space-y-8">
+            {focus === "home" && topWins ? (
+              <Suspense fallback={<TopWinsSkeleton />}>
+                <TopWins promise={topWins} />
+              </Suspense>
+            ) : null}
             {sections.map((section) => (
               <CardRow key={section.id} title={section.title} href={focus === "home" ? section.href : undefined}>
                 <Suspense fallback={<GridSkeleton count={preview ? PREVIEW_COUNT : CATEGORY_SKELETON_COUNT} />}>

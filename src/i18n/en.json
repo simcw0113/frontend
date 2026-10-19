@@ -70,6 +70,8 @@
     "trendingGames": "Trending games",
     "slots": "Slots",
     "providers": "Providers",
+    "topWins": "Top wins of the month",
+    "rank": "Rank {n}",
     "all": "All",
     "viewAll": "View all",
     "back": "Back",

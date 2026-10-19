@@ -70,6 +70,8 @@
     "trendingGames": "Juegos en tendencia",
     "slots": "Tragaperras",
     "providers": "Proveedores",
+    "topWins": "Mayores premios del mes",
+    "rank": "Puesto {n}",
     "all": "Todos",
     "viewAll": "Ver todo",
     "back": "Volver",

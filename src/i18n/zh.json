@@ -70,6 +70,8 @@
     "trendingGames": "热门游戏",
     "slots": "老虎机",
     "providers": "供应商",
+    "topWins": "本月最高赢奖",
+    "rank": "第 {n} 名",
     "all": "全部",
     "viewAll": "查看全部",
     "back": "返回",

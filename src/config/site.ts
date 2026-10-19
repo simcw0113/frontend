@@ -14,9 +14,13 @@ export const apiConfig = {
   // config/lobby.ts (automatic while there is no API address), false = the API.
   // Replace the expression with a literal to force one or the other.
   useStaticGames: !apiBaseUrl,
+  // Same switch for "Top wins of the month" (src/lib/topWins.ts).
+  useStaticTopWins: !apiBaseUrl,
   loginPath: "/auth/login",
   registerPath: "/auth/register",
   // TODO(API): placeholder. {category} is replaced by the slug ("slots", "trending-games");
   // lang, provider, page and q are sent as query parameters.
   categoryGamesPath: "/games/category/{category}",
+  // TODO(API): placeholder for the monthly top wins list; lang is sent as a query parameter.
+  topWinsPath: "/wins/top-month",
 };
