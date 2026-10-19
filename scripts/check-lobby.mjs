@@ -100,6 +100,51 @@ for (const path of ["/en/promotions/nope", "/en/promotion"]) {
 const sitemap = await page("/sitemap.xml");
 check("sitemap lists /en/promotions", sitemap.html.includes("/en/promotions</loc>"));
 
+// Top bar links (config/topNav.ts): 5 links in this order inside the header, the shown page's
+// link marked aria-current="page". Live Dealer is its own page but no home row; Sports and VIP
+// are "Coming soon" placeholders.
+const topNavPaths = ["/casino/slots", "/casino/live-dealer", "/sports", "/promotions", "/vip"];
+function topNavLinks(html) {
+  const header = html.slice(html.indexOf("<header"), html.indexOf("</header>"));
+  const nav = header.slice(header.indexOf("<nav"), header.indexOf("</nav>"));
+  return [...nav.matchAll(/<a\b[^>]*>/g)].map(([tag]) => ({
+    href: tag.match(/href="([^"]*)"/)?.[1],
+    current: tag.includes('aria-current="page"'),
+  }));
+}
+const comingSoon = { en: "Coming soon", cn: "敬请期待", de: "Demnächst verfügbar", es: "Próximamente" };
+for (const lang of Object.keys(comingSoon)) {
+  const links = topNavLinks((await page(`/${lang}`)).html);
+  check(
+    `/${lang} top bar has 5 links in order (Slots, Live Dealer, Sports, Promotions, VIP), none current on home`,
+    links.length === 5 && links.every((link, i) => link.href === `/${lang}${topNavPaths[i]}` && !link.current),
+  );
+  for (const path of ["/sports", "/vip"]) {
+    const { status, html } = await page(`/${lang}${path}`);
+    const current = topNavLinks(html).filter((link) => link.current).map((link) => link.href);
+    check(
+      `/${lang}${path} responds 200 with "${comingSoon[lang]}", its top link current, no search bar`,
+      status === 200 && html.includes(comingSoon[lang]) && current.join() === `/${lang}${path}` && !html.includes('id="lobby-search"'),
+    );
+  }
+}
+for (const path of ["/en/casino/slots", "/en/promotions", "/en/casino/live-dealer"]) {
+  const current = topNavLinks((await page(path)).html).filter((link) => link.current).map((link) => link.href);
+  check(`${path} marks only its own top link as current`, current.join() === path);
+}
+{
+  const live = await page("/en/casino/live-dealer");
+  check("/en/casino/live-dealer responds 200 with Live Dealer games", live.status === 200 && live.html.includes("Live Dealer") && live.html.includes("Lightning Roulette"));
+  const home = await page("/en");
+  const body = home.html.slice(home.html.indexOf("</header>"));
+  check("/en home has no Live Dealer row", !body.includes('href="/en/casino/live-dealer"') && !body.includes("Lightning Roulette"));
+  check("sitemap lists /en/casino/live-dealer, /en/sports and /en/vip", ["/en/casino/live-dealer", "/en/sports", "/en/vip"].every((path) => sitemap.html.includes(`${path}</loc>`)));
+}
+for (const path of ["/en/casino/nope", "/en/sport", "/en/vip/nope"]) {
+  const { status } = await page(path);
+  check(`${path} is 404`, status === 404);
+}
+
 const search = await page("/api/games/search?q=dragon");
 check("/api/games/search?q=dragon returns games", search.status === 200 && search.html.includes("Dragon Lantern"));
 const bad = await page("/api/games/search?page=0");

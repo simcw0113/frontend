@@ -143,6 +143,19 @@ export const slotsGames: Game[] = [
   { id: "neon-sevens", title: "Neon Sevens", provider: "Evolution", playing: 33, tags: ["slots"], from: "#a855f7", to: "#3b0764", symbol: "seven" },
 ];
 
+// Games of the "Live Dealer" category (/casino/live-dealer). Static placeholder data, to be
+// replaced by the API (category key "live-dealer").
+export const liveDealerGames: Game[] = [
+  { id: "lightning-roulette", title: "Lightning Roulette", provider: "Evolution", playing: 318, tags: ["live"], from: "#7f1d1d", to: "#1c1917", symbol: "table" },
+  { id: "speed-baccarat", title: "Speed Baccarat", provider: "Evolution", playing: 264, tags: ["live"], from: "#1e3a8a", to: "#172554", symbol: "cards" },
+  { id: "infinite-blackjack", title: "Infinite Blackjack", provider: "Evolution", playing: 201, tags: ["live", "new"], from: "#14532d", to: "#052e16", symbol: "cards" },
+  { id: "mega-wheel", title: "Mega Wheel", provider: "Pragmatic Play", playing: 176, tags: ["live"], from: "#a16207", to: "#422006", symbol: "orbit" },
+  { id: "dragon-tiger-live", title: "Dragon Tiger", provider: "SA Gaming", playing: 142, tags: ["live"], from: "#dc2626", to: "#450a0a", symbol: "tiger" },
+  { id: "super-sic-bo", title: "Super Sic Bo", provider: "Evolution", playing: 118, tags: ["live"], from: "#7c3aed", to: "#2e1065", symbol: "coin" },
+  { id: "vip-baccarat", title: "VIP Baccarat", provider: "Ezugi", playing: 97, tags: ["live"], from: "#0f766e", to: "#042f2e", symbol: "crown" },
+  { id: "auto-roulette", title: "Auto Roulette", provider: "Playtech", playing: 71, tags: ["live", "new"], from: "#be123c", to: "#4c0519", symbol: "table" },
+];
+
 // TEMPORARY test cover (public/games/test-cover.jpg) shown on every static game of the home
 // rows and category pages. Remove it from withTestCover (or the constant) to get the drawn
 // covers back; a game's own `image` (e.g. from the API mapper) always wins.
@@ -154,6 +167,7 @@ const withTestCover = (games: Game[]): Game[] => games.map((game) => ({ ...game,
 export const categoryGames: Record<string, Game[]> = {
   "trending-games": withTestCover(trendingGames),
   slots: withTestCover(slotsGames),
+  "live-dealer": withTestCover(liveDealerGames),
 };
 
 export const sideNav: { id: string; label: string; items?: string[] }[] = [

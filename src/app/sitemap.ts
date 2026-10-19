@@ -7,6 +7,8 @@ const pages = [
   { path: "/", priority: 1 },
   ...casinoCategories.map(({ slug }) => ({ path: `/casino/${slug}`, priority: 0.8 })),
   { path: "/promotions", priority: 0.7 },
+  { path: "/sports", priority: 0.5 },
+  { path: "/vip", priority: 0.5 },
 ];
 
 // One entry per language and page, each listing its translations.

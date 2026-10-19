@@ -70,6 +70,7 @@
     "playing": "{count} 人在玩",
     "trendingGames": "热门游戏",
     "slots": "老虎机",
+    "liveDealer": "真人荷官",
     "providers": "供应商",
     "topWins": "本月最高赢奖",
     "rank": "第 {n} 名",
@@ -177,5 +178,18 @@
       "gameShows": "游戏秀",
       "sicBo": "骰宝"
     }
+  },
+  "topNav": {
+    "label": "主导航",
+    "slots": "老虎机",
+    "liveDealer": "真人荷官",
+    "sports": "体育",
+    "promotions": "优惠活动",
+    "vip": "VIP"
+  },
+  "comingSoon": {
+    "text": "敬请期待",
+    "sportsMeta": "体育投注即将上线。",
+    "vipMeta": "VIP 俱乐部即将上线。"
   }
 }

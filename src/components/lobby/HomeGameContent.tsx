@@ -5,7 +5,7 @@ import { useI18n } from "@/components/I18nProvider";
 import { GameCover } from "@/components/lobby/GameCover";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { Partners, PartnersSkeleton } from "@/components/lobby/Partners";
-import { casinoCategories, defaultCasinoCategory, type CasinoCategory } from "@/config/categories";
+import { defaultCasinoCategory, homeCategories, type CasinoCategory } from "@/config/categories";
 import type { CategoryGamesResult } from "@/lib/games";
 import type { PartnersResult } from "@/lib/partners";
 
@@ -16,7 +16,8 @@ const PREVIEW_COUNT = 8;
 const CATEGORY_SKELETON_COUNT = 16;
 
 // The game content under the search bar. On the home page: one row per entry of
-// `casinoCategories` (config/categories.ts, in that order, each with a View all link),
+// `casinoCategories` (config/categories.ts, in that order, each with a View all link; entries
+// with `showOnHome: false` are skipped),
 // then Partners, so a new row always lands above Partners. On a category page: just that
 // category's full list. To add a home row see the notes at the top of config/categories.ts;
 // nothing here changes.
@@ -33,7 +34,7 @@ export function HomeGameContent({
 }) {
   const { t } = useI18n();
   const home = focus === "home";
-  const rows = home ? casinoCategories : [category ?? defaultCasinoCategory];
+  const rows = home ? homeCategories : [category ?? defaultCasinoCategory];
   return (
     <>
       <div className="mt-6 space-y-8">

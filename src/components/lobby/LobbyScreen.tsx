@@ -14,6 +14,7 @@ import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { GiftIcon, PromotionsGrid, PromotionsHeader, PromotionsSkeleton } from "@/components/lobby/Promotions";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { SearchModal } from "@/components/lobby/SearchModal";
+import { ComingSoonHeader, TopNav } from "@/components/lobby/TopNav";
 import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
 import { fill, localeChoices } from "@/i18n";
 import { toSlug } from "@/i18n/routing";
@@ -28,7 +29,7 @@ const NAV_ITEM =
   "flex h-11 w-full items-center rounded-lg px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 
-export type LobbyFocus = "home" | "casino" | "promotions";
+export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip";
 
 // `games` holds one promise per category slug, started on the server (lib/games.ts)
 // and read here with use() inside <Suspense>, so the page shell shows at once.
@@ -107,7 +108,8 @@ export function LobbyScreen({
   }
 
   const casino = (category && findCasinoCategory(category)) || defaultCasinoCategory;
-  const route = focus === "home" ? "/" : focus === "promotions" ? "/promotions" : `/casino/${casino.slug}`;
+  const route = focus === "home" ? "/" : focus === "casino" ? `/casino/${casino.slug}` : `/${focus}`;
+  const gamesPage = focus === "home" || focus === "casino";
   const openRegister = () => {
     setAuthView("register");
     setSignInOpen(true);
@@ -117,7 +119,12 @@ export function LobbyScreen({
     <div className="min-h-full bg-lobby text-ink">
       <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} initialView={authView} />
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
-      <header style={{ viewTransitionName: "lobby-header" }} className="sticky top-0 z-40 flex h-16 items-center gap-1 border-b border-white/10 bg-lobby px-3">
+      {/* One row of 64px from lg (toggle, logo, top links, buttons). Below lg the top links wrap
+          to a second, scrollable row (.top-nav); --lobby-header-h in globals.css follows suit. */}
+      <header
+        style={{ viewTransitionName: "lobby-header" }}
+        className="lobby-header sticky top-0 z-40 flex flex-wrap items-center gap-x-1 bg-lobby px-3"
+      >
         <button
           type="button"
           aria-label={sidebarOpen ? t.menu.hide : t.menu.show}
@@ -145,7 +152,8 @@ export function LobbyScreen({
             />
           </LobbyLink>
         </h1>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <TopNav route={route} />
+        <div className="ml-auto flex h-16 shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={() => {
@@ -170,7 +178,7 @@ export function LobbyScreen({
       </header>
 
       <div className={`lobby-shell flex${sidebarOpen ? " is-open" : ""}`}>
-        <div className="lobby-slot sticky top-16 h-[calc(100vh-4rem)] self-start">
+        <div className="lobby-slot sticky top-(--lobby-header-h) h-[calc(100vh-var(--lobby-header-h))] self-start">
           <aside
             id="lobby-sidebar"
             aria-hidden={!sidebarOpen}
@@ -237,7 +245,9 @@ export function LobbyScreen({
 
         <main id="content" data-route={route} data-lang={toSlug(locale)} className="min-w-0 flex-1 px-3 py-4 sm:px-5">
           <div className="lobby-vt-top">
-            {focus === "home" ? <Hero /> : focus === "promotions" ? <PromotionsHeader /> : (
+            {focus === "home" ? <Hero /> : focus === "promotions" ? <PromotionsHeader /> : focus === "sports" || focus === "vip" ? (
+              <ComingSoonHeader title={t.topNav[focus]} />
+            ) : (
               <LobbyLink
                 href="/"
                 scroll={false}
@@ -270,7 +280,7 @@ export function LobbyScreen({
               </div>
             ) : null}
           </div>
-          {focus !== "promotions" ? (
+          {gamesPage ? (
           <label className="lobby-vt-search relative mt-4 block">
             <span className="sr-only">{t.lobby.search}</span>
             <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted">
@@ -307,12 +317,12 @@ export function LobbyScreen({
                 <PromotionsGrid promise={promotions} onJoin={openRegister} />
               </Suspense>
             ) : null
-          ) : (
+          ) : gamesPage ? (
             <>
               {focus === "casino" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
               <HomeGameContent focus={focus} category={casino} games={games} partners={partners} />
             </>
-          )}
+          ) : null}
           <LobbyFooter />
           </div>
         </main>

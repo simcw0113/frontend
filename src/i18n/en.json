@@ -70,6 +70,7 @@
     "playing": "{count} playing",
     "trendingGames": "Trending games",
     "slots": "Slots",
+    "liveDealer": "Live Dealer",
     "providers": "Providers",
     "topWins": "Top wins of the month",
     "rank": "Rank {n}",
@@ -177,5 +178,18 @@
       "gameShows": "Game Shows",
       "sicBo": "Sic Bo"
     }
+  },
+  "topNav": {
+    "label": "Main",
+    "slots": "Slots",
+    "liveDealer": "Live Dealer",
+    "sports": "Sports",
+    "promotions": "Promotions",
+    "vip": "VIP"
+  },
+  "comingSoon": {
+    "text": "Coming soon",
+    "sportsMeta": "Sports betting is coming soon.",
+    "vipMeta": "The VIP club is coming soon."
   }
 }

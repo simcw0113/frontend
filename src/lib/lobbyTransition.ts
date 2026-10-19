@@ -28,9 +28,11 @@ let token = 0;
 let replaying = false;
 let installed = false;
 
-// The lobby ("/"), the casino category pages and the promotions page.
+// The lobby ("/"), the casino category pages and the promotions, sports and VIP pages.
+const LOBBY_PAGES = new Set(["/", "/promotions", "/sports", "/vip"]);
+
 export function isLobbyRoute(path: string): path is LobbyRoute {
-  if (path === "/" || path === "/promotions") return true;
+  if (LOBBY_PAGES.has(path)) return true;
   return path.startsWith("/casino/") && findCasinoCategory(path.slice("/casino/".length)) !== undefined;
 }
 

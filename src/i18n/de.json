@@ -70,6 +70,7 @@
     "playing": "{count} spielen",
     "trendingGames": "Beliebte Spiele",
     "slots": "Spielautomaten",
+    "liveDealer": "Live-Dealer",
     "providers": "Anbieter",
     "topWins": "Top-Gewinne des Monats",
     "rank": "Platz {n}",
@@ -177,5 +178,18 @@
       "gameShows": "Gameshows",
       "sicBo": "Sic Bo"
     }
+  },
+  "topNav": {
+    "label": "Hauptmenü",
+    "slots": "Spielautomaten",
+    "liveDealer": "Live-Dealer",
+    "sports": "Sport",
+    "promotions": "Aktionen",
+    "vip": "VIP"
+  },
+  "comingSoon": {
+    "text": "Demnächst verfügbar",
+    "sportsMeta": "Sportwetten sind bald verfügbar.",
+    "vipMeta": "Der VIP-Club kommt bald."
   }
 }

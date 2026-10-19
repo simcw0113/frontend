@@ -70,6 +70,7 @@
     "playing": "{count} jugando",
     "trendingGames": "Juegos en tendencia",
     "slots": "Tragaperras",
+    "liveDealer": "Crupier en vivo",
     "providers": "Proveedores",
     "topWins": "Mayores premios del mes",
     "rank": "Puesto {n}",
@@ -177,5 +178,18 @@
       "gameShows": "Game shows",
       "sicBo": "Sic Bo"
     }
+  },
+  "topNav": {
+    "label": "Principal",
+    "slots": "Tragaperras",
+    "liveDealer": "Crupier en vivo",
+    "sports": "Deportes",
+    "promotions": "Promociones",
+    "vip": "VIP"
+  },
+  "comingSoon": {
+    "text": "Próximamente",
+    "sportsMeta": "Las apuestas deportivas llegan pronto.",
+    "vipMeta": "El club VIP llega pronto."
   }
 }
