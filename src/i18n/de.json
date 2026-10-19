@@ -67,7 +67,7 @@
     "searchPlaceholder": "{name} suchen",
     "playing": "{count} spielen",
     "trendingGames": "Beliebte Spiele",
-    "trendingSports": "Beliebte Sportarten",
+    "slots": "Spielautomaten",
     "providers": "Anbieter",
     "all": "Alle",
     "viewAll": "Alle anzeigen",
@@ -108,20 +108,6 @@
         "items": ["Verantwortungsvolles Spielen", "Faires Spiel", "Selbstsperre", "KYC-Richtlinie"]
       }
     ]
-  },
-  "sports": {
-    "football": "American Football",
-    "soccer": "Fußball",
-    "tennis": "Tennis",
-    "cricket": "Cricket",
-    "baseball": "Baseball",
-    "mma": "MMA",
-    "cs2": "CS2",
-    "racing": "Pferderennen",
-    "boxing": "Boxen",
-    "golf": "Golf",
-    "basketball": "Basketball",
-    "formula": "Formel"
   },
   "errors": {
     "unreachable": "Die API ist nicht erreichbar.",

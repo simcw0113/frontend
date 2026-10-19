@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MouseEvent, ReactNode } from "react";
+import { useI18n } from "@/components/I18nProvider";
 import { isLobbyRoute, withLobbyTransition } from "@/lib/lobbyTransition";
 
 // A link between lobby routes ("View all", "Back") that plays the lobby
-// cross-fade. Modified clicks and non-lobby targets behave like a normal Link.
+// cross-fade. `href` is the app path without the language prefix ("/games");
+// the current locale prefix is added here. Modified clicks and non-lobby targets behave like a normal Link.
 export function LobbyLink({
   href,
   scroll = true,
@@ -21,6 +23,8 @@ export function LobbyLink({
   children: ReactNode;
 }) {
   const router = useRouter();
+  const { href: localized } = useI18n();
+  const target = localized(href);
 
   function onClick(event: MouseEvent<HTMLAnchorElement>) {
     if (
@@ -36,11 +40,11 @@ export function LobbyLink({
     }
     event.preventDefault();
     onGo?.();
-    withLobbyTransition(href, () => router.push(href, { scroll }));
+    withLobbyTransition(href, () => router.push(target, { scroll }));
   }
 
   return (
-    <Link href={href} scroll={scroll} onClick={onClick} className={className}>
+    <Link href={target} scroll={scroll} onClick={onClick} className={className}>
       {children}
     </Link>
   );

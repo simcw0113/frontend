@@ -121,27 +121,32 @@ export const trendingGames: Game[] = [
   houseGames[6],
 ];
 
-export type Sport = {
-  id: string;
-  name: string;
-  from: string;
-  to: string;
-};
-
-export const trendingSports: Sport[] = [
-  { id: "football", name: "American Football", from: "#02EFF0", to: "#0F282F" },
-  { id: "soccer", name: "Soccer", from: "#02EFF0", to: "#0F282F" },
-  { id: "tennis", name: "Tennis", from: "#02EFF0", to: "#0F282F" },
-  { id: "cricket", name: "Cricket", from: "#02EFF0", to: "#0F282F" },
-  { id: "baseball", name: "Baseball", from: "#02EFF0", to: "#0F282F" },
-  { id: "mma", name: "MMA", from: "#02EFF0", to: "#0F282F" },
-  { id: "cs2", name: "CS2", from: "#02EFF0", to: "#0F282F" },
-  { id: "racing", name: "Horse Racing", from: "#02EFF0", to: "#0F282F" },
-  { id: "boxing", name: "Boxing", from: "#02EFF0", to: "#0F282F" },
-  { id: "golf", name: "Golf", from: "#02EFF0", to: "#0F282F" },
-  { id: "basketball", name: "Basketball", from: "#02EFF0", to: "#0F282F" },
-  { id: "formula", name: "Formula", from: "#02EFF0", to: "#0F282F" },
+// Games of the "Slots" category (/casino/slots). Static placeholder data, to be
+// replaced by an API response of the same shape.
+export const slotsGames: Game[] = [
+  { id: "fortune-reels", title: "Fortune Reels", provider: "Pragmatic Play", playing: 212, tags: ["slots", "bonus"], from: "#f59e0b", to: "#7c2d12", symbol: "seven" },
+  { id: "dragon-lantern", title: "Dragon Lantern", provider: "Jili", playing: 187, tags: ["slots", "new"], from: "#dc2626", to: "#5f1020", symbol: "lantern" },
+  { id: "wild-tiger-gold", title: "Wild Tiger Gold", provider: "PG Soft", playing: 164, tags: ["slots"], from: "#f97316", to: "#7c2d12", symbol: "tiger" },
+  { id: "crown-of-pharaohs", title: "Crown of Pharaohs", provider: "Hacksaw", playing: 143, tags: ["slots", "bonus"], from: "#ca8a04", to: "#422006", symbol: "crown" },
+  { id: "jungle-king", title: "Jungle King", provider: "Nolimit City", playing: 129, tags: ["slots", "wagering"], from: "#16a34a", to: "#14532d", symbol: "ape" },
+  { id: "lucky-piggy", title: "Lucky Piggy", provider: "Habanero", playing: 98, tags: ["slots"], from: "#eab308", to: "#854d0e", symbol: "pig" },
+  { id: "midnight-manor", title: "Midnight Manor", provider: "Relax", playing: 86, tags: ["slots", "new"], from: "#7c3aed", to: "#2e1065", symbol: "ghost" },
+  { id: "golden-whiskers", title: "Golden Whiskers", provider: "Playtech", playing: 77, tags: ["slots"], from: "#38bdf8", to: "#1e3a8a", symbol: "cat" },
+  { id: "megaways-legion", title: "Megaways Legion", provider: "Big Time Gaming", playing: 121, tags: ["slots", "bonus"], from: "#ef4444", to: "#7f1d1d", symbol: "helm" },
+  { id: "starlight-spins", title: "Starlight Spins", provider: "Push Gaming", playing: 64, tags: ["slots"], from: "#6366f1", to: "#1e1b4b", symbol: "star" },
+  { id: "coin-cascade", title: "Coin Cascade", provider: "Red Tiger", playing: 59, tags: ["slots", "wagering"], from: "#facc15", to: "#a16207", symbol: "coin" },
+  { id: "deep-sea-treasure", title: "Deep Sea Treasure", provider: "Pragmatic Play", playing: 55, tags: ["slots"], from: "#0ea5e9", to: "#0c4a6e", symbol: "fish" },
+  { id: "hot-reels-777", title: "Hot Reels 777", provider: "Jili", playing: 48, tags: ["slots"], from: "#e11d48", to: "#4c0519", symbol: "reel" },
+  { id: "emperors-fortune", title: "Emperor's Fortune", provider: "PG Soft", playing: 44, tags: ["slots", "new"], from: "#d97706", to: "#78350f", symbol: "crown" },
+  { id: "bonanza-ape", title: "Bonanza Ape", provider: "Hacksaw", playing: 39, tags: ["slots"], from: "#f97316", to: "#9a3412", symbol: "ape" },
+  { id: "neon-sevens", title: "Neon Sevens", provider: "Evolution", playing: 33, tags: ["slots"], from: "#a855f7", to: "#3b0764", symbol: "seven" },
 ];
+
+// Games of each casino category, keyed by slug (see config/categories.ts).
+export const categoryGames: Record<string, Game[]> = {
+  "trending-games": trendingGames,
+  slots: slotsGames,
+};
 
 export const sideNav: { id: string; label: string; items?: string[] }[] = [
   { id: "promotions", label: "Promotions", items: ["Welcome offer", "Races", "Drops"] },

@@ -1,25 +1,27 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import type { AuthView } from "@/components/auth/AuthFormPanel";
 import { SignInDialog } from "@/components/SignInDialog";
 import { useI18n } from "@/components/I18nProvider";
 import { bannerSlides } from "@/config/banners";
-import { trendingGames, trendingSports, type Sport } from "@/config/lobby";
+import { casinoCategories, defaultCasinoCategory, findCasinoCategory } from "@/config/categories";
+import { categoryGames } from "@/config/lobby";
 import { GameCover } from "@/components/lobby/GameCover";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { fill, localeChoices } from "@/i18n";
+import { toSlug } from "@/i18n/routing";
 import { animate, reduceMotion } from "@/lib/motion";
 
 const PREVIEW_COUNT = 8;
 const HOME_SCROLL_KEY = "lobby-home-scroll";
 
 
-export type LobbyFocus = "home" | "games" | "sports";
+export type LobbyFocus = "home" | "casino";
 
-export function LobbyScreen({ focus = "home" }: { focus?: LobbyFocus }) {
+export function LobbyScreen({ focus = "home", category }: { focus?: LobbyFocus; category?: string }) {
   const [query, setQuery] = useState("");
   const [languageOpen, setLanguageOpen] = useState(false);
   const { locale, setLocale, t } = useI18n();
@@ -64,22 +66,14 @@ export function LobbyScreen({ focus = "home" }: { focus?: LobbyFocus }) {
   }
 
   const needle = query.trim().toLowerCase();
-  const games = useMemo(
-    () => trendingGames.filter((game) => !needle || game.title.toLowerCase().includes(needle)),
-    [needle],
-  );
-  const sports = useMemo(
-    () =>
-      trendingSports.filter((sport) => {
-        const name = t.sports[sport.id as keyof typeof t.sports] ?? sport.name;
-        return !needle || name.toLowerCase().includes(needle);
-      }),
-    [needle, t],
-  );
-  const sections = [
-    { id: "games", kind: "games" as const, title: t.lobby.trendingGames, href: "/games" },
-    { id: "sports", kind: "sports" as const, title: t.lobby.trendingSports, href: "/sports" },
-  ].filter((section) => focus === "home" || section.kind === focus);
+  const casino = (category && findCasinoCategory(category)) || defaultCasinoCategory;
+  const sections = (focus === "home" ? casinoCategories : [casino]).map((item) => ({
+    id: item.slug,
+    title: t.lobby[item.titleKey],
+    href: `/casino/${item.slug}`,
+    games: (categoryGames[item.slug] ?? []).filter((game) => !needle || game.title.toLowerCase().includes(needle)),
+  }));
+  const route = focus === "home" ? "/" : `/casino/${casino.slug}`;
   const preview = focus === "home" && !needle;
 
   return (
@@ -167,7 +161,7 @@ export function LobbyScreen({ focus = "home" }: { focus?: LobbyFocus }) {
           </aside>
         </div>
 
-        <main id="content" data-route={focus === "home" ? "/" : `/${focus}`} className="min-w-0 flex-1 px-3 py-4 sm:px-5">
+        <main id="content" data-route={route} data-lang={toSlug(locale)} className="min-w-0 flex-1 px-3 py-4 sm:px-5">
           <div className="lobby-vt-top">
             {focus === "home" ? <Hero /> : (
               <LobbyLink
@@ -198,33 +192,20 @@ export function LobbyScreen({ focus = "home" }: { focus?: LobbyFocus }) {
           </label>
 
           <div className="lobby-vt-content">
-          {focus === "games" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
+          {focus === "casino" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
           <div className="mt-6 space-y-8">
-            {sections.map((section) =>
-              section.kind === "games" ? (
-                <CardRow
-                  key={section.id}
-                  title={section.title}
-                  count={games.length}
-                  href={focus === "home" ? section.href : undefined}
-                >
-                  {(preview ? games.slice(0, PREVIEW_COUNT) : games).map((game) => (
-                    <GameCover key={game.id} game={game} fluid />
-                  ))}
-                </CardRow>
-              ) : (
-                <CardRow
-                  key={section.id}
-                  title={section.title}
-                  count={sports.length}
-                  href={focus === "home" ? section.href : undefined}
-                >
-                  {(preview ? sports.slice(0, PREVIEW_COUNT) : sports).map((sport) => (
-                    <SportCard key={sport.id} sport={sport} />
-                  ))}
-                </CardRow>
-              ),
-            )}
+            {sections.map((section) => (
+              <CardRow
+                key={section.id}
+                title={section.title}
+                count={section.games.length}
+                href={focus === "home" ? section.href : undefined}
+              >
+                {(preview ? section.games.slice(0, PREVIEW_COUNT) : section.games).map((game) => (
+                  <GameCover key={game.id} game={game} fluid />
+                ))}
+              </CardRow>
+            ))}
           </div>
           <LobbyFooter />
           </div>
@@ -404,40 +385,6 @@ function CardRow({
         </div>
       )}
     </section>
-  );
-}
-
-function SportCard({ sport }: { sport: Sport }) {
-  const { t } = useI18n();
-  const name = t.sports[sport.id as keyof typeof t.sports] ?? sport.name;
-
-  return (
-    <article className="min-w-0">
-      <div
-        className="relative flex aspect-[3/4] items-end overflow-hidden rounded-xl p-3 shadow-md"
-        style={{ background: `radial-gradient(circle at 100% 0%, ${sport.from}, ${sport.to} 46%)` }}
-      >
-        <SportMark id={sport.id} />
-        <h3 className="relative text-sm leading-none font-black tracking-tight text-white uppercase">
-          {name}
-        </h3>
-      </div>
-    </article>
-  );
-}
-
-function SportMark({ id }: { id: string }) {
-  return (
-    <svg viewBox="0 0 80 80" className="pointer-events-none absolute inset-x-4 top-4 h-16 w-auto" aria-hidden="true">
-      {id === "soccer" || id === "football" ? <circle cx="40" cy="36" r="18" fill="white" fillOpacity="0.9" /> : null}
-      {id === "tennis" ? <ellipse cx="40" cy="36" rx="16" ry="20" fill="none" stroke="white" strokeWidth="3" /> : null}
-      {id === "baseball" ? <circle cx="40" cy="36" r="16" fill="white" /> : null}
-      {id === "basketball" ? <circle cx="40" cy="36" r="16" fill="#fb923c" /> : null}
-      {id === "racing" ? <path d="M20 50 L40 18 L60 50 Z" fill="white" /> : null}
-      {id !== "soccer" && id !== "football" && id !== "tennis" && id !== "baseball" && id !== "basketball" && id !== "racing" ? (
-        <rect x="24" y="20" width="32" height="32" rx="8" fill="white" fillOpacity="0.9" />
-      ) : null}
-    </svg>
   );
 }
 

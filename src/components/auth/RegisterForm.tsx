@@ -20,7 +20,7 @@ const PASSWORD_MIN = 8;
 
 export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter();
-  const { t } = useI18n();
+  const { t, href } = useI18n();
   const [method, setMethod] = useState<Method>("email");
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
@@ -84,7 +84,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
       });
       setPassword("");
       if (onSuccess) onSuccess();
-      else router.push("/");
+      else router.push(href("/"));
     } catch (cause) {
       if (cause instanceof ApiError && cause.code) setError(t.errors[cause.code]);
       else if (cause instanceof ApiError) setError(cause.message);

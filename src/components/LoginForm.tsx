@@ -9,7 +9,7 @@ import { loginWithPassword } from "@/lib/auth";
 
 export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter();
-  const { t } = useI18n();
+  const { t, href } = useI18n();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -37,7 +37,7 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
       await loginWithPassword({ identifier: trimmed, password, remember });
       setPassword("");
       if (onSuccess) onSuccess();
-      else router.push("/");
+      else router.push(href("/"));
     } catch (cause) {
       if (cause instanceof ApiError && cause.code) {
         setError(t.errors[cause.code]);

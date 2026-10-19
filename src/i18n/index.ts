@@ -9,8 +9,6 @@ export type Locale = (typeof locales)[number];
 export type Dictionary = typeof en;
 export type MessageValues = Record<string, string | number>;
 
-const LOCALE_KEY = "locale";
-
 function asDictionary(messages: Dictionary) {
   return messages;
 }
@@ -31,16 +29,6 @@ export const localeChoices: { id: Locale; label: keyof Dictionary["language"] }[
 
 export function isLocale(value: string | null): value is Locale {
   return locales.some((locale) => locale === value);
-}
-
-export function readLocale(): Locale {
-  if (typeof window === "undefined") return "en";
-  const saved = window.localStorage.getItem(LOCALE_KEY);
-  return isLocale(saved) ? saved : "en";
-}
-
-export function saveLocale(locale: Locale) {
-  window.localStorage.setItem(LOCALE_KEY, locale);
 }
 
 export function htmlLang(locale: Locale) {

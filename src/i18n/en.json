@@ -67,7 +67,7 @@
     "searchPlaceholder": "Search {name}",
     "playing": "{count} playing",
     "trendingGames": "Trending games",
-    "trendingSports": "Trending sports",
+    "slots": "Slots",
     "providers": "Providers",
     "all": "All",
     "viewAll": "View all",
@@ -108,20 +108,6 @@
         "items": ["Responsible Gaming", "Fairness Gaming", "Self-Exclusion", "KYC Policy"]
       }
     ]
-  },
-  "sports": {
-    "football": "American Football",
-    "soccer": "Soccer",
-    "tennis": "Tennis",
-    "cricket": "Cricket",
-    "baseball": "Baseball",
-    "mma": "MMA",
-    "cs2": "CS2",
-    "racing": "Horse Racing",
-    "boxing": "Boxing",
-    "golf": "Golf",
-    "basketball": "Basketball",
-    "formula": "Formula"
   },
   "errors": {
     "unreachable": "Could not reach the API.",
