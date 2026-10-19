@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { LobbyScreen } from "@/components/lobby/LobbyScreen";
 import { casinoCategories, findCasinoCategory } from "@/config/categories";
 import { getCategoryGames } from "@/lib/games";
@@ -26,11 +27,27 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/casino/[ca
   };
 }
 
-export default async function CasinoCategoryPage({ params }: PageProps<"/[lang]/casino/[category]">) {
-  const { lang, category: slug } = await params;
-  const category = findCasinoCategory(slug);
-  if (!category) notFound();
-  // Not awaited: the lobby streams it through <Suspense> (skeleton until it resolves).
-  const games = { [category.slug]: getCategoryGames(category.slug, { lang }) };
-  return <LobbyScreen focus="casino" category={category.slug} games={games} />;
+// Instant navigation (Partial Prefetching): `params` is URL data, so it is not awaited here.
+// The lobby shell (header, sidebar, search bar, category title, footer) renders without it and
+// is shared by every category link; the slug is read in the client with useParams(). The game
+// list is a promise chained on `params` and streamed through the grid's <Suspense> (skeleton
+// until it resolves, which the lobby view transition waits for).
+// Unknown slugs get a real 404 from proxy.ts before reaching this page; CategoryGuard keeps
+// notFound() as a backstop, inside <Suspense> so it does not pull URL data into the shell.
+export default function CasinoCategoryPage({ params }: PageProps<"/[lang]/casino/[category]">) {
+  const categoryGames = params.then(({ lang, category }) => getCategoryGames(category, { lang }));
+  return (
+    <>
+      <LobbyScreen focus="casino" games={{}} categoryGames={categoryGames} />
+      <Suspense fallback={null}>
+        <CategoryGuard params={params} />
+      </Suspense>
+    </>
+  );
+}
+
+async function CategoryGuard({ params }: Pick<PageProps<"/[lang]/casino/[category]">, "params">) {
+  const { category } = await params;
+  if (!findCasinoCategory(category)) notFound();
+  return null;
 }

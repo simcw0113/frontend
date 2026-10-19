@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { useI18n } from "@/components/I18nProvider";
 
-// Brand mark + wordmark. Same mark as LogoLoader (gradient tile with ring).
+// Brand mark + wordmark (gradient tile with ring).
 export function BrandLogo({ className = "" }: { className?: string }) {
   const { t } = useI18n();
   const gradientId = `auth-logo-${useId().replace(/:/g, "")}`;

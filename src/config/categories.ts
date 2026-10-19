@@ -26,11 +26,12 @@ export type CasinoCategory = {
   titleKey: keyof Dictionary["lobby"];
   title: string;
   showOnHome?: boolean; // default true; false = own page only, no home row
+  luckyPick?: boolean; // show the "Lucky Pick" random-game reel on its page (components/lobby/LuckyPick.tsx)
 };
 
 export const casinoCategories: CasinoCategory[] = [
   { slug: "trending-games", titleKey: "trendingGames", title: "Trending games" },
-  { slug: "slots", titleKey: "slots", title: "Slots" },
+  { slug: "slots", titleKey: "slots", title: "Slots", luckyPick: true },
   // Not on the home page for now (top bar link + its own page only).
   { slug: "live-dealer", titleKey: "liveDealer", title: "Live dealer games", showOnHome: false },
 ];

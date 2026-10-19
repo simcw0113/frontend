@@ -5,9 +5,13 @@
   "skip": "Skip to content",
   "menu": {
     "home": "Home",
+    "recent": "Recent Games",
+    "favourites": "Favourites",
     "promotions": "Promotions",
     "hide": "Hide menu",
-    "show": "Show menu"
+    "show": "Show menu",
+    "collapse": "Collapse menu",
+    "expand": "Expand menu"
   },
   "auth": {
     "signIn": "Sign in",
@@ -185,11 +189,29 @@
     "liveDealer": "Live Dealer",
     "sports": "Sports",
     "promotions": "Promotions",
-    "vip": "VIP"
+    "vip": "VIP",
+    "zAi": "Z-AI"
   },
   "comingSoon": {
     "text": "Coming soon",
     "sportsMeta": "Sports betting is coming soon.",
-    "vipMeta": "The VIP club is coming soon."
+    "vipMeta": "The VIP club is coming soon.",
+    "zAiMeta": "Z-AI is coming soon."
+  },
+  "playerGames": {
+    "recentEmpty": "No recent games yet",
+    "favouritesEmpty": "No favourites yet",
+    "recentMeta": "The games you played recently.",
+    "favouritesMeta": "Your favourite games."
+  },
+  "luckyPick": {
+    "title": "Lucky Pick Slots",
+    "subtitle": "Your fortune starts with one lucky pick!",
+    "spin": "Spin",
+    "play": "Play",
+    "tryAgain": "Try Again",
+    "by": "by {provider}",
+    "picked": "Your lucky pick: {name}",
+    "close": "Close"
   }
 }

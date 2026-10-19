@@ -23,6 +23,18 @@ export function TopNav({ route }: { route: string }) {
     }
   }, [route]);
 
+  // Mark the list when its links do not fit (CSS then fades the edges of the scrolling list).
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const update = () => list.toggleAttribute("data-scroll", list.scrollWidth > list.clientWidth + 1);
+    const observer = new ResizeObserver(update);
+    observer.observe(list);
+    list.querySelectorAll("li").forEach((item) => observer.observe(item)); // labels change with the language
+    update();
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <nav aria-label={t.topNav.label} className="top-nav">
       <ul ref={listRef} className="top-nav-list">
@@ -30,13 +42,26 @@ export function TopNav({ route }: { route: string }) {
           const active = item.path === route;
           return (
             <li key={item.id} className="shrink-0 snap-start">
-              <LobbyLink
-                href={item.path}
-                aria-current={active ? "page" : undefined}
-                className={`top-nav-link ${active ? "text-brand" : "text-white hover:text-brand"}`}
-              >
-                {t.topNav[item.labelKey]}
-              </LobbyLink>
+              {item.featured ? (
+                <LobbyLink href={item.path} aria-current={active ? "page" : undefined} className="top-nav-link top-nav-featured">
+                  {/* Gradient border, glowing pill, shimmering gradient text and a twinkling
+                      sparkle; all static under reduced motion. The name is the text. */}
+                  <span className="zai-pill">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" className="zai-spark">
+                      <path d="M12 1.5 13.9 10.1 22.5 12 13.9 13.9 12 22.5 10.1 13.9 1.5 12 10.1 10.1Z" />
+                    </svg>
+                    <span className="zai-text">{t.topNav[item.labelKey]}</span>
+                  </span>
+                </LobbyLink>
+              ) : (
+                <LobbyLink
+                  href={item.path}
+                  aria-current={active ? "page" : undefined}
+                  className={`top-nav-link ${active ? "text-brand" : "text-white hover:text-brand"}`}
+                >
+                  {t.topNav[item.labelKey]}
+                </LobbyLink>
+              )}
             </li>
           );
         })}
@@ -45,7 +70,7 @@ export function TopNav({ route }: { route: string }) {
   );
 }
 
-// Title bar of a page that is not ready yet (Sports, VIP): the title and "Coming soon".
+// Title bar of a page that is not ready yet (Sports, VIP, Z-AI): the title and "Coming soon".
 export function ComingSoonHeader({ title }: { title: string }) {
   const { t } = useI18n();
   return (

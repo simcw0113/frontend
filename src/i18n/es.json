@@ -5,9 +5,13 @@
   "skip": "Saltar al contenido",
   "menu": {
     "home": "Inicio",
+    "recent": "Juegos recientes",
+    "favourites": "Favoritos",
     "promotions": "Promociones",
     "hide": "Ocultar menú",
-    "show": "Mostrar menú"
+    "show": "Mostrar menú",
+    "collapse": "Contraer menú",
+    "expand": "Expandir menú"
   },
   "auth": {
     "signIn": "Iniciar sesión",
@@ -185,11 +189,29 @@
     "liveDealer": "Crupier en vivo",
     "sports": "Deportes",
     "promotions": "Promociones",
-    "vip": "VIP"
+    "vip": "VIP",
+    "zAi": "Z-AI"
   },
   "comingSoon": {
     "text": "Próximamente",
     "sportsMeta": "Las apuestas deportivas llegan pronto.",
-    "vipMeta": "El club VIP llega pronto."
+    "vipMeta": "El club VIP llega pronto.",
+    "zAiMeta": "Z-AI llega pronto."
+  },
+  "playerGames": {
+    "recentEmpty": "Aún no hay juegos recientes",
+    "favouritesEmpty": "Aún no tienes favoritos",
+    "recentMeta": "Los juegos que jugaste hace poco.",
+    "favouritesMeta": "Tus juegos favoritos."
+  },
+  "luckyPick": {
+    "title": "Tragaperras de la suerte",
+    "subtitle": "¡Tu fortuna empieza con una elección!",
+    "spin": "Girar",
+    "play": "Jugar",
+    "tryAgain": "Otra vez",
+    "by": "de {provider}",
+    "picked": "Tu elección de la suerte: {name}",
+    "close": "Cerrar"
   }
 }

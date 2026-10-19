@@ -9,6 +9,7 @@ const pages = [
   { path: "/promotions", priority: 0.7 },
   { path: "/sports", priority: 0.5 },
   { path: "/vip", priority: 0.5 },
+  { path: "/z-ai", priority: 0.5 },
 ];
 
 // One entry per language and page, each listing its translations.

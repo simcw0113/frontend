@@ -148,30 +148,103 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
   display: none;
 }
 
-.lobby-slot {
-  width: 0;
-  min-width: 0;
-  overflow: hidden;
-  flex: none;
-  transition: width 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.lobby-shell.is-open .lobby-slot {
-  width: 16rem;
+/* Lobby sidebar (#lobby-sidebar, LobbyScreen).
+   Below lg: a 16rem drawer under the header, slid in over the page with a backdrop
+   (.drawer-open on .lobby-root).
+   From lg: a full-height column from the top of the viewport (own scroll when long), 16rem
+   expanded or a 4.5rem icon rail (.is-collapsed); the header and page (.lobby-column) start at
+   its right edge and follow the width. No transitions under reduced motion. */
+.lobby-root {
+  --lobby-rail: 16rem;
 }
 
 .lobby-aside {
+  position: fixed;
+  top: var(--lobby-header-h);
+  left: 0;
+  z-index: 30;
+  width: 16rem;
+  height: calc(100dvh - var(--lobby-header-h));
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
   transform: translateX(-100%);
+  visibility: hidden;
+  transition:
+    transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+    visibility 0s linear 0.22s;
+}
+
+.lobby-root.drawer-open .lobby-aside {
+  transform: none;
+  visibility: visible;
   transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.lobby-shell.is-open .lobby-aside {
-  transform: none;
+.lobby-backdrop {
+  position: fixed;
+  inset: var(--lobby-header-h) 0 0;
+  z-index: 25;
+  background: rgb(7 20 24 / 0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.lobby-root.drawer-open .lobby-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* The language list does not belong to the 64px top row. */
+.lobby-aside-top {
+  box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.1);
+}
+
+@media (min-width: 1024px) {
+  .lobby-root.is-collapsed {
+    --lobby-rail: 4.5rem;
+  }
+
+  .lobby-aside {
+    top: 0;
+    z-index: 41;
+    width: var(--lobby-rail);
+    height: 100dvh;
+    transform: none;
+    visibility: visible;
+    transition: width 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .lobby-root.drawer-open .lobby-aside {
+    transition: width 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .lobby-backdrop {
+    display: none;
+  }
+
+  .lobby-column {
+    margin-left: var(--lobby-rail);
+    transition: margin-left 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  /* Icon rail: labels visually hidden (still the accessible names; title shows a tooltip). */
+  .lobby-root.is-collapsed .lobby-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lobby-slot,
-  .lobby-aside {
+  .lobby-aside,
+  .lobby-root.drawer-open .lobby-aside,
+  .lobby-backdrop,
+  .lobby-column {
     transition: none;
   }
 }
@@ -204,19 +277,9 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
   }
 }
 
-/* Below md the lobby sidebar floats over the page instead of squeezing it. */
-@media (max-width: 767px) {
-  .lobby-slot {
-    position: fixed;
-    top: var(--lobby-header-h);
-    left: 0;
-    z-index: 30;
-    height: calc(100dvh - var(--lobby-header-h));
-  }
-}
 
 /* Lobby header: a 64px main row; below lg the top links (.top-nav) add a 44px row under it.
-   --lobby-header-h is its height, used by the sticky / floating sidebar. The bottom line is
+   --lobby-header-h is its height, used by the sidebar drawer. The bottom line is
    a shadow so it adds no height. */
 :root {
   --lobby-header-h: 6.75rem;
@@ -240,19 +303,27 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
 }
 
-/* Below lg: one scrollable line (no scrollbar), snapping to links, faded at the edges. */
+/* Below lg: one scrollable line (no scrollbar), snapping to links, faded at the edges.
+   Text-to-text spacing = 2 x 8px link padding + the gap: 22px here, 26px at lg, 34px at xl. */
+/* The list box is 64px tall (pulled back to the 44px row with negative margins) and ends with
+   24px of padding, so the Z-AI glow (up to 16px) is not clipped by the scrolling box. The edge
+   fade only applies while the links overflow (data-scroll, set by TopNav). */
 .top-nav-list {
   display: flex;
-  height: 2.75rem;
+  height: 4rem;
+  margin-block: -0.625rem;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.375rem;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
   scroll-padding-inline: 0.75rem;
   padding-inline: 0.75rem 1.5rem;
   scrollbar-width: none;
-  mask-image: linear-gradient(90deg, transparent, #000 0.75rem, #000 calc(100% - 1.5rem), transparent);
+}
+
+.top-nav-list[data-scroll] {
+  mask-image: linear-gradient(90deg, transparent, #000 0.75rem, #000 calc(100% - 1rem), transparent);
 }
 
 .top-nav-list::-webkit-scrollbar {
@@ -277,18 +348,156 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
 }
 
 @media (min-width: 1024px) {
+  /* Inline after the logo. It may shrink (never wraps or pushes the buttons): if the links
+     ever outgrow the space they scroll sideways like the row below lg. */
   .top-nav {
     order: 0;
-    flex-basis: auto;
-    margin-inline: 1.25rem 0;
+    flex: 0 1 auto;
+    margin-inline: 1.25rem 1rem;
     box-shadow: none;
   }
 
+  /* Fits: nothing clips it (the glow may spread over the margin). */
   .top-nav-list {
     height: 4rem;
+    margin-block: 0;
+    gap: 0.625rem;
     padding-inline: 0;
     overflow: visible;
-    mask-image: none;
+  }
+
+  /* Too long for the space (e.g. de/es at 1024 with the sidebar expanded): it scrolls, faded
+     at the edges, with 24px at the end for the glow (data-scroll is set by TopNav). */
+  .top-nav-list[data-scroll] {
+    overflow-x: auto;
+    padding-inline: 0.5rem 1.5rem;
+    margin-right: -1rem;
+    mask-image: linear-gradient(90deg, transparent, #000 0.5rem, #000 calc(100% - 1rem), transparent);
+  }
+}
+
+@media (min-width: 1280px) {
+  .top-nav-list {
+    gap: 1.125rem;
+  }
+}
+
+/* Z-AI, the featured top bar link: a glowing pill with a moving gradient border (cyan ->
+   white -> violet), shimmering gradient text and a twinkling sparkle. Only background-position,
+   transform and opacity animate (~3.5s loops); all static under reduced motion. The pill is
+   30px tall inside the 36px link, so nothing shifts. */
+.top-nav-featured {
+  border-radius: 9999px;
+  margin-inline: 0.5rem 0.25rem; /* extra room so the glow does not touch the neighbours */
+  padding-inline: 0.25rem;
+}
+
+.zai-pill {
+  --zai-violet: #8b7bff;
+  position: relative;
+  display: inline-flex;
+  height: 1.875rem;
+  align-items: center;
+  gap: 0.3125rem;
+  border-radius: 9999px;
+  padding-inline: 0.625rem 0.75rem;
+  background: rgb(2 239 240 / 0.08);
+  box-shadow: 0 0 10px rgb(2 239 240 / 0.35);
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* The border: a gradient ring (the inner part masked away). */
+.zai-pill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(90deg, var(--brand), #fff, var(--zai-violet), var(--brand)) 0 0 / 300% 100%;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  animation: zai-flow 3.5s linear infinite;
+  pointer-events: none;
+}
+
+.zai-text {
+  background: linear-gradient(100deg, var(--brand) 0%, #fff 35%, var(--zai-violet) 55%, #fff 75%, var(--brand) 100%) 0 0 / 250% 100%;
+  background-clip: text;
+  color: transparent;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  animation: zai-flow 3.5s linear infinite;
+}
+
+.zai-spark {
+  width: 0.8125rem;
+  height: 0.8125rem;
+  flex: none;
+  fill: #fff;
+  filter: drop-shadow(0 0 3px rgb(2 239 240 / 0.9));
+  animation: zai-twinkle 3s ease-in-out infinite;
+}
+
+@media (hover: hover) {
+  .top-nav-featured:hover .zai-pill {
+    box-shadow: 0 0 16px rgb(2 239 240 / 0.6);
+  }
+}
+
+.top-nav-featured[aria-current="page"] .zai-pill {
+  background: linear-gradient(90deg, rgb(2 239 240 / 0.3), rgb(139 123 255 / 0.3));
+  box-shadow: 0 0 16px rgb(2 239 240 / 0.6);
+}
+
+@keyframes zai-flow {
+  to {
+    background-position: 100% 0;
+  }
+}
+
+@keyframes zai-twinkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.7) rotate(45deg);
+    opacity: 0.65;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zai-pill::before,
+  .zai-text,
+  .zai-spark {
+    animation: none;
+  }
+}
+
+/* Header logo: pressed in (scale + dim) while the pointer is down, springs back on release.
+   Transform only, so nothing moves around it. Reduced motion: just the quick dim. */
+.logo-press {
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.2s ease;
+}
+
+.logo-press:active {
+  transform: scale(0.92);
+  opacity: 0.85;
+  transition-duration: 0.12s;
+  transition-timing-function: ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-press {
+    transition: opacity 0.1s ease;
+  }
+
+  .logo-press:active {
+    transform: none;
   }
 }
 
@@ -440,102 +649,109 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
   pointer-events: none;
 }
 
-.loader-overlay.is-leaving .loader-stage {
+.loader-overlay.is-leaving .brand-loader {
   transform: scale(1.06);
 }
 
-.loader-stage {
-  position: relative;
+/* BrandLoader: logo (64px tall) breathing over a cyan glow, shimmer bar below. */
+.brand-loader {
   display: grid;
-  width: 50px;
-  height: 50px;
-  place-items: center;
+  justify-items: center;
+  gap: 1.25rem;
   transition: transform 0.5s ease;
 }
 
-.loader-glow,
-.loader-ripple,
-.loader-orbit,
-.loader-mark {
+.brand-loader--delayed {
+  animation: brand-loader-in 0.25s ease 0.18s both;
+}
+
+.brand-loader-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.brand-loader-glow {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
-}
-
-.loader-glow {
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
-  background: #02eff0;
-  opacity: 0.45;
-  filter: blur(14px);
-  animation: loader-glow 2.2s ease-in-out infinite;
-}
-
-.loader-ripple {
-  width: 50px;
-  height: 50px;
-  border: 1.5px solid #02eff0;
+  inset: 12%;
   border-radius: 999px;
-  animation: loader-ripple 2.2s cubic-bezier(0.16, 0.84, 0.32, 1) infinite;
+  background: var(--brand);
+  filter: blur(22px);
+  opacity: 0.35;
+  animation: brand-loader-glow 2.4s ease-in-out infinite;
 }
 
-.loader-ripple-late {
-  animation-delay: 1.1s;
+.brand-loader-logo {
+  position: relative;
+  width: auto;
+  height: 4rem;
+  filter: drop-shadow(0 0 10px rgb(2 239 240 / 0.45));
+  animation: brand-loader-breathe 2.4s ease-in-out infinite;
 }
 
-.loader-orbit {
-  width: 78px;
-  height: 78px;
+.brand-loader-bar {
+  position: relative;
+  width: 7.5rem;
+  height: 3px;
+  overflow: hidden;
   border-radius: 999px;
-  animation: loader-spin 1.45s linear infinite;
+  background: rgb(255 255 255 / 0.12);
 }
 
-.loader-orbit-track,
-.loader-orbit-arc {
+.brand-loader-bar > span {
   position: absolute;
-  inset: 0;
+  inset: 0 auto 0 0;
+  width: 40%;
   border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--brand), #fff);
+  animation: brand-loader-sweep 1.3s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
-.loader-orbit-track {
-  border: 1.5px solid rgb(255 255 255 / 0.18);
-}
-
-.loader-orbit-arc {
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    transparent 210deg,
-    rgb(2 239 240 / 0.2) 260deg,
-    #02eff0 330deg,
-    #ffffff 360deg
-  );
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 1px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 1px));
-}
-
-.loader-orbit-head {
+/* Visually hidden (the status name); shown as text under reduced motion. */
+.brand-loader-label {
   position: absolute;
-  top: -2px;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  margin-left: -3px;
-  border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 0 10px 2px #02eff0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-.loader-mark {
-  animation: loader-settle 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+@keyframes brand-loader-in {
+  from {
+    opacity: 0;
+  }
 }
 
-.loader-ring {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: loader-draw 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
+@keyframes brand-loader-breathe {
+  0%,
+  100% {
+    transform: scale(0.96);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+}
+
+@keyframes brand-loader-glow {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes brand-loader-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
 }
 
 @keyframes loader-spin {
@@ -544,57 +760,31 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
   }
 }
 
-@keyframes loader-ripple {
-  0% {
-    transform: scale(0.7);
-    opacity: 0.7;
-  }
-  100% {
-    transform: scale(2.7);
-    opacity: 0;
-  }
-}
-
-@keyframes loader-glow {
-  0%,
-  100% {
-    opacity: 0.28;
-  }
-  50% {
-    opacity: 0.85;
-  }
-}
-
-@keyframes loader-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes loader-settle {
-  from {
-    transform: scale(0.9);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .loader-glow,
-  .loader-ripple,
-  .loader-orbit,
-  .loader-mark,
-  .loader-ring {
+  .brand-loader {
+    transition: none;
+  }
+
+  .brand-loader--delayed {
+    animation: brand-loader-in 0s linear 0.18s both;
+  }
+
+  .brand-loader-glow,
+  .brand-loader-logo {
     animation: none;
   }
 
-  .loader-ring {
-    stroke-dashoffset: 0;
+  .brand-loader-bar {
+    display: none;
   }
 
-  .loader-ripple {
-    opacity: 0;
+  .brand-loader-label {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+    font-size: 0.875rem;
+    color: var(--muted);
   }
 }
 
@@ -1298,5 +1488,170 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
 
   .promo-dialog.is-closing::backdrop {
     animation: auth-backdrop-out 0.16s ease-in forwards;
+  }
+}
+
+/* Lucky Pick (components/lobby/LuckyPick.tsx): a reel of square tiles, the cyan selector frame
+   (pointer notch + glow) fixed in the middle, a pill Spin button. The strip moves with a
+   transform transition set from JS; reduced motion gets a short fade instead. */
+.lucky-pick {
+  --lucky-tile: 6rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, var(--lobby-soft), var(--lobby));
+  padding: 1.25rem 0 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .lucky-pick {
+    --lucky-tile: 7rem;
+  }
+}
+
+.lucky-pick > h2,
+.lucky-pick > p {
+  padding-inline: 1rem;
+}
+
+.lucky-viewport {
+  position: relative;
+  margin-top: 1rem;
+  padding-block: 0.875rem;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.lucky-track {
+  display: flex;
+  gap: 0.75rem;
+  width: max-content;
+  will-change: transform;
+}
+
+.lucky-track.is-fading {
+  animation: lucky-fade 0.22s ease-out;
+}
+
+@keyframes lucky-fade {
+  from {
+    opacity: 0.25;
+  }
+}
+
+.lucky-tile {
+  position: relative;
+  width: var(--lucky-tile);
+  height: var(--lucky-tile);
+  flex: none;
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+
+.lucky-name {
+  position: absolute;
+  inset: auto 0 0;
+  overflow: hidden;
+  padding: 1.25rem 0.375rem 0.375rem;
+  background: linear-gradient(180deg, transparent, rgb(0 0 0 / 0.8));
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lucky-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--lucky-tile) + 0.75rem);
+  height: calc(var(--lucky-tile) + 0.75rem);
+  translate: -50% -50%;
+  border: 3px solid var(--brand);
+  border-radius: 1rem;
+  box-shadow:
+    0 0 14px rgb(2 239 240 / 0.55),
+    inset 0 0 12px rgb(2 239 240 / 0.25);
+  pointer-events: none;
+}
+
+.lucky-frame.is-empty {
+  display: grid;
+  place-items: center;
+  background: var(--lobby-soft);
+}
+
+.lucky-notch {
+  position: absolute;
+  top: -0.5rem;
+  left: 50%;
+  width: 0.75rem;
+  height: 0.75rem;
+  translate: -50% 0;
+  rotate: 45deg;
+  border-radius: 2px;
+  background: var(--brand);
+  box-shadow: 0 0 8px rgb(2 239 240 / 0.6);
+}
+
+.lucky-question {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.06);
+  color: var(--brand);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.lucky-spin {
+  min-width: 5.5rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: var(--brand);
+  padding-inline: 1.25rem;
+  color: var(--lobby);
+  font-size: 0.875rem;
+  font-weight: 800;
+  box-shadow: 0 0 14px rgb(2 239 240 / 0.45);
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+.lucky-spin:hover {
+  filter: brightness(1.1);
+}
+
+.lucky-spin:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.lucky-spin:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.lucky-dialog {
+  width: min(100% - 2rem, 24rem);
+}
+
+.lucky-result-cover {
+  position: relative;
+  width: 8.5rem;
+  height: 8.5rem;
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: 1rem;
+  box-shadow: 0 0 28px rgb(2 239 240 / 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lucky-spin {
+    transition: none;
   }
 }

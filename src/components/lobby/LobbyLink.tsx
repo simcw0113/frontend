@@ -14,6 +14,7 @@ export function LobbyLink({
   scroll = true,
   onGo,
   className,
+  title,
   children,
   "aria-current": ariaCurrent,
 }: {
@@ -21,6 +22,7 @@ export function LobbyLink({
   scroll?: boolean;
   onGo?: () => void;
   className?: string;
+  title?: string;
   children: ReactNode;
   "aria-current"?: "page";
 }) {
@@ -60,6 +62,7 @@ export function LobbyLink({
       onFocus={warm}
       onTouchStart={warm}
       aria-current={ariaCurrent}
+      title={title}
       className={className}
     >
       {children}

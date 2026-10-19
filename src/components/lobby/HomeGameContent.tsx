@@ -66,6 +66,27 @@ export function HomeGameContent({
   );
 }
 
+// The player's Recent games / Favourites list (/recent, /favourites): the same grid, covers
+// and states as a category page, with the page's own empty text. The title is the page's
+// title bar (LobbyScreen), so the section is labelled by it.
+export function PlayerGameList({
+  promise,
+  emptyText,
+  labelledBy,
+}: {
+  promise: Promise<CategoryGamesResult>;
+  emptyText: string;
+  labelledBy: string;
+}) {
+  return (
+    <section aria-labelledby={labelledBy} className="mt-6">
+      <Suspense fallback={<GridSkeleton count={8} />}>
+        <GameGrid promise={promise} emptyText={emptyText} />
+      </Suspense>
+    </section>
+  );
+}
+
 function CardRow({ title, href, children }: { title: string; href?: string; children: ReactNode }) {
   const { t } = useI18n();
   return (
@@ -98,11 +119,11 @@ function Notice({ children }: { children: ReactNode }) {
 
 // The games of one category: the list, "nothing here yet" for an empty category,
 // or the error state.
-function GameGrid({ promise, limit }: { promise: Promise<CategoryGamesResult>; limit?: number }) {
+function GameGrid({ promise, limit, emptyText }: { promise: Promise<CategoryGamesResult>; limit?: number; emptyText?: string }) {
   const { t } = useI18n();
   const result = use(promise);
   if (result.error) return <Notice>{t.lobby.loadError}</Notice>;
-  if (result.games.length === 0) return <Notice>{t.lobby.empty}</Notice>;
+  if (result.games.length === 0) return <Notice>{emptyText ?? t.lobby.empty}</Notice>;
   return (
     <div className={GRID}>
       {(limit ? result.games.slice(0, limit) : result.games).map((game) => (

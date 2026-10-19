@@ -5,9 +5,13 @@
   "skip": "Zum Inhalt springen",
   "menu": {
     "home": "Startseite",
+    "recent": "Zuletzt gespielt",
+    "favourites": "Favoriten",
     "promotions": "Aktionen",
     "hide": "Menü ausblenden",
-    "show": "Menü anzeigen"
+    "show": "Menü anzeigen",
+    "collapse": "Menü einklappen",
+    "expand": "Menü ausklappen"
   },
   "auth": {
     "signIn": "Anmelden",
@@ -185,11 +189,29 @@
     "liveDealer": "Live-Dealer",
     "sports": "Sport",
     "promotions": "Aktionen",
-    "vip": "VIP"
+    "vip": "VIP",
+    "zAi": "Z-AI"
   },
   "comingSoon": {
     "text": "Demnächst verfügbar",
     "sportsMeta": "Sportwetten sind bald verfügbar.",
-    "vipMeta": "Der VIP-Club kommt bald."
+    "vipMeta": "Der VIP-Club kommt bald.",
+    "zAiMeta": "Z-AI kommt bald."
+  },
+  "playerGames": {
+    "recentEmpty": "Noch keine zuletzt gespielten Spiele",
+    "favouritesEmpty": "Noch keine Favoriten",
+    "recentMeta": "Ihre zuletzt gespielten Spiele.",
+    "favouritesMeta": "Ihre Lieblingsspiele."
+  },
+  "luckyPick": {
+    "title": "Glücksgriff Slots",
+    "subtitle": "Ihr Glück beginnt mit einem Griff!",
+    "spin": "Drehen",
+    "play": "Spielen",
+    "tryAgain": "Nochmal",
+    "by": "von {provider}",
+    "picked": "Ihr Glücksgriff: {name}",
+    "close": "Schließen"
   }
 }

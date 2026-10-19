@@ -1,5 +1,6 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { Suspense, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import type { AuthView } from "@/components/auth/AuthFormPanel";
 import { SignInDialog } from "@/components/SignInDialog";
@@ -12,9 +13,12 @@ import { HowToRegister } from "@/components/lobby/HowToRegister";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { GiftIcon, PromotionsGrid, PromotionsHeader, PromotionsSkeleton } from "@/components/lobby/Promotions";
+import { LuckyPick } from "@/components/lobby/LuckyPick";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { SearchModal } from "@/components/lobby/SearchModal";
 import { ComingSoonHeader, TopNav } from "@/components/lobby/TopNav";
+import { sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
+import { PlayerGameList } from "@/components/lobby/HomeGameContent";
 import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
 import { fill, localeChoices } from "@/i18n";
 import { toSlug } from "@/i18n/routing";
@@ -23,20 +27,30 @@ import type { PartnersResult } from "@/lib/partners";
 import type { PromotionsResult } from "@/lib/promotions";
 import type { TopWinsResult } from "@/lib/topWins";
 import { animate, reduceMotion } from "@/lib/motion";
-import { setSidebarOpen, useSidebarOpen } from "@/lib/sidebarState";
+import { setDrawerOpen, setSidebarOpen, useDrawerOpen, useSidebarOpen, useSidebarRail } from "@/lib/sidebarState";
 
+// px-[14px] keeps the 20px icon centred in the 72px rail (12px aside padding + 14px), so the
+// icons do not move while the sidebar collapses or expands.
 const NAV_ITEM =
-  "flex h-11 w-full items-center rounded-lg px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
+  "flex h-11 w-full items-center rounded-lg px-[14px] text-sm font-medium whitespace-nowrap focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand";
+const TOGGLE =
+  "grid size-11 shrink-0 place-items-center rounded-lg text-brand hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 
-export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip";
+export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites";
 
 // `games` holds one promise per category slug, started on the server (lib/games.ts)
 // and read here with use() inside <Suspense>, so the page shell shows at once.
+// A category page passes its one list as `categoryGames` instead: the page does not await
+// its params (Instant navigation: URL data stays out of the shared App Shell), so it cannot
+// key the list by slug. The slug itself is read here with useParams(), which resolves on the
+// server for the generateStaticParams categories and synchronously on client navigations.
 export function LobbyScreen({
   focus = "home",
   category,
   games,
+  categoryGames,
+  playerGames,
   topWins,
   partners,
   promotions,
@@ -44,6 +58,8 @@ export function LobbyScreen({
   focus?: LobbyFocus;
   category?: string;
   games: Record<string, Promise<CategoryGamesResult>>;
+  categoryGames?: Promise<CategoryGamesResult>; // category page only (see above)
+  playerGames?: Promise<CategoryGamesResult>; // Recent games / Favourites pages only
   topWins?: Promise<TopWinsResult>; // home only
   partners?: Promise<PartnersResult>; // home only
   promotions?: Promise<PromotionsResult>; // promotions page only
@@ -51,7 +67,11 @@ export function LobbyScreen({
   const [searchOpen, setSearchOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
   const { locale, setLocale, t } = useI18n();
-  const sidebarOpen = useSidebarOpen();
+  const sidebarOpen = useSidebarOpen(); // lg+: expanded (icon + label) or the icon rail
+  const drawerOpen = useDrawerOpen(); // below lg: the drawer over the page
+  const rail = useSidebarRail();
+  const collapsed = rail && !sidebarOpen; // icon rail: labels visually hidden, tooltips on
+  const drawerToggleRef = useRef<HTMLButtonElement>(null);
   const [signInOpen, setSignInOpen] = useState(false);
   const [authView, setAuthView] = useState<AuthView>("login");
   const [cookiesOn, setCookiesOn] = useState(true);
@@ -95,50 +115,179 @@ export function LobbyScreen({
   }, [searchOpen, signInOpen]);
 
   function toggleSidebar() {
+    if (sidebarOpen) setLanguageOpen(false);
     setSidebarOpen((open) => !open);
   }
 
-  // The sidebar floats over the page below md: close it after choosing a page.
+  // Below lg the sidebar is a drawer over the page: close it after choosing a page.
   function closeSidebarOnSmallScreens() {
-    if (window.matchMedia("(max-width: 767px)").matches) setSidebarOpen(false);
+    setDrawerOpen(false);
   }
+
+  // Drawer: Esc closes it and gives focus back to the header toggle (not while a pop-up is open,
+  // the pop-up handles its own Esc).
+  useEffect(() => {
+    if (!drawerOpen || rail || searchOpen || signInOpen) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setDrawerOpen(false);
+      drawerToggleRef.current?.focus();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [drawerOpen, rail, searchOpen, signInOpen]);
 
   function dismissCookies() {
     setCookiesOn(false);
   }
 
-  const casino = (category && findCasinoCategory(category)) || defaultCasinoCategory;
+  const params = useParams<{ category?: string }>();
+  const slug = category ?? (focus === "casino" ? params?.category : undefined);
+  const casino = (slug && findCasinoCategory(slug)) || defaultCasinoCategory;
+  const listGames = categoryGames ? { ...games, [casino.slug]: categoryGames } : games;
+  const luckyGames = listGames[casino.slug] as Promise<CategoryGamesResult> | undefined;
   const route = focus === "home" ? "/" : focus === "casino" ? `/casino/${casino.slug}` : `/${focus}`;
   const gamesPage = focus === "home" || focus === "casino";
+  const playerPage = focus === "recent" || focus === "favourites";
+  const sideGroups: { path: string; label: string; Icon: () => ReactNode }[][] = [
+    [
+      { path: "/", label: t.menu.home, Icon: HomeIcon },
+      ...sidebarPlayerItems.map((item) => ({ path: item.path, label: t.menu[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
+    ],
+    sidebarPromoItems.map((item) => ({ path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
+    sidebarNavItems.map((item) => ({ path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
+  ];
   const openRegister = () => {
     setAuthView("register");
     setSignInOpen(true);
   };
 
   return (
-    <div className="min-h-full bg-lobby text-ink">
+    <div className={`lobby-root min-h-full bg-lobby text-ink${collapsed ? " is-collapsed" : ""}${drawerOpen ? " drawer-open" : ""}`}>
       <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} initialView={authView} />
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
-      {/* One row of 64px from lg (toggle, logo, top links, buttons). Below lg the top links wrap
-          to a second, scrollable row (.top-nav); --lobby-header-h in globals.css follows suit. */}
+
+      {/* From lg: a full-height column on the left (expanded, or an icon rail when collapsed)
+          with its toggle in the top row; the header and the page sit to its right. Below lg:
+          a drawer under the header, opened by the header toggle. See .lobby-aside in globals.css. */}
+      <aside
+        id="lobby-sidebar"
+        aria-hidden={!rail && !drawerOpen}
+        inert={!rail && !drawerOpen}
+        className="lobby-aside flex flex-col border-r border-white/10 bg-lobby"
+      >
+        <div className="lobby-aside-top hidden h-16 shrink-0 items-center px-3.5 lg:flex">
+          <button
+            type="button"
+            aria-label={sidebarOpen ? t.menu.collapse : t.menu.expand}
+            aria-expanded={sidebarOpen}
+            aria-controls="lobby-sidebar"
+            onClick={toggleSidebar}
+            className={TOGGLE}
+          >
+            <MenuIcon />
+          </button>
+        </div>
+        <div className="lobby-aside-body flex flex-col p-3">
+          {/* Groups (config/topNav.ts): Home + the player's pages | Promotions, VIP | games, then
+              the language selector. The shown page's link is aria-current="page". */}
+          {sideGroups.map((group, groupIndex) => (
+            <div key={groupIndex} className="contents">
+              {groupIndex > 0 ? <hr className="my-3 border-white/10" /> : null}
+              {group.map((item, index) => {
+                const active = item.path === route;
+                return (
+                  <LobbyLink
+                    key={item.path}
+                    href={item.path}
+                    onGo={closeSidebarOnSmallScreens}
+                    aria-current={active ? "page" : undefined}
+                    title={collapsed ? item.label : undefined}
+                    className={`${NAV_ITEM} gap-3 ${index < group.length - 1 ? "mb-1" : ""} ${active ? "bg-brand/15 text-brand" : "hover:bg-white/10"}`}
+                  >
+                    <item.Icon />
+                    <span className="lobby-label">{item.label}</span>
+                  </LobbyLink>
+                );
+              })}
+            </div>
+          ))}
+          <hr className="my-3 border-white/10" />
+          <div className="relative" data-nav-item>
+            {/* In the icon rail this expands the sidebar with the language list open. */}
+            <button
+              type="button"
+              aria-expanded={languageOpen}
+              aria-label={`${t.language.label}: ${t.language[locale]}`}
+              title={collapsed ? `${t.language.label}: ${t.language[locale]}` : undefined}
+              onClick={() => {
+                if (collapsed) {
+                  setSidebarOpen(true);
+                  setLanguageOpen(true);
+                  return;
+                }
+                setLanguageOpen((open) => !open);
+              }}
+              className={`${NAV_ITEM} justify-between hover:bg-white/10`}
+            >
+              <span className="flex items-center gap-3">
+                <GlobeIcon />
+                <span className="lobby-label">{t.language[locale]}</span>
+              </span>
+              <span aria-hidden="true" className={`lobby-label inline-block transition-transform duration-300 motion-reduce:transition-none ${languageOpen ? "rotate-180" : ""}`}>
+                ▾
+              </span>
+            </button>
+            <Collapse open={languageOpen}>
+              <div className="mt-1 rounded-lg border border-white/10 bg-white/5 p-1">
+                {localeChoices.map((choice) => (
+                  <button
+                    key={choice.id}
+                    type="button"
+                    aria-pressed={locale === choice.id}
+                    onClick={() => {
+                      setLocale(choice.id);
+                      setLanguageOpen(false);
+                    }}
+                    className={`block w-full rounded-md px-3 py-2 text-left text-sm whitespace-nowrap ${
+                      locale === choice.id ? "bg-brand text-lobby" : "hover:bg-white/10"
+                    }`}
+                  >
+                    {t.language[choice.label]}
+                  </button>
+                ))}
+              </div>
+            </Collapse>
+          </div>
+        </div>
+      </aside>
+      {/* Drawer backdrop (below lg): a click outside closes it. Not focusable; Esc and the
+          toggle do the same for keyboards. */}
+      <div aria-hidden="true" className="lobby-backdrop" onClick={() => setDrawerOpen(false)} />
+
+      <div className="lobby-column">
+      {/* One row of 64px from lg (logo, top links, buttons). Below lg the drawer toggle comes
+          first and the top links wrap to a second, scrollable row (.top-nav); --lobby-header-h
+          in globals.css follows suit. */}
       <header
         style={{ viewTransitionName: "lobby-header" }}
-        className="lobby-header sticky top-0 z-40 flex flex-wrap items-center gap-x-1 bg-lobby px-3"
+        className="lobby-header sticky top-0 z-40 flex flex-wrap items-center gap-x-1 bg-lobby px-3 lg:flex-nowrap"
       >
         <button
+          ref={drawerToggleRef}
           type="button"
-          aria-label={sidebarOpen ? t.menu.hide : t.menu.show}
-          aria-expanded={sidebarOpen}
+          aria-label={drawerOpen ? t.menu.hide : t.menu.show}
+          aria-expanded={drawerOpen}
           aria-controls="lobby-sidebar"
-          onClick={toggleSidebar}
-          className="grid size-11 shrink-0 place-items-center rounded-lg text-brand hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          onClick={() => setDrawerOpen((open) => !open)}
+          className={`${TOGGLE} lg:hidden`}
         >
           <MenuIcon />
         </button>
-        <h1 className="ml-1.5 min-w-0 md:ml-[13px]">
+        <h1 className="ml-1.5 min-w-0 md:ml-[13px] lg:ml-3">
           <LobbyLink
             href="/"
-            className="flex items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            className="logo-press flex items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
             {/* Plain img with explicit width/height (no layout shift): the file may be swapped for any host/format. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -160,7 +309,7 @@ export function LobbyScreen({
               setAuthView("login");
               setSignInOpen(true);
             }}
-            className="rounded-lg px-3 py-2 text-sm font-semibold hover:bg-white/10"
+            className="rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap hover:bg-white/10"
           >
             {t.auth.signIn}
           </button>
@@ -177,76 +326,12 @@ export function LobbyScreen({
         </div>
       </header>
 
-      <div className={`lobby-shell flex${sidebarOpen ? " is-open" : ""}`}>
-        <div className="lobby-slot sticky top-(--lobby-header-h) h-[calc(100vh-var(--lobby-header-h))] self-start">
-          <aside
-            id="lobby-sidebar"
-            aria-hidden={!sidebarOpen}
-            inert={!sidebarOpen}
-            className="lobby-aside flex h-full w-64 flex-col border-r border-white/10 bg-lobby p-3"
-          >
-            <LobbyLink
-              href="/"
-              onGo={closeSidebarOnSmallScreens}
-              aria-current={focus === "home" ? "page" : undefined}
-              className={`${NAV_ITEM} mb-1 gap-3 ${focus === "home" ? "bg-brand/15 text-brand" : "hover:bg-white/10"}`}
-            >
-              <HomeIcon />
-              {t.menu.home}
-            </LobbyLink>
-            <LobbyLink
-              href="/promotions"
-              onGo={closeSidebarOnSmallScreens}
-              aria-current={focus === "promotions" ? "page" : undefined}
-              className={`${NAV_ITEM} mb-1 gap-3 ${focus === "promotions" ? "bg-brand/15 text-brand" : "hover:bg-white/10"}`}
-            >
-              <GiftIcon />
-              {t.menu.promotions}
-            </LobbyLink>
-            <div className="relative" data-nav-item>
-              <button
-                type="button"
-                aria-expanded={languageOpen}
-                aria-label={`${t.language.label}: ${t.language[locale]}`}
-                onClick={() => setLanguageOpen((open) => !open)}
-                className={`${NAV_ITEM} justify-between hover:bg-white/10`}
-              >
-                <span className="flex items-center gap-3">
-                  <GlobeIcon />
-                  {t.language[locale]}
-                </span>
-                <span aria-hidden="true" className={`inline-block transition-transform duration-300 ${languageOpen ? "rotate-180" : ""}`}>
-                  ▾
-                </span>
-              </button>
-              <Collapse open={languageOpen}>
-                <div className="mt-1 rounded-lg border border-white/10 bg-white/5 p-1">
-                  {localeChoices.map((choice) => (
-                    <button
-                      key={choice.id}
-                      type="button"
-                      aria-pressed={locale === choice.id}
-                      onClick={() => {
-                        setLocale(choice.id);
-                        setLanguageOpen(false);
-                      }}
-                      className={`block w-full rounded-md px-3 py-2 text-left text-sm ${
-                        locale === choice.id ? "bg-brand text-lobby" : "hover:bg-white/10"
-                      }`}
-                    >
-                      {t.language[choice.label]}
-                    </button>
-                  ))}
-                </div>
-              </Collapse>
-            </div>
-          </aside>
-        </div>
-
-        <main id="content" data-route={route} data-lang={toSlug(locale)} className="min-w-0 flex-1 px-3 py-4 sm:px-5">
+        <main id="content" data-route={route} data-lang={toSlug(locale)} className="min-w-0 px-3 py-4 sm:px-5">
           <div className="lobby-vt-top">
-            {focus === "home" ? <Hero /> : focus === "promotions" ? <PromotionsHeader /> : focus === "sports" || focus === "vip" ? (
-              <ComingSoonHeader title={t.topNav[focus]} />
+            {focus === "home" ? <Hero /> : focus === "promotions" ? <PromotionsHeader /> : playerPage ? (
+              <PlayerHeader focus={focus} />
+            ) : focus === "sports" || focus === "vip" || focus === "z-ai" ? (
+              <ComingSoonHeader title={focus === "z-ai" ? t.topNav.zAi : t.topNav[focus]} />
             ) : (
               <LobbyLink
                 href="/"
@@ -317,10 +402,23 @@ export function LobbyScreen({
                 <PromotionsGrid promise={promotions} onJoin={openRegister} />
               </Suspense>
             ) : null
+          ) : playerPage ? (
+            playerGames ? (
+              <PlayerGameList
+                promise={playerGames}
+                labelledBy="player-games-title"
+                emptyText={focus === "recent" ? t.playerGames.recentEmpty : t.playerGames.favouritesEmpty}
+              />
+            ) : null
           ) : gamesPage ? (
             <>
               {focus === "casino" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
-              <HomeGameContent focus={focus} category={casino} games={games} partners={partners} />
+              {focus === "casino" && casino.luckyPick && luckyGames ? (
+                <Suspense fallback={null}>
+                  <LuckyPick promise={luckyGames} onRequireAuth={openRegister} />
+                </Suspense>
+              ) : null}
+              <HomeGameContent focus={focus} category={casino} games={listGames} partners={partners} />
             </>
           ) : null}
           <LobbyFooter />
@@ -469,6 +567,94 @@ function HomeIcon() {
       <path d="M4 11 L12 4 L20 11" />
       <path d="M6 10 V20 H10 V14 H14 V20 H18 V10" />
     </svg>
+  );
+}
+
+// Sidebar games group (config/topNav.ts sidebarNavItems): same 24px grid, 1.8 stroke as Home.
+function SlotsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2.5" y="5" width="16" height="14" rx="2.5" />
+      <path d="M7.83 9 V15 M13.17 9 V15" />
+      <path d="M4.6 10.4 H6.6 L5.4 13.6 M9.9 10.4 H11.9 L10.7 13.6 M15.2 10.4 H17.2 L16 13.6" strokeWidth="1.4" />
+      <path d="M18.5 9.5 H20.5 V6" />
+      <circle cx="20.5" cy="5" r="1.2" />
+    </svg>
+  );
+}
+
+function LiveDealerIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="8.5" y="3.5" width="10" height="14" rx="2" transform="rotate(12 13.5 10.5)" />
+      <rect x="4" y="5.5" width="10" height="14" rx="2" transform="rotate(-8 9 12.5)" />
+      <path d="M9 10.3 C10.4 11.8 10.4 11.8 9 13.3 C7.6 11.8 7.6 11.8 9 10.3 Z" />
+    </svg>
+  );
+}
+
+function SportsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 8.6 L15.2 10.9 L14 14.7 H10 L8.8 10.9 Z" />
+      <path d="M12 8.6 V3.5 M15.2 10.9 L20 9.4 M14 14.7 L17 18.8 M10 14.7 L7 18.8 M8.8 10.9 L4 9.4" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function RecentIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5 V12 L15 14" />
+    </svg>
+  );
+}
+
+function HeartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 20 C6.5 16.2 3.5 12.9 3.5 9.3 C3.5 6.6 5.6 4.5 8.2 4.5 C9.8 4.5 11.2 5.3 12 6.6 C12.8 5.3 14.2 4.5 15.8 4.5 C18.4 4.5 20.5 6.6 20.5 9.3 C20.5 12.9 17.5 16.2 12 20 Z" />
+    </svg>
+  );
+}
+
+function CrownIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 17.5 L3 7.5 L8.2 11 L12 5 L15.8 11 L21 7.5 L20 17.5 Z" />
+      <path d="M4.5 20 H19.5" />
+    </svg>
+  );
+}
+
+const SIDEBAR_ICONS: Record<
+  (typeof sidebarNavItems)[number]["id"] | (typeof sidebarPlayerItems)[number]["id"] | (typeof sidebarPromoItems)[number]["id"],
+  () => ReactNode
+> = {
+  recent: RecentIcon,
+  favourites: HeartIcon,
+  promotions: GiftIcon,
+  vip: CrownIcon,
+  slots: SlotsIcon,
+  "live-dealer": LiveDealerIcon,
+  sports: SportsIcon,
+};
+
+// Title bar of the player's Recent games / Favourites page (same bar as Promotions).
+function PlayerHeader({ focus }: { focus: "recent" | "favourites" }) {
+  const { t } = useI18n();
+  const Art = focus === "recent" ? RecentIcon : HeartIcon;
+  return (
+    <div className="promo-header">
+      <h2 id="player-games-title" className="text-xl font-bold">
+        {t.menu[focus]}
+      </h2>
+      <span className="promo-header-art grid place-items-center [&>svg]:size-full">
+        <Art />
+      </span>
+    </div>
   );
 }
 

@@ -28,8 +28,9 @@ let token = 0;
 let replaying = false;
 let installed = false;
 
-// The lobby ("/"), the casino category pages and the promotions, sports and VIP pages.
-const LOBBY_PAGES = new Set(["/", "/promotions", "/sports", "/vip"]);
+// The lobby ("/"), the casino category pages, the promotions, sports, VIP and Z-AI pages and
+// the player's Recent games and Favourites.
+const LOBBY_PAGES = new Set(["/", "/promotions", "/sports", "/vip", "/z-ai", "/recent", "/favourites"]);
 
 export function isLobbyRoute(path: string): path is LobbyRoute {
   if (LOBBY_PAGES.has(path)) return true;

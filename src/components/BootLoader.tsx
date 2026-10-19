@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LogoLoader } from "@/components/LogoLoader";
+import { BrandLoader } from "@/components/BrandLoader";
 
 const HOLD_MS = 1500;
 const FADE_MS = 500;
 
+// First-load splash over the page (shown at once, it is in the server HTML), then fades out.
 export function BootLoader() {
   const [phase, setPhase] = useState<"show" | "leave" | "gone">("show");
 
@@ -31,7 +32,7 @@ export function BootLoader() {
 
   return (
     <div className={`loader-overlay${phase === "leave" ? " is-leaving" : ""}`}>
-      <LogoLoader />
+      <BrandLoader delayed={false} />
     </div>
   );
 }

@@ -6,8 +6,10 @@ export const siteConfig = {
   url: siteUrl.replace(/\/$/, ""),
   // Top bar logo (an image in public/). To change it, replace the file or point `src` at a new
   // one and update width/height (the file's pixel size); the alt text is the translated site name.
-  // NOTE: the current file is a neon mark used as a placeholder; swap in the real brand logo.
-  logo: { src: "/brand/logo.png", width: 288, height: 168 },
+  // TEMPORARY test logo: the white LV monogram (public/brand/logo-lv.png, made from
+  // lv-source.png; logo-lv-full.png also has the wordmark). To switch back to the previous neon
+  // placeholder: { src: "/brand/logo.png", width: 288, height: 168 }.
+  logo: { src: "/brand/logo-lv.png", width: 225, height: 219 },
 };
 
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
@@ -24,6 +26,8 @@ export const apiConfig = {
   useStaticPartners: !apiBaseUrl,
   // Same switch for the promotions page (src/lib/promotions.ts).
   useStaticPromotions: !apiBaseUrl,
+  // Same switch for the player's Recent games / Favourites pages (src/lib/playerGames.ts).
+  useStaticPlayerGames: !apiBaseUrl,
   loginPath: "/auth/login",
   registerPath: "/auth/register",
   // TODO(API): placeholder. {category} is replaced by the slug ("slots", "trending-games");
@@ -37,4 +41,8 @@ export const apiConfig = {
   partnersPath: "/partners",
   // TODO(API): placeholder for the promotions list (already localized); lang is sent as a query parameter.
   promotionsPath: "/promotions",
+  // TODO(API): placeholders for the signed-in player's lists (user-specific: sent with the
+  // auth token as a Bearer header, never cached); lang is sent as a query parameter.
+  recentGamesPath: "/player/games/recent",
+  favouriteGamesPath: "/player/games/favourites",
 };

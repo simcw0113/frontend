@@ -10,6 +10,7 @@ export type TopNavItem = {
   id: string;
   labelKey: Exclude<keyof Dictionary["topNav"], "label">;
   path: string;
+  featured?: boolean; // drawn as the highlighted pill (.top-nav-featured in globals.css)
 };
 
 export const topNavItems: TopNavItem[] = [
@@ -18,4 +19,29 @@ export const topNavItems: TopNavItem[] = [
   { id: "sports", labelKey: "sports", path: "/sports" },
   { id: "promotions", labelKey: "promotions", path: "/promotions" },
   { id: "vip", labelKey: "vip", path: "/vip" },
+  // Brand name, the same in every language.
+  { id: "z-ai", labelKey: "zAi", path: "/z-ai", featured: true },
 ];
+
+// Sidebar items of the player's own pages, right under Home (labels under `menu`).
+export const sidebarPlayerItems = [
+  { id: "recent", labelKey: "recent", path: "/recent" },
+  { id: "favourites", labelKey: "favourites", path: "/favourites" },
+] as const;
+
+// Top links that also appear in the sidebar with Promotions (labels under `topNav`).
+export const sidebarPromoItems = (["promotions", "vip"] as const).map((id) => {
+  const item = topNavItems.find((entry) => entry.id === id);
+  if (!item) throw new Error(`topNav: missing sidebar item "${id}"`);
+  return { ...item, id };
+});
+
+// Top links that also appear in the sidebar (the games group, between the dividers), in this
+// order. Same labels (topNav.*) and paths as the top bar, so the two never drift apart.
+export const sidebarNavIds = ["slots", "live-dealer", "sports"] as const;
+export type SidebarNavId = (typeof sidebarNavIds)[number];
+export const sidebarNavItems = sidebarNavIds.map((id) => {
+  const item = topNavItems.find((entry) => entry.id === id);
+  if (!item) throw new Error(`topNav: missing sidebar item "${id}"`);
+  return { ...item, id };
+});

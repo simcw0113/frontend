@@ -1,26 +1,54 @@
 import { useSyncExternalStore } from "react";
 
-// Open/closed state of the lobby sidebar, shared by every lobby page (home and
-// the casino category pages are separate screens) so choosing a page, or
-// collapsing the menu, carries over to the page that opens next. The server
-// snapshot is "open", so hydration matches the markup.
-let open = true;
-const listeners = new Set<() => void>();
+// Lobby sidebar state, shared by every lobby page (home, casino categories, promotions, ...
+// are separate screens) so it carries over to the page that opens next.
+//   - expanded: from lg (1024px) the sidebar is a full-height column, either expanded (icon +
+//     label) or collapsed to an icon rail. The server snapshot is "expanded" so hydration
+//     matches the markup.
+//   - drawer: below lg it is a drawer over the page, closed until the header toggle opens it.
+// The breakpoint matches the `lg` rules of .lobby-aside in globals.css.
+export const SIDEBAR_RAIL_QUERY = "(min-width: 1024px)";
 
-export function setSidebarOpen(next: boolean | ((current: boolean) => boolean)) {
-  const value = typeof next === "function" ? next(open) : next;
-  if (value === open) return;
-  open = value;
-  listeners.forEach((listener) => listener());
+function store(initial: boolean) {
+  let value = initial;
+  const listeners = new Set<() => void>();
+  return {
+    set(next: boolean | ((current: boolean) => boolean)) {
+      const resolved = typeof next === "function" ? next(value) : next;
+      if (resolved === value) return;
+      value = resolved;
+      listeners.forEach((listener) => listener());
+    },
+    use() {
+      return useSyncExternalStore(
+        (listener) => {
+          listeners.add(listener);
+          return () => listeners.delete(listener);
+        },
+        () => value,
+        () => initial,
+      );
+    },
+  };
 }
 
-export function useSidebarOpen() {
+const expanded = store(true);
+const drawer = store(false);
+
+export const setSidebarOpen = expanded.set;
+export const useSidebarOpen = expanded.use;
+export const setDrawerOpen = drawer.set;
+export const useDrawerOpen = drawer.use;
+
+// True from lg (sidebar is the column/rail); the server assumes desktop.
+export function useSidebarRail() {
   return useSyncExternalStore(
     (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
+      const media = window.matchMedia(SIDEBAR_RAIL_QUERY);
+      media.addEventListener("change", listener);
+      return () => media.removeEventListener("change", listener);
     },
-    () => open,
+    () => window.matchMedia(SIDEBAR_RAIL_QUERY).matches,
     () => true,
   );
 }

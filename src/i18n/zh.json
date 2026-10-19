@@ -5,9 +5,13 @@
   "skip": "跳到内容",
   "menu": {
     "home": "首页",
+    "recent": "最近游戏",
+    "favourites": "收藏",
     "promotions": "优惠活动",
     "hide": "隐藏菜单",
-    "show": "显示菜单"
+    "show": "显示菜单",
+    "collapse": "收起菜单",
+    "expand": "展开菜单"
   },
   "auth": {
     "signIn": "登录",
@@ -185,11 +189,29 @@
     "liveDealer": "真人荷官",
     "sports": "体育",
     "promotions": "优惠活动",
-    "vip": "VIP"
+    "vip": "VIP",
+    "zAi": "Z-AI"
   },
   "comingSoon": {
     "text": "敬请期待",
     "sportsMeta": "体育投注即将上线。",
-    "vipMeta": "VIP 俱乐部即将上线。"
+    "vipMeta": "VIP 俱乐部即将上线。",
+    "zAiMeta": "Z-AI 即将上线。"
+  },
+  "playerGames": {
+    "recentEmpty": "暂无最近游戏",
+    "favouritesEmpty": "暂无收藏",
+    "recentMeta": "你最近玩过的游戏。",
+    "favouritesMeta": "你收藏的游戏。"
+  },
+  "luckyPick": {
+    "title": "幸运老虎机",
+    "subtitle": "好运从一次幸运选择开始！",
+    "spin": "旋转",
+    "play": "开始游戏",
+    "tryAgain": "再试一次",
+    "by": "{provider} 出品",
+    "picked": "你的幸运之选：{name}",
+    "close": "关闭"
   }
 }
