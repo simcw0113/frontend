@@ -7,6 +7,7 @@
     "home": "Inicio",
     "recent": "Juegos recientes",
     "favourites": "Favoritos",
+    "missions": "Misiones",
     "promotions": "Promociones",
     "hide": "Ocultar menú",
     "show": "Mostrar menú",
@@ -196,7 +197,8 @@
     "text": "Próximamente",
     "sportsMeta": "Las apuestas deportivas llegan pronto.",
     "vipMeta": "El club VIP llega pronto.",
-    "zAiMeta": "Z-AI llega pronto."
+    "zAiMeta": "Z-AI llega pronto.",
+    "missionsMeta": "Las misiones llegarán pronto."
   },
   "playerGames": {
     "recentEmpty": "Aún no hay juegos recientes",
@@ -213,5 +215,26 @@
     "by": "de {provider}",
     "picked": "Tu elección de la suerte: {name}",
     "close": "Cerrar"
+  },
+  "gamePage": {
+    "favourite": "Favorito",
+    "theatre": "Modo cine",
+    "fullscreen": "Pantalla completa",
+    "close": "Cerrar juego",
+    "leaveTitle": "¿Salir del juego?",
+    "stay": "Quedarse",
+    "leave": "Salir",
+    "recommended": "Recomendados",
+    "previous": "Juegos anteriores",
+    "next": "Juegos siguientes",
+    "nowPlaying": "Jugando ahora",
+    "statRtp": "RTP",
+    "statEdge": "Ventaja de la casa",
+    "statCategory": "Categoría",
+    "percent": "{value} %",
+    "description": "Juega a {name} con dinero real. Consulta las reglas dentro del juego para ver líneas de pago, funciones y límites.",
+    "loadError": "No se pudo cargar este juego. Inténtalo de nuevo más tarde.",
+    "signIn": "Inicia sesión para jugar a este juego.",
+    "loading": "Cargando juego…"
   }
 }

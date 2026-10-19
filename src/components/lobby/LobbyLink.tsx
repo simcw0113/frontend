@@ -4,7 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MouseEvent, ReactNode } from "react";
 import { useI18n } from "@/components/I18nProvider";
-import { isLobbyRoute, withLobbyTransition } from "@/lib/lobbyTransition";
+import { isLobbyRoute, rememberGameOpener, withLobbyTransition } from "@/lib/lobbyTransition";
+
+// Counts lobby navigations made in this tab, so the game page's close button can go back
+// (to the list the game was opened from) instead of leaving the site.
+let inAppNavigations = 0;
+export function hasInAppHistory() {
+  return inAppNavigations > 0;
+}
 
 // A link between lobby routes ("View all", "Back") that plays the lobby
 // cross-fade. `href` is the app path without the language prefix ("/games");
@@ -15,6 +22,8 @@ export function LobbyLink({
   onGo,
   className,
   title,
+  autoFocusTarget,
+  ariaLabel,
   children,
   "aria-current": ariaCurrent,
 }: {
@@ -23,6 +32,8 @@ export function LobbyLink({
   onGo?: () => void;
   className?: string;
   title?: string;
+  autoFocusTarget?: boolean; // data-autofocus (first focus in a dialog)
+  ariaLabel?: string;
   children: ReactNode;
   "aria-current"?: "page";
 }) {
@@ -44,6 +55,8 @@ export function LobbyLink({
     }
     event.preventDefault();
     onGo?.();
+    inAppNavigations += 1;
+    if (href.includes("/game/")) rememberGameOpener(target);
     withLobbyTransition(href, () => router.push(target, { scroll }));
   }
 
@@ -63,6 +76,8 @@ export function LobbyLink({
       onTouchStart={warm}
       aria-current={ariaCurrent}
       title={title}
+      data-autofocus={autoFocusTarget || undefined}
+      aria-label={ariaLabel}
       className={className}
     >
       {children}

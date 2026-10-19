@@ -1,7 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { apiConfig } from "@/config/site";
-import { gameCatalog, type CatalogGame } from "@/config/gameCatalog";
-import { categoryGames, type Game, type GameSymbol, type GameTag } from "@/config/lobby";
+import { catalogCasinoCategory, findStaticGame, gameCatalog, type CatalogGame } from "@/config/gameCatalog";
+import { categoryGames, TEST_GAME_COVER, withGameInfo, type Game, type GameSymbol, type GameTag } from "@/config/lobby";
 import type { SearchCategoryId } from "@/config/searchCategories";
 import { apiJson } from "@/lib/api";
 import { useStaticData as isStaticData } from "@/lib/apiMode";
@@ -81,6 +81,8 @@ function hash(text: string) {
 // TODO(API): map the real response onto Game. `image` is the cover; without one the
 // card draws a gradient + symbol picked from the id.
 export function mapGame(dto: GameDto): Game {
+  // The API's id, unchanged: it is the game page URL (/casino/{category}/game/{id}) and the id
+  // sent to the launch endpoint (lib/gameLaunch.ts).
   const id = String(dto.id);
   const [from, to] = PALETTE[hash(id) % PALETTE.length];
   return {
@@ -178,6 +180,31 @@ export async function getCategoryGames(
   return staticGamesEnabled() ? fromStatic(category, opts) : fromApi(category, opts);
 }
 
+// --- Game page ----------------------------------------------------------------
+// /{lang}/casino/{category}/game/{id}: the game (from the category's list, or, in static mode,
+// any Explore catalog game) and the rest of the category as "Recommended". null = no such
+// game (the page answers 404).
+// TODO(API): a game-detail endpoint for games outside the category list.
+export type GameDetails = { game: Game; recommended: Game[] };
+
+// Looked up by the game's id (the id in the API list, unchanged by mapGame). An id that is not
+// in this category is null (404). Static mode also finds Explore catalog games, under the
+// category their search card links to (config/gameCatalog.ts#findStaticGame).
+// TODO(API): if the category list is paged, a game further down needs a by-id endpoint.
+export async function getGameDetails(category: string, id: string, opts: CategoryGamesOptions): Promise<GameDetails | null> {
+  const list = await getCategoryGames(category, opts);
+  let game = list.games.find((entry) => entry.id === id);
+  if (!game && staticGamesEnabled()) {
+    const found = findStaticGame(category, id);
+    if (found) game = withGameInfo({ ...found, image: found.image ?? TEST_GAME_COVER });
+  }
+  if (!game) return null;
+  return {
+    game: { ...game, category },
+    recommended: list.games.filter((entry) => entry.id !== id).map((entry) => ({ ...entry, category })),
+  };
+}
+
 // --- "Explore" search -------------------------------------------------------
 // Called from the browser through the route handler app/api/games/search/route.ts
 // (never directly), so the API address, and later the auth token, stay on the
@@ -206,8 +233,10 @@ export type SearchGamesResult = {
 };
 
 // Drops the catalog-only category tags.
-function toGame({ id, title, provider, playing, tags, from, to, symbol }: CatalogGame): Game {
-  return { id, title, provider, playing, tags, from, to, symbol };
+// `category`: the casino page a search result opens under (/casino/{category}/game/{id}).
+function toGame(game: CatalogGame): Game {
+  const { id, title, provider, playing, tags, from, to, symbol } = game;
+  return { id, title, provider, playing, tags, from, to, symbol, category: catalogCasinoCategory(game) };
 }
 
 function searchStatic({ q, category, page, pageSize }: SearchGamesOptions): SearchGamesResult {

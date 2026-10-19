@@ -14,10 +14,11 @@ import { LobbyFooter } from "@/components/lobby/LobbyFooter";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { GiftIcon, PromotionsGrid, PromotionsHeader, PromotionsSkeleton } from "@/components/lobby/Promotions";
 import { LuckyPick } from "@/components/lobby/LuckyPick";
+import { GameView, GameViewSkeleton, type GamePageData } from "@/components/lobby/GameView";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { SearchModal } from "@/components/lobby/SearchModal";
 import { ComingSoonHeader, TopNav } from "@/components/lobby/TopNav";
-import { sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
+import { sidebarMissionsItem, sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
 import { PlayerGameList } from "@/components/lobby/HomeGameContent";
 import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
 import { fill, localeChoices } from "@/i18n";
@@ -37,7 +38,7 @@ const TOGGLE =
   "grid size-11 shrink-0 place-items-center rounded-lg text-brand hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 
-export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites";
+export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites" | "missions" | "game";
 
 // `games` holds one promise per category slug, started on the server (lib/games.ts)
 // and read here with use() inside <Suspense>, so the page shell shows at once.
@@ -54,6 +55,7 @@ export function LobbyScreen({
   topWins,
   partners,
   promotions,
+  gamePage,
 }: {
   focus?: LobbyFocus;
   category?: string;
@@ -63,6 +65,7 @@ export function LobbyScreen({
   topWins?: Promise<TopWinsResult>; // home only
   partners?: Promise<PartnersResult>; // home only
   promotions?: Promise<PromotionsResult>; // promotions page only
+  gamePage?: Promise<GamePageData>; // game page only (/casino/{category}/game/{id})
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
@@ -141,12 +144,15 @@ export function LobbyScreen({
     setCookiesOn(false);
   }
 
-  const params = useParams<{ category?: string }>();
-  const slug = category ?? (focus === "casino" ? params?.category : undefined);
+  const params = useParams<{ category?: string; id?: string }>();
+  const slug = category ?? (focus === "casino" || focus === "game" ? params?.category : undefined);
   const casino = (slug && findCasinoCategory(slug)) || defaultCasinoCategory;
   const listGames = categoryGames ? { ...games, [casino.slug]: categoryGames } : games;
   const luckyGames = listGames[casino.slug] as Promise<CategoryGamesResult> | undefined;
-  const route = focus === "home" ? "/" : focus === "casino" ? `/casino/${casino.slug}` : `/${focus}`;
+  // `route`: the page shown (main[data-route], lobby transitions); `navRoute`: what the top bar
+  // and sidebar highlight (a game page highlights its category).
+  const navRoute = focus === "home" ? "/" : focus === "casino" || focus === "game" ? `/casino/${casino.slug}` : `/${focus}`;
+  const route = focus === "game" ? `${navRoute}/game/${params?.id ?? ""}` : navRoute;
   const gamesPage = focus === "home" || focus === "casino";
   const playerPage = focus === "recent" || focus === "favourites";
   const sideGroups: { path: string; label: string; Icon: () => ReactNode }[][] = [
@@ -154,7 +160,13 @@ export function LobbyScreen({
       { path: "/", label: t.menu.home, Icon: HomeIcon },
       ...sidebarPlayerItems.map((item) => ({ path: item.path, label: t.menu[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
     ],
-    sidebarPromoItems.map((item) => ({ path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
+    sidebarPromoItems.flatMap((item) => {
+      const entry = { path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] };
+      // Missions sits right below Promotions (sidebar only, not in the top bar).
+      if (item.id !== "promotions") return [entry];
+      const missions = sidebarMissionsItem;
+      return [entry, { path: missions.path, label: t.menu[missions.labelKey], Icon: SIDEBAR_ICONS[missions.id] }];
+    }),
     sidebarNavItems.map((item) => ({ path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
   ];
   const openRegister = () => {
@@ -172,6 +184,7 @@ export function LobbyScreen({
           a drawer under the header, opened by the header toggle. See .lobby-aside in globals.css. */}
       <aside
         id="lobby-sidebar"
+        style={{ viewTransitionName: "lobby-sidebar" }}
         aria-hidden={!rail && !drawerOpen}
         inert={!rail && !drawerOpen}
         className="lobby-aside flex flex-col border-r border-white/10 bg-lobby"
@@ -195,7 +208,7 @@ export function LobbyScreen({
             <div key={groupIndex} className="contents">
               {groupIndex > 0 ? <hr className="my-3 border-white/10" /> : null}
               {group.map((item, index) => {
-                const active = item.path === route;
+                const active = item.path === navRoute;
                 return (
                   <LobbyLink
                     key={item.path}
@@ -301,7 +314,7 @@ export function LobbyScreen({
             />
           </LobbyLink>
         </h1>
-        <TopNav route={route} />
+        <TopNav route={navRoute} />
         <div className="ml-auto flex h-16 shrink-0 items-center gap-2">
           <button
             type="button"
@@ -330,9 +343,9 @@ export function LobbyScreen({
           <div className="lobby-vt-top">
             {focus === "home" ? <Hero /> : focus === "promotions" ? <PromotionsHeader /> : playerPage ? (
               <PlayerHeader focus={focus} />
-            ) : focus === "sports" || focus === "vip" || focus === "z-ai" ? (
-              <ComingSoonHeader title={focus === "z-ai" ? t.topNav.zAi : t.topNav[focus]} />
-            ) : (
+            ) : focus === "sports" || focus === "vip" || focus === "z-ai" || focus === "missions" ? (
+              <ComingSoonHeader title={focus === "z-ai" ? t.topNav.zAi : focus === "missions" ? t.menu.missions : t.topNav[focus]} />
+            ) : focus === "game" ? null : (
               <LobbyLink
                 href="/"
                 scroll={false}
@@ -402,6 +415,12 @@ export function LobbyScreen({
                 <PromotionsGrid promise={promotions} onJoin={openRegister} />
               </Suspense>
             ) : null
+          ) : focus === "game" ? (
+            gamePage ? (
+              <Suspense fallback={<GameViewSkeleton />}>
+                <GameView promise={gamePage} onRegister={openRegister} />
+              </Suspense>
+            ) : null
           ) : playerPage ? (
             playerGames ? (
               <PlayerGameList
@@ -415,7 +434,7 @@ export function LobbyScreen({
               {focus === "casino" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
               {focus === "casino" && casino.luckyPick && luckyGames ? (
                 <Suspense fallback={null}>
-                  <LuckyPick promise={luckyGames} onRequireAuth={openRegister} />
+                  <LuckyPick promise={luckyGames} category={casino.slug} />
                 </Suspense>
               ) : null}
               <HomeGameContent focus={focus} category={casino} games={listGames} partners={partners} />
@@ -620,6 +639,16 @@ function HeartIcon() {
   );
 }
 
+function MissionsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="11" cy="13" r="7.5" />
+      <circle cx="11" cy="13" r="3.5" />
+      <path d="M11 13 L19 5 M16.5 4.5 L19 5 L19.5 7.5" />
+    </svg>
+  );
+}
+
 function CrownIcon() {
   return (
     <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -630,12 +659,16 @@ function CrownIcon() {
 }
 
 const SIDEBAR_ICONS: Record<
-  (typeof sidebarNavItems)[number]["id"] | (typeof sidebarPlayerItems)[number]["id"] | (typeof sidebarPromoItems)[number]["id"],
+  | (typeof sidebarNavItems)[number]["id"]
+  | (typeof sidebarPlayerItems)[number]["id"]
+  | (typeof sidebarPromoItems)[number]["id"]
+  | typeof sidebarMissionsItem.id,
   () => ReactNode
 > = {
   recent: RecentIcon,
   favourites: HeartIcon,
   promotions: GiftIcon,
+  missions: MissionsIcon,
   vip: CrownIcon,
   slots: SlotsIcon,
   "live-dealer": LiveDealerIcon,

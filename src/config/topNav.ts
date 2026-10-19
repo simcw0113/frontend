@@ -23,6 +23,9 @@ export const topNavItems: TopNavItem[] = [
   { id: "z-ai", labelKey: "zAi", path: "/z-ai", featured: true },
 ];
 
+// Sidebar-only page of the promotions group, right below Promotions (label under `menu`).
+export const sidebarMissionsItem = { id: "missions", labelKey: "missions", path: "/missions" } as const;
+
 // Sidebar items of the player's own pages, right under Home (labels under `menu`).
 export const sidebarPlayerItems = [
   { id: "recent", labelKey: "recent", path: "/recent" },

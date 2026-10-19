@@ -1,5 +1,5 @@
 import { apiConfig } from "@/config/site";
-import { categoryGames, type Game } from "@/config/lobby";
+import { categoryGames, staticGameId, type Game } from "@/config/lobby";
 import { apiJson } from "@/lib/api";
 import { useStaticData as isStaticData } from "@/lib/apiMode";
 import { mapResponse, type CategoryGamesDto, type CategoryGamesResult, type GameDto } from "@/lib/games";
@@ -27,8 +27,8 @@ const pick = (ids: string[]): Game[] => {
   const all = Object.values(categoryGames).flat();
   return ids.map((id) => all.find((game) => game.id === id)).filter((game): game is Game => !!game);
 };
-const STATIC_RECENT = ["lightning-roulette", "hot-reels-777", "speed-baccarat", "neon-sevens", "emperors-fortune", "mega-wheel"];
-const STATIC_FAVOURITES = ["bonanza-ape", "infinite-blackjack", "hot-reels-777", "vip-baccarat"];
+const STATIC_RECENT = ["lightning-roulette", "hot-reels-777", "speed-baccarat", "neon-sevens", "emperors-fortune", "mega-wheel"].map(staticGameId);
+const STATIC_FAVOURITES = ["bonanza-ape", "infinite-blackjack", "hot-reels-777", "vip-baccarat"].map(staticGameId);
 
 function staticEnabled(): boolean {
   const config: Partial<typeof apiConfig> = apiConfig;

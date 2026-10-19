@@ -1,8 +1,10 @@
 import {
+  categoryGames,
   houseGames,
   liveGames,
   slotGames,
   slotsGames,
+  staticGameId,
   type Game,
   type GameSymbol,
 } from "@/config/lobby";
@@ -106,8 +108,9 @@ function generated(): CatalogGame[] {
   const games: CatalogGame[] = [];
   for (const spec of SPECS) {
     for (const [index, title] of spec.names.entries()) {
-      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-      const seed = hash(id);
+      const key = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const id = staticGameId(key); // same id as a lobby game of the same name
+      const seed = hash(key);
       const [from, to] = PALETTE[seed % PALETTE.length];
       games.push({
         id,
@@ -127,9 +130,9 @@ function generated(): CatalogGame[] {
 
 function existing(): CatalogGame[] {
   const liveCategory: Record<string, Exclude<SearchCategoryId, "all">> = {
-    "live-roulette": "roulette",
-    "live-blackjack": "blackjack",
-    "live-baccarat": "baccarat",
+    [staticGameId("live-roulette")]: "roulette",
+    [staticGameId("live-blackjack")]: "blackjack",
+    [staticGameId("live-baccarat")]: "baccarat",
   };
   return [
     ...slotsGames.map((game) => ({ ...game, categories: ["slots" as const] })),
@@ -137,6 +140,30 @@ function existing(): CatalogGame[] {
     ...liveGames.map((game) => ({ ...game, categories: [liveCategory[game.id], live] })),
     ...houseGames.map((game) => ({ ...game, categories: [] })),
   ];
+}
+
+// The casino category an Explore result opens under (/casino/{category}/game/{id}).
+export function catalogCasinoCategory(game: CatalogGame): string {
+  if (game.categories.includes("slots")) return "slots";
+  if (game.categories.includes("live-casino")) return "live-dealer";
+  return "trending-games";
+}
+
+// Static mode only: the game with this id in this casino category (the category's own list,
+// else an Explore catalog game that opens under it), or undefined: an unknown id, or an id of
+// another category, is a 404 (proxy.ts, the game page).
+export function findStaticGame(category: string, id: string): Game | undefined {
+  const own = categoryGames[category]?.find((game) => game.id === id);
+  if (own) return own;
+  const found = gameCatalog.find((game) => game.id === id);
+  if (!found || catalogCasinoCategory(found) !== category) return undefined;
+  const { categories: _unused, ...game } = found;
+  void _unused;
+  return game;
+}
+
+export function isStaticGame(category: string, id: string): boolean {
+  return findStaticGame(category, id) !== undefined;
 }
 
 // Pseudo-shuffled by id hash so "All Games" mixes the categories; stable.

@@ -3,7 +3,9 @@
 import type { JSAnimation } from "animejs";
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useI18n } from "@/components/I18nProvider";
-import { SymbolMark } from "@/components/lobby/GameCover";
+import { gameHref, SymbolMark } from "@/components/lobby/GameCover";
+import { LobbyLink } from "@/components/lobby/LobbyLink";
+import { defaultCasinoCategory } from "@/config/categories";
 import { defaultSearchCategory, searchCategories, type SearchCategoryId } from "@/config/searchCategories";
 import type { Game } from "@/config/lobby";
 import { fill, htmlLang } from "@/i18n";
@@ -404,7 +406,7 @@ function ExploreContent({ onClose }: { onClose: () => void }) {
               <ul ref={list} tabIndex={-1} className={`${GRID} outline-none`}>
                 {games.map((game) => (
                   <li key={game.id} className="min-w-0">
-                    <SearchCard game={game} />
+                    <SearchCard game={game} onGo={onClose} />
                   </li>
                 ))}
               </ul>
@@ -446,14 +448,16 @@ function ExploreContent({ onClose }: { onClose: () => void }) {
 // the scroll area, so it follows the real width).
 const GRID = "grid grid-cols-3 gap-2.5 @xl:grid-cols-4 @xl:gap-3 @3xl:grid-cols-6 @5xl:grid-cols-8";
 
-// TODO(API): launch the game here (URL or route from the API); a no-op for now.
-function SearchCard({ game }: { game: Game }) {
+// Opens the game page (and closes Explore). API results without a category open under
+// Trending games.
+function SearchCard({ game, onGo }: { game: Game; onGo: () => void }) {
   const { locale, t } = useI18n();
   const players = game.playing.toLocaleString(htmlLang(locale));
   return (
-    <button
-      type="button"
-      aria-label={`${game.title}, ${game.provider}, ${fill(t.lobby.playing, { count: players })}`}
+    <LobbyLink
+      href={gameHref(game, defaultCasinoCategory.slug)}
+      onGo={onGo}
+      ariaLabel={`${game.title}, ${game.provider}, ${fill(t.lobby.playing, { count: players })}`}
       className="game-card block w-full rounded-xl text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
     >
       <span
@@ -477,7 +481,7 @@ function SearchCard({ game }: { game: Game }) {
           {game.provider}
         </span>
       </span>
-    </button>
+    </LobbyLink>
   );
 }
 

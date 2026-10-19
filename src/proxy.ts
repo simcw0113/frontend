@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { findCasinoCategory } from "@/config/categories";
+import { isStaticGame } from "@/config/gameCatalog";
+import { hasApiBaseUrl } from "@/lib/apiMode";
 import { defaultSlug, isSlug, localeCookie, localizedPath, negotiate } from "@/i18n/routing";
 
 // Sends unprefixed URLs (/, /games, ...) to the visitor's language:
@@ -11,8 +13,12 @@ export function proxy(request: NextRequest) {
   if (isSlug(first)) {
     // Unknown casino category: answer 404 right away. (The page also calls
     // notFound(), but with partial prerendering the first hit would stream a 200.)
-    const [, , section, category] = pathname.split("/");
-    if (section === "casino" && category && !findCasinoCategory(category)) {
+    // Game page /{lang}/casino/{category}/game/{id}: an unknown id, or one of another category,
+    // is a 404 (static data only; with the API the page's notFound() is the check). Other
+    // depths (/casino/{category}/game, /casino/{category}/{x}) match no route: 404 as well.
+    const [, , section, category, sub, id, ...rest] = pathname.split("/");
+    const unknownGame = sub === "game" && id && rest.length === 0 && !hasApiBaseUrl() && !isStaticGame(category, id);
+    if (section === "casino" && category && (!findCasinoCategory(category) || unknownGame)) {
       return NextResponse.rewrite(new URL(`/${first}/not-found`, request.url));
     }
     const response = NextResponse.next();

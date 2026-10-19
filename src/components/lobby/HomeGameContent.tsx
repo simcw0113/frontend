@@ -2,7 +2,7 @@
 
 import { Suspense, use, type ReactNode } from "react";
 import { useI18n } from "@/components/I18nProvider";
-import { GameCover } from "@/components/lobby/GameCover";
+import { GameCover, gameHref } from "@/components/lobby/GameCover";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { Partners, PartnersSkeleton } from "@/components/lobby/Partners";
 import { defaultCasinoCategory, homeCategories, type CasinoCategory } from "@/config/categories";
@@ -46,7 +46,7 @@ export function HomeGameContent({
             <CardRow key={row.slug} title={t.lobby[row.titleKey]} href={home ? `/casino/${row.slug}` : undefined}>
               {promise ? (
                 <Suspense fallback={<GridSkeleton count={home ? PREVIEW_COUNT : CATEGORY_SKELETON_COUNT} />}>
-                  <GameGrid promise={promise} limit={home ? PREVIEW_COUNT : undefined} />
+                  <GameGrid promise={promise} category={row.slug} limit={home ? PREVIEW_COUNT : undefined} />
                 </Suspense>
               ) : (
                 <Notice>{t.lobby.empty}</Notice>
@@ -81,7 +81,7 @@ export function PlayerGameList({
   return (
     <section aria-labelledby={labelledBy} className="mt-6">
       <Suspense fallback={<GridSkeleton count={8} />}>
-        <GameGrid promise={promise} emptyText={emptyText} />
+        <GameGrid promise={promise} category={defaultCasinoCategory.slug} emptyText={emptyText} />
       </Suspense>
     </section>
   );
@@ -119,7 +119,19 @@ function Notice({ children }: { children: ReactNode }) {
 
 // The games of one category: the list, "nothing here yet" for an empty category,
 // or the error state.
-function GameGrid({ promise, limit, emptyText }: { promise: Promise<CategoryGamesResult>; limit?: number; emptyText?: string }) {
+// Each tile opens its game page (/casino/{category}/game/{id}); `category` is the fallback for
+// games that do not name theirs (player lists from the API).
+function GameGrid({
+  promise,
+  category,
+  limit,
+  emptyText,
+}: {
+  promise: Promise<CategoryGamesResult>;
+  category: string;
+  limit?: number;
+  emptyText?: string;
+}) {
   const { t } = useI18n();
   const result = use(promise);
   if (result.error) return <Notice>{t.lobby.loadError}</Notice>;
@@ -127,7 +139,7 @@ function GameGrid({ promise, limit, emptyText }: { promise: Promise<CategoryGame
   return (
     <div className={GRID}>
       {(limit ? result.games.slice(0, limit) : result.games).map((game) => (
-        <GameCover key={game.id} game={game} fluid />
+        <GameCover key={game.id} game={game} href={gameHref(game, category)} fluid />
       ))}
     </div>
   );

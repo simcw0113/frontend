@@ -40,9 +40,29 @@ export type Game = {
   to: string;
   symbol: GameSymbol;
   image?: string; // cover image URL; without it GameCover draws the gradient + symbol
+  category?: string; // casino category slug the game page lives under (/casino/{category}/game/{id})
+  rtp?: number; // return to player, % (game page chips; hidden when missing)
+  edge?: number; // house edge, %
+  description?: string; // short blurb for the game page (a translated generic line without it)
 };
 
 export type CategoryId = "lobby" | GameTag;
+
+// Static game ids. The game page is /casino/{category}/game/{id}; with the API, `id` is the API's
+// own id (lib/games.ts#mapGame keeps it as is). The static lists below are written with a
+// readable key ("fortune-reels") that withStaticIds turns into a stable numeric-style id: a
+// 7-digit string (1000000-9999999) derived from the key (FNV-1a), so it never changes while
+// the key stays. staticGameId("fortune-reels") gives the id of a static game anywhere else
+// (Top wins, sample Recent/Favourites).
+export function staticGameId(key: string): string {
+  let h = 0x811c9dc5;
+  for (const char of key) h = Math.imul(h ^ char.charCodeAt(0), 0x01000193) >>> 0;
+  return String(1_000_000 + (h % 9_000_000));
+}
+
+function withStaticIds(games: Game[]): Game[] {
+  return games.map((game) => ({ ...game, id: staticGameId(game.id) }));
+}
 
 export const categories: { id: CategoryId; label: string }[] = [
   { id: "lobby", label: "Lobby" },
@@ -56,7 +76,7 @@ export const categories: { id: CategoryId; label: string }[] = [
   { id: "new", label: "New" },
 ];
 
-export const slotGames: Game[] = [
+export const slotGames: Game[] = withStaticIds([
   { id: "emerald-crown", title: "Emerald Crown", provider: "Nova", playing: 48, tags: ["slots", "new"], from: "#1f8a4c", to: "#0d3b28", symbol: "crown" },
   { id: "ape-legacy", title: "Ape Legacy", provider: "Nova", playing: 43, tags: ["slots"], from: "#f08a2a", to: "#8a3d12", symbol: "ape" },
   { id: "royal-whisker", title: "Royal Whisker", provider: "Orbit", playing: 36, tags: ["slots", "bonus"], from: "#49b7e8", to: "#1d4e86", symbol: "cat" },
@@ -65,9 +85,9 @@ export const slotGames: Game[] = [
   { id: "gold-pig", title: "Gold Pig", provider: "Jolt", playing: 9, tags: ["slots", "wagering"], from: "#f0b429", to: "#a15c12", symbol: "pig" },
   { id: "temple-luck", title: "Temple Luck", provider: "Jolt", playing: 35, tags: ["slots"], from: "#d64545", to: "#6e1824", symbol: "lantern" },
   { id: "tiger-dance", title: "Tiger Dance", provider: "Nova", playing: 14, tags: ["slots", "new"], from: "#3d7dff", to: "#1a2f78", symbol: "tiger" },
-];
+]);
 
-export const houseGames: Game[] = [
+export const houseGames: Game[] = withStaticIds([
   { id: "sky-jet", title: "Sky Jet", provider: "House", playing: 484, tags: ["house", "new"], from: "#5b3df5", to: "#24145f", symbol: "jet" },
   { id: "orbit-crash", title: "Orbit Crash", provider: "House", playing: 20, tags: ["house"], from: "#2f6bff", to: "#10245c", symbol: "orbit" },
   { id: "star-mine", title: "Star Mine", provider: "House", playing: 92, tags: ["house", "bonus"], from: "#ff5fa2", to: "#8a2458", symbol: "star" },
@@ -76,25 +96,25 @@ export const houseGames: Game[] = [
   { id: "limbo-drop", title: "Limbo Drop", provider: "House", playing: 84, tags: ["house", "wagering"], from: "#ff8a1e", to: "#b45309", symbol: "block" },
   { id: "card-jack", title: "Card Jack", provider: "House", playing: 24, tags: ["house"], from: "#24324a", to: "#121826", symbol: "cards" },
   { id: "coin-merge", title: "Coin Merge", provider: "House", playing: 37, tags: ["house", "new"], from: "#f5c542", to: "#8a6410", symbol: "coin" },
-];
+]);
 
-export const halloweenGames: Game[] = [
+export const halloweenGames: Game[] = withStaticIds([
   { id: "ghost-reel", title: "Ghost Reel", provider: "Peak", playing: 61, tags: ["halloween", "slots"], from: "#6d28d9", to: "#2e1065", symbol: "ghost" },
   { id: "pumpkin-night", title: "Pumpkin Night", provider: "Peak", playing: 44, tags: ["halloween", "bonus"], from: "#f97316", to: "#7c2d12", symbol: "lantern" },
   { id: "mask-manor", title: "Mask Manor", provider: "Orbit", playing: 19, tags: ["halloween"], from: "#111827", to: "#3f1d4e", symbol: "helm" },
-];
+]);
 
-export const fishingGames: Game[] = [
+export const fishingGames: Game[] = withStaticIds([
   { id: "reef-blast", title: "Reef Blast", provider: "Orbit", playing: 73, tags: ["fishing"], from: "#0ea5e9", to: "#0c4a6e", symbol: "fish" },
   { id: "golden-catch", title: "Golden Catch", provider: "Jolt", playing: 51, tags: ["fishing", "wagering"], from: "#fbbf24", to: "#0e7490", symbol: "fish" },
   { id: "deep-reel", title: "Deep Reel", provider: "Nova", playing: 33, tags: ["fishing", "new"], from: "#0369a1", to: "#082f49", symbol: "reel" },
-];
+]);
 
-export const liveGames: Game[] = [
+export const liveGames: Game[] = withStaticIds([
   { id: "live-roulette", title: "Live Roulette", provider: "Summit", playing: 126, tags: ["live"], from: "#7f1d1d", to: "#1c1917", symbol: "table" },
   { id: "live-blackjack", title: "Live Blackjack", provider: "Summit", playing: 88, tags: ["live", "new"], from: "#14532d", to: "#052e16", symbol: "cards" },
   { id: "live-baccarat", title: "Live Baccarat", provider: "House", playing: 64, tags: ["live"], from: "#1e3a8a", to: "#172554", symbol: "table" },
-];
+]);
 
 export const lobbyRows: { id: string; title: string; games: Game[] }[] = [
   { id: "slots", title: "Slots", games: slotGames },
@@ -124,7 +144,7 @@ export const trendingGames: Game[] = [
 
 // Games of the "Slots" category (/casino/slots). Static placeholder data, to be
 // replaced by an API response of the same shape.
-export const slotsGames: Game[] = [
+export const slotsGames: Game[] = withStaticIds([
   { id: "fortune-reels", title: "Fortune Reels", provider: "Pragmatic Play", playing: 212, tags: ["slots", "bonus"], from: "#f59e0b", to: "#7c2d12", symbol: "seven" },
   { id: "dragon-lantern", title: "Dragon Lantern", provider: "Jili", playing: 187, tags: ["slots", "new"], from: "#dc2626", to: "#5f1020", symbol: "lantern" },
   { id: "wild-tiger-gold", title: "Wild Tiger Gold", provider: "PG Soft", playing: 164, tags: ["slots"], from: "#f97316", to: "#7c2d12", symbol: "tiger" },
@@ -141,11 +161,11 @@ export const slotsGames: Game[] = [
   { id: "emperors-fortune", title: "Emperor's Fortune", provider: "PG Soft", playing: 44, tags: ["slots", "new"], from: "#d97706", to: "#78350f", symbol: "crown" },
   { id: "bonanza-ape", title: "Bonanza Ape", provider: "Hacksaw", playing: 39, tags: ["slots"], from: "#f97316", to: "#9a3412", symbol: "ape" },
   { id: "neon-sevens", title: "Neon Sevens", provider: "Evolution", playing: 33, tags: ["slots"], from: "#a855f7", to: "#3b0764", symbol: "seven" },
-];
+]);
 
 // Games of the "Live Dealer" category (/casino/live-dealer). Static placeholder data, to be
 // replaced by the API (category key "live-dealer").
-export const liveDealerGames: Game[] = [
+export const liveDealerGames: Game[] = withStaticIds([
   { id: "lightning-roulette", title: "Lightning Roulette", provider: "Evolution", playing: 318, tags: ["live"], from: "#7f1d1d", to: "#1c1917", symbol: "table" },
   { id: "speed-baccarat", title: "Speed Baccarat", provider: "Evolution", playing: 264, tags: ["live"], from: "#1e3a8a", to: "#172554", symbol: "cards" },
   { id: "infinite-blackjack", title: "Infinite Blackjack", provider: "Evolution", playing: 201, tags: ["live", "new"], from: "#14532d", to: "#052e16", symbol: "cards" },
@@ -154,20 +174,32 @@ export const liveDealerGames: Game[] = [
   { id: "super-sic-bo", title: "Super Sic Bo", provider: "Evolution", playing: 118, tags: ["live"], from: "#7c3aed", to: "#2e1065", symbol: "coin" },
   { id: "vip-baccarat", title: "VIP Baccarat", provider: "Ezugi", playing: 97, tags: ["live"], from: "#0f766e", to: "#042f2e", symbol: "crown" },
   { id: "auto-roulette", title: "Auto Roulette", provider: "Playtech", playing: 71, tags: ["live", "new"], from: "#be123c", to: "#4c0519", symbol: "table" },
-];
+]);
 
 // TEMPORARY test cover (public/games/test-cover.jpg) shown on every static game of the home
 // rows and category pages. Remove it from withTestCover (or the constant) to get the drawn
 // covers back; a game's own `image` (e.g. from the API mapper) always wins.
 export const TEST_GAME_COVER = "/games/test-cover.jpg";
 
-const withTestCover = (games: Game[]): Game[] => games.map((game) => ({ ...game, image: game.image ?? TEST_GAME_COVER }));
+const withTestCover = (games: Game[], category: string): Game[] =>
+  games.map((game) => withGameInfo({ ...game, image: game.image ?? TEST_GAME_COVER, category }));
 
-// Games of each casino category, keyed by slug (see config/categories.ts).
+// Static sample RTP / house edge for the game page chips (invented, neutral, stable per id:
+// 95.50-97.49 %). The API's own values win.
+export function withGameInfo(game: Game): Game {
+  if (game.rtp !== undefined) return game;
+  let h = 0;
+  for (const char of game.id) h = (h * 31 + char.charCodeAt(0)) >>> 0;
+  const rtp = Math.round((95.5 + (h % 200) / 100) * 100) / 100;
+  return { ...game, rtp, edge: Math.round((100 - rtp) * 100) / 100 };
+}
+
+// Games of each casino category, keyed by slug (see config/categories.ts). The game page is
+// /casino/{category}/game/{id} (static ids: see staticGameId).
 export const categoryGames: Record<string, Game[]> = {
-  "trending-games": withTestCover(trendingGames),
-  slots: withTestCover(slotsGames),
-  "live-dealer": withTestCover(liveDealerGames),
+  "trending-games": withTestCover(trendingGames, "trending-games"),
+  slots: withTestCover(slotsGames, "slots"),
+  "live-dealer": withTestCover(liveDealerGames, "live-dealer"),
 };
 
 export const sideNav: { id: string; label: string; items?: string[] }[] = [

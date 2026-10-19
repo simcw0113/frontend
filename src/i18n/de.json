@@ -7,6 +7,7 @@
     "home": "Startseite",
     "recent": "Zuletzt gespielt",
     "favourites": "Favoriten",
+    "missions": "Missionen",
     "promotions": "Aktionen",
     "hide": "Menü ausblenden",
     "show": "Menü anzeigen",
@@ -196,7 +197,8 @@
     "text": "Demnächst verfügbar",
     "sportsMeta": "Sportwetten sind bald verfügbar.",
     "vipMeta": "Der VIP-Club kommt bald.",
-    "zAiMeta": "Z-AI kommt bald."
+    "zAiMeta": "Z-AI kommt bald.",
+    "missionsMeta": "Missionen sind bald verfügbar."
   },
   "playerGames": {
     "recentEmpty": "Noch keine zuletzt gespielten Spiele",
@@ -213,5 +215,26 @@
     "by": "von {provider}",
     "picked": "Ihr Glücksgriff: {name}",
     "close": "Schließen"
+  },
+  "gamePage": {
+    "favourite": "Favorit",
+    "theatre": "Kinomodus",
+    "fullscreen": "Vollbild",
+    "close": "Spiel schließen",
+    "leaveTitle": "Spiel verlassen?",
+    "stay": "Bleiben",
+    "leave": "Verlassen",
+    "recommended": "Empfohlen",
+    "previous": "Vorherige Spiele",
+    "next": "Nächste Spiele",
+    "nowPlaying": "Läuft gerade",
+    "statRtp": "RTP",
+    "statEdge": "Hausvorteil",
+    "statCategory": "Kategorie",
+    "percent": "{value} %",
+    "description": "Spiele {name} um echtes Geld. Gewinnlinien, Features und Limits findest du in den Spielregeln im Spiel.",
+    "loadError": "Dieses Spiel konnte nicht geladen werden. Bitte versuche es später erneut.",
+    "signIn": "Melde dich an, um dieses Spiel zu spielen.",
+    "loading": "Spiel wird geladen…"
   }
 }

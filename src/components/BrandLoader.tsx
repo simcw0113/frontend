@@ -22,7 +22,7 @@ export function BrandLoader({ delayed = true }: { delayed?: boolean }) {
       <span className="brand-loader-bar" aria-hidden="true">
         <span />
       </span>
-      <span className="brand-loader-label">{t.loading}…</span>
+      <span className="brand-loader-label">{`${t.loading}…`}</span>
     </div>
   );
 }

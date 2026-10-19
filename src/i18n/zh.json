@@ -7,6 +7,7 @@
     "home": "首页",
     "recent": "最近游戏",
     "favourites": "收藏",
+    "missions": "任务",
     "promotions": "优惠活动",
     "hide": "隐藏菜单",
     "show": "显示菜单",
@@ -196,7 +197,8 @@
     "text": "敬请期待",
     "sportsMeta": "体育投注即将上线。",
     "vipMeta": "VIP 俱乐部即将上线。",
-    "zAiMeta": "Z-AI 即将上线。"
+    "zAiMeta": "Z-AI 即将上线。",
+    "missionsMeta": "任务即将推出。"
   },
   "playerGames": {
     "recentEmpty": "暂无最近游戏",
@@ -213,5 +215,26 @@
     "by": "{provider} 出品",
     "picked": "你的幸运之选：{name}",
     "close": "关闭"
+  },
+  "gamePage": {
+    "favourite": "收藏",
+    "theatre": "影院模式",
+    "fullscreen": "全屏",
+    "close": "关闭游戏",
+    "leaveTitle": "离开游戏？",
+    "stay": "留下",
+    "leave": "离开",
+    "recommended": "推荐",
+    "previous": "上一组游戏",
+    "next": "下一组游戏",
+    "nowPlaying": "正在游玩",
+    "statRtp": "RTP",
+    "statEdge": "庄家优势",
+    "statCategory": "类别",
+    "percent": "{value}%",
+    "description": "畅玩 {name}，赢取真钱奖励。赔付线、特色功能与限额请查看游戏内规则。",
+    "loadError": "游戏加载失败，请稍后重试。",
+    "signIn": "登录后即可畅玩此游戏。",
+    "loading": "游戏加载中…"
   }
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useI18n } from "@/components/I18nProvider";
+import { LobbyLink } from "@/components/lobby/LobbyLink";
 import type { Game, GameSymbol } from "@/config/lobby";
 import { fill, htmlLang } from "@/i18n";
 
@@ -168,14 +169,21 @@ export function SymbolMark({ symbol, className }: { symbol: GameSymbol; classNam
   }
 }
 
-export function GameCover({ game, fluid = false }: { game: Game; fluid?: boolean }) {
+// Game page path of a tile (home rows, category grids, search, player lists, Lucky Pick).
+export function gameHref(game: { id: string; category?: string }, fallbackCategory: string) {
+  return `/casino/${game.category ?? fallbackCategory}/game/${game.id}`;
+}
+
+// With `href` the whole tile is a link to the game page (lobby transition, same hover lift).
+export function GameCover({ game, fluid = false, href }: { game: Game; fluid?: boolean; href?: string }) {
   const { locale, t } = useI18n();
   // A cover image that fails (also before hydration) falls back to the drawn cover.
   const [failed, setFailed] = useState(false);
   const image = game.image && !failed ? game.image : null;
 
-  return (
-    <article className={`game-card ${fluid ? "min-w-0" : "w-[132px] shrink-0 sm:w-[148px]"}`}>
+  const size = fluid ? "min-w-0" : "w-[132px] shrink-0 sm:w-[148px]";
+  const body = (
+    <>
       <div
         className="game-cover relative aspect-[3/4] overflow-hidden rounded-xl"
         style={{ background: `linear-gradient(180deg, ${game.from}, ${game.to})` }}
@@ -187,7 +195,7 @@ export function GameCover({ game, fluid = false }: { game: Game; fluid?: boolean
               if (img && img.complete && img.naturalWidth === 0) setFailed(true);
             }}
             src={image}
-            alt={game.title}
+            alt={href ? "" : game.title}
             width={330}
             height={440}
             loading="lazy"
@@ -227,6 +235,17 @@ export function GameCover({ game, fluid = false }: { game: Game; fluid?: boolean
         <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />
         {fill(t.lobby.playing, { count: game.playing.toLocaleString(htmlLang(locale)) })}
       </p>
-    </article>
+    </>
   );
+  if (href) {
+    return (
+      <LobbyLink
+        href={href}
+        className={`game-card block rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand ${size}`}
+      >
+        {body}
+      </LobbyLink>
+    );
+  }
+  return <article className={`game-card ${size}`}>{body}</article>;
 }

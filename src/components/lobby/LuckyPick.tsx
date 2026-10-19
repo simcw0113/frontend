@@ -3,12 +3,12 @@
 import type { JSAnimation } from "animejs";
 import { use, useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useI18n } from "@/components/I18nProvider";
-import { SymbolMark } from "@/components/lobby/GameCover";
+import { gameHref, SymbolMark } from "@/components/lobby/GameCover";
+import { LobbyLink } from "@/components/lobby/LobbyLink";
 import type { Game } from "@/config/lobby";
 import { fill } from "@/i18n";
 import type { CategoryGamesResult } from "@/lib/games";
 import { animate, reduceMotion } from "@/lib/motion";
-import { getAuthToken } from "@/lib/token";
 
 // "Lucky Pick": a horizontal reel of the category's games (the same list as the page grid,
 // so it follows the API later) with a cyan selector frame in the middle. Spin scrolls the
@@ -28,13 +28,13 @@ function randomIndex(n: number) {
   return buffer[0] % n;
 }
 
-export function LuckyPick({ promise, onRequireAuth }: { promise: Promise<CategoryGamesResult>; onRequireAuth: () => void }) {
+export function LuckyPick({ promise, category }: { promise: Promise<CategoryGamesResult>; category: string }) {
   const result = use(promise);
   if (result.error || result.games.length === 0) return null;
-  return <LuckyPickReel games={result.games} onRequireAuth={onRequireAuth} />;
+  return <LuckyPickReel games={result.games} category={category} />;
 }
 
-function LuckyPickReel({ games, onRequireAuth }: { games: Game[]; onRequireAuth: () => void }) {
+function LuckyPickReel({ games, category }: { games: Game[]; category: string }) {
   const { t } = useI18n();
   const n = games.length;
   const loops = Math.max(3, Math.ceil(MIN_TRAVEL / n));
@@ -166,13 +166,8 @@ function LuckyPickReel({ games, onRequireAuth }: { games: Game[]; onRequireAuth:
           setResult(null);
           spinButton.current?.focus();
         }}
-        onPlay={() => {
-          // TODO(API): launch the game (same as the game cards, a no-op for now). Signed-out
-          // players get Register first, like the promotions' Join now.
-          setResult(null);
-          if (getAuthToken()) spinButton.current?.focus();
-          else onRequireAuth();
-        }}
+        playHref={result ? gameHref(result, category) : ""}
+        onPlay={() => setResult(null)}
         onTryAgain={() => {
           setResult(null);
           spin();
@@ -208,11 +203,13 @@ const FOCUSABLE =
 function LuckyPickModal({
   game,
   onClose,
+  playHref,
   onPlay,
   onTryAgain,
 }: {
   game: Game | null;
   onClose: () => void;
+  playHref: string; // the game page, like the game cards
   onPlay: () => void;
   onTryAgain: () => void;
 }) {
@@ -349,14 +346,14 @@ function LuckyPickModal({
           </h2>
           {game.provider ? <p className="mt-1 text-sm text-muted">{fill(t.luckyPick.by, { provider: game.provider })}</p> : null}
           <div className="mt-6 grid gap-3">
-            <button
-              type="button"
-              data-autofocus
-              onClick={onPlay}
-              className="h-12 rounded-xl bg-brand text-base font-extrabold text-lobby hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            <LobbyLink
+              href={playHref}
+              autoFocusTarget
+              onGo={onPlay}
+              className="grid h-12 place-items-center rounded-xl bg-brand text-base font-extrabold text-lobby hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {t.luckyPick.play}
-            </button>
+            </LobbyLink>
             <button
               type="button"
               onClick={onTryAgain}

@@ -14,7 +14,7 @@ import { findCasinoCategory } from "@/config/categories";
 // the page that is shown carries its own prefix in data-lang.
 export type LobbyRoute = string;
 
-const SETTLE_MS = 40;
+const SETTLE_MS = 20;
 // How long the old page is held while the new route loads. Instant in production;
 // the first visit of a route in `next dev` has to compile it first, and giving up
 // early would end the transition on the old page and swap it in later without any
@@ -29,12 +29,16 @@ let replaying = false;
 let installed = false;
 
 // The lobby ("/"), the casino category pages, the promotions, sports, VIP and Z-AI pages and
-// the player's Recent games and Favourites.
-const LOBBY_PAGES = new Set(["/", "/promotions", "/sports", "/vip", "/z-ai", "/recent", "/favourites"]);
+// the player's Recent games and Favourites, and Missions.
+const LOBBY_PAGES = new Set(["/", "/promotions", "/sports", "/vip", "/z-ai", "/recent", "/favourites", "/missions"]);
 
 export function isLobbyRoute(path: string): path is LobbyRoute {
   if (LOBBY_PAGES.has(path)) return true;
-  return path.startsWith("/casino/") && findCasinoCategory(path.slice("/casino/".length)) !== undefined;
+  if (!path.startsWith("/casino/")) return false;
+  // /casino/{category} and a game page /casino/{category}/game/{id}
+  const [category, ...rest] = path.slice("/casino/".length).split("/");
+  if (findCasinoCategory(category) === undefined) return false;
+  return rest.length === 0 || (rest.length === 2 && rest[0] === "game" && rest[1].length > 0);
 }
 
 function reduceMotion() {
@@ -80,25 +84,76 @@ function whenShown(path: string): Promise<void> {
   });
 }
 
+function isGameRoute(path: string | null | undefined): boolean {
+  return !!path?.includes("/game/");
+}
+
 // Runs `go` (which must start the navigation to `path`) inside a view transition.
+// Opening or leaving a game page is a plain navigation: no transition, nothing to wait for.
 export function withLobbyTransition(path: LobbyRoute, go: () => void) {
+  const from = shownRoute();
+  const game = isGameRoute(path) || isGameRoute(from);
   // Already on that page (e.g. the sidebar's Home while on the lobby): nothing to swap.
-  if (typeof document.startViewTransition !== "function" || reduceMotion() || shownRoute() === path) {
+  if (game || typeof document.startViewTransition !== "function" || reduceMotion() || from === path) {
     go();
+    if (isGameRoute(from) && !isGameRoute(path)) revealGameOpener();
     return;
   }
   const mine = ++token;
   const root = document.documentElement;
   root.dataset.lobbyDir = path === "/" ? "back" : "forward";
-  const transition = document.startViewTransition(async () => {
+  let navigated = false;
+  const navigate = () => {
+    if (navigated) return;
+    navigated = true;
     go();
-    await whenShown(path);
-  });
+  };
   const done = () => {
     if (mine === token) delete root.dataset.lobbyDir;
   };
-  transition.finished.then(done, done);
-  transition.ready.catch(() => {}); // skipped by a newer transition: nothing to do
+  try {
+    const transition = document.startViewTransition(async () => {
+      navigate();
+      await whenShown(path);
+    });
+    transition.finished.then(done, done);
+    transition.ready.catch(() => {}); // skipped by a newer transition: nothing to do
+    transition.updateCallbackDone.catch(navigate);
+  } catch {
+    done();
+    navigate(); // whatever happens to the transition, the navigation still happens
+  }
+}
+
+// The game tile a game page was opened from (LobbyLink records it), so leaving the game can
+// bring it back into view and focus it on the page it came from.
+let opener: { href: string; from: string } | null = null;
+
+export function rememberGameOpener(href: string) {
+  const from = shownRoute();
+  opener = from ? { href, from } : null;
+}
+
+export function revealGameOpener() {
+  const target = opener;
+  opener = null;
+  if (!target) return;
+  const started = performance.now();
+  const poll = () => {
+    if (shownRoute() === target.from && !isLoading()) {
+      const shown = Array.from(document.querySelectorAll<HTMLElement>("main[data-route]")).find((el) => el.checkVisibility());
+      const link = Array.from(shown?.querySelectorAll<HTMLAnchorElement>("a[href]") ?? []).find(
+        (el) => el.getAttribute("href") === target.href,
+      );
+      if (!link) return;
+      const box = link.getBoundingClientRect();
+      if (box.bottom < 80 || box.top > window.innerHeight) link.scrollIntoView({ block: "center" });
+      link.focus({ preventScroll: true });
+      return;
+    }
+    if (performance.now() - started < GIVE_UP_MS + 1000) window.setTimeout(poll, 30);
+  };
+  poll();
 }
 
 // Browser Back/Forward between lobby routes. The router would update the page
@@ -117,7 +172,11 @@ export function installLobbyHistoryTransitions() {
       // Same language only: another prefix is a different document, not a swap.
       if (!from || from.lang !== lang || !isSlug(lang)) return;
       if (from.route === to || !isLobbyRoute(to) || !isLobbyRoute(from.route)) return;
-      if (typeof document.startViewTransition !== "function" || reduceMotion()) return;
+      // Game pages and no-animation setups: the router handles the event as usual.
+      if (isGameRoute(from.route) || isGameRoute(to) || typeof document.startViewTransition !== "function" || reduceMotion()) {
+        if (isGameRoute(from.route) && !isGameRoute(to)) revealGameOpener();
+        return;
+      }
       event.stopImmediatePropagation();
       const state = window.history.state;
       withLobbyTransition(to, () => {

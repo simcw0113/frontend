@@ -28,6 +28,8 @@ export const apiConfig = {
   useStaticPromotions: !apiBaseUrl,
   // Same switch for the player's Recent games / Favourites pages (src/lib/playerGames.ts).
   useStaticPlayerGames: !apiBaseUrl,
+  // Same switch for the game page's launch URL (src/lib/gameLaunch.ts): true = TEST_GAME_URL.
+  useStaticGameLaunch: !apiBaseUrl,
   loginPath: "/auth/login",
   registerPath: "/auth/register",
   // TODO(API): placeholder. {category} is replaced by the slug ("slots", "trending-games");
@@ -45,4 +47,15 @@ export const apiConfig = {
   // auth token as a Bearer header, never cached); lang is sent as a query parameter.
   recentGamesPath: "/player/games/recent",
   favouriteGamesPath: "/player/games/favourites",
+  // TODO(API): placeholder for the game launch URL (the iframe src). {id} is replaced by the
+  // game id; lang is a query parameter; sent with the player's token, never cached.
+  gameLaunchPath: "/games/{id}/launch",
 };
+
+// TEMPORARY test URL for the game page iframe while there is no launch API (static mode), the
+// same for every game: a YouTube video (https://www.youtube.com/watch?v=P4sGaqucJcs) in its
+// embed form, since watch pages refuse framing. Used as it is (no query added); only the local demo
+// "/demo-game.html" (public/, kept for offline testing) gets ?name=<game name>.
+// External sites can refuse to be framed (X-Frame-Options / CSP frame-ancestors): the frame
+// then stays blank or shows the browser's error page.
+export const TEST_GAME_URL = "https://www.youtube.com/embed/P4sGaqucJcs";

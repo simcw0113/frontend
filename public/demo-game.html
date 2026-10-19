@@ -1,0 +1,79 @@
+<!doctype html>
+<!-- Self-contained demo "game" for the game page iframe (TEST_GAME_URL in src/config/site.ts).
+     No external requests. ?name= sets the title (as text only). Replace with the provider's
+     launch URL from the API (src/lib/gameLaunch.ts). -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>Demo game</title>
+<style>
+  :root { color-scheme: dark; --bg: #0f282f; --deep: #081a1f; --brand: #02eff0; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: grid; place-items: center; overflow: hidden;
+    font-family: system-ui, sans-serif; color: #fff;
+    background: radial-gradient(circle at 50% 30%, #16373f, var(--deep) 70%);
+  }
+  main { display: grid; justify-items: center; gap: 4vmin; padding: 4vmin; text-align: center; }
+  h1 { margin: 0; font-size: clamp(1.1rem, 5vmin, 2.6rem); letter-spacing: .04em; text-transform: uppercase; }
+  .reels { display: flex; gap: 2vmin; }
+  .reel {
+    width: 16vmin; height: 20vmin; display: grid; place-items: center; overflow: hidden;
+    border: 2px solid rgb(2 239 240 / .5); border-radius: 2vmin; background: var(--bg);
+    font-size: 10vmin; box-shadow: 0 0 3vmin rgb(2 239 240 / .25) inset;
+  }
+  .reel.spin span { animation: roll .12s linear infinite; }
+  @keyframes roll { from { transform: translateY(-60%); } to { transform: translateY(60%); } }
+  button {
+    font: inherit; font-weight: 800; font-size: clamp(.9rem, 3.4vmin, 1.4rem); text-transform: uppercase;
+    padding: 1.6vmin 6vmin; border: 0; border-radius: 99px; background: var(--brand); color: var(--bg); cursor: pointer;
+  }
+  button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  button:disabled { opacity: .6; cursor: default; }
+  p { margin: 0; min-height: 1.4em; color: rgb(255 255 255 / .7); font-size: clamp(.8rem, 2.8vmin, 1.1rem); }
+  @media (prefers-reduced-motion: reduce) { .reel.spin span { animation: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">Demo game</h1>
+  <div class="reels" aria-hidden="true">
+    <div class="reel"><span>7</span></div><div class="reel"><span>★</span></div><div class="reel"><span>♦</span></div>
+  </div>
+  <button id="start" type="button">Click to start</button>
+  <p id="status" role="status">Demo mode · no real money</p>
+</main>
+<script>
+  (function () {
+    var name = new URLSearchParams(location.search).get("name");
+    if (name) { document.getElementById("title").textContent = name.slice(0, 80); document.title = name.slice(0, 80); }
+    var symbols = ["7", "★", "♦", "♣", "♥", "●"];
+    var reels = Array.prototype.slice.call(document.querySelectorAll(".reel"));
+    var button = document.getElementById("start");
+    var status = document.getElementById("status");
+    var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    button.addEventListener("click", function () {
+      button.disabled = true;
+      status.textContent = "Spinning…";
+      reels.forEach(function (reel) { reel.classList.add("spin"); });
+      reels.forEach(function (reel, i) {
+        setTimeout(function () {
+          reel.classList.remove("spin");
+          reel.firstChild.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+          if (i === reels.length - 1) {
+            var shown = reels.map(function (r) { return r.textContent; });
+            status.textContent = shown[0] === shown[1] && shown[1] === shown[2] ? "Big win! (demo)" : "No win this time (demo)";
+            button.textContent = "Spin again";
+            button.disabled = false;
+          }
+        }, reduce ? 0 : 600 + i * 350);
+      });
+    });
+  })();
+</script>
+</body>
+</html>

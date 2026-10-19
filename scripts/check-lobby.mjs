@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 // Regression check for the lobby pages, run against a RUNNING server (no deps):
 //   npm run dev   (or build && start), then:  npm run check:lobby
 //   BASE_URL=http://localhost:3115 npm run check:lobby
@@ -68,16 +69,16 @@ for (const [lang, heading] of Object.entries(headings)) {
     /<button[^>]*aria-expanded="true"[^>]*aria-controls="lobby-sidebar"/.test(sidebar) && /<button[^>]*aria-controls="lobby-sidebar"[^>]*class="[^"]*lg:hidden/.test(header),
   );
   check(
-    `/${lang} sidebar items (Home, Recent, Favourites | Promotions, VIP | Slots, Live Dealer, Sports | Language) each have an icon and a label, with dividers`,
-    items.length === 9 && items.every(([, , inner]) => inner.includes("<svg") && /class="lobby-label[^"]*">[^<]+</.test(inner)) && (sidebar.match(/<hr/g) ?? []).length === 3,
+    `/${lang} sidebar items (Home, Recent, Favourites | Promotions, Missions, VIP | Slots, Live Dealer, Sports | Language) each have an icon and a label, with dividers`,
+    items.length === 10 && items.every(([, , inner]) => inner.includes("<svg") && /class="lobby-label[^"]*">[^<]+</.test(inner)) && (sidebar.match(/<hr/g) ?? []).length === 3,
   );
   // Groups (config/topNav.ts): Home + player pages | Promotions, VIP | games (same paths as the
   // top bar) | language selector.
   const groups = sidebar.split("<hr");
   const hrefsOf = (html) => [...(html ?? "").matchAll(/<a\b[^>]*href="([^"]*)"/g)].map((m) => m[1]);
-  const expectGroups = [["", "/recent", "/favourites"], ["/promotions", "/vip"], ["/casino/slots", "/casino/live-dealer", "/sports"]];
+  const expectGroups = [["", "/recent", "/favourites"], ["/promotions", "/missions", "/vip"], ["/casino/slots", "/casino/live-dealer", "/sports"]];
   check(
-    `/${lang} sidebar groups: Home, Recent, Favourites | Promotions, VIP | Slots, Live Dealer, Sports | language`,
+    `/${lang} sidebar groups: Home, Recent, Favourites | Promotions, Missions, VIP | Slots, Live Dealer, Sports | language`,
     expectGroups.every((paths, i) => hrefsOf(groups[i]).join() === paths.map((p) => `/${lang}${p}`).join()) && (groups[3] ?? "").includes("aria-expanded"),
   );
   check(
@@ -166,7 +167,7 @@ for (const path of ["/en/casino/slots", "/en/promotions", "/en/casino/live-deale
 }
 // Sidebar current page: only the matching sidebar link has aria-current="page" (none on the
 // category pages that have no sidebar entry).
-for (const [path, expected] of [["/en", "/en"], ["/en/recent", "/en/recent"], ["/en/favourites", "/en/favourites"], ["/en/vip", "/en/vip"], ["/en/casino/slots", "/en/casino/slots"], ["/en/casino/live-dealer", "/en/casino/live-dealer"], ["/en/sports", "/en/sports"], ["/en/casino/trending-games", ""]]) {
+for (const [path, expected] of [["/en", "/en"], ["/en/recent", "/en/recent"], ["/en/favourites", "/en/favourites"], ["/en/vip", "/en/vip"], ["/en/missions", "/en/missions"], ["/en/casino/slots", "/en/casino/slots"], ["/en/casino/live-dealer", "/en/casino/live-dealer"], ["/en/sports", "/en/sports"], ["/en/casino/trending-games", ""]]) {
   const html = (await page(path)).html;
   const aside = html.slice(html.indexOf('<aside id="lobby-sidebar"'), html.indexOf("</aside>"));
   const current = [...aside.matchAll(/<a\b[^>]*>/g)].filter(([tag]) => tag.includes('aria-current="page"')).map(([tag]) => tag.match(/href="([^"]*)"/)?.[1]);
@@ -206,7 +207,7 @@ if (process.env.CDP_URL) {
   const hydrated = `new Promise((resolve) => { const t0 = Date.now(); (function poll() { const b = document.querySelector("#lobby-sidebar button[aria-controls]"); if ((b && Object.keys(b).some((k) => k.startsWith("__reactProps"))) || Date.now() - t0 > 8000) resolve(true); else setTimeout(poll, 50); })(); })`;
   const press = (selector) => evaluate(`document.querySelector(${JSON.stringify(selector)}).click()`);
   const key = async (k, vk) => { for (const type of ["rawKeyDown", "keyUp"]) await send("Input.dispatchKeyEvent", { type, key: k, code: k, windowsVirtualKeyCode: vk }); };
-  const layout = `(() => { const aside = document.querySelector("#lobby-sidebar"); const a = aside.getBoundingClientRect(); const h = document.querySelector("header").getBoundingClientRect(); const m = document.querySelector("main#content").getBoundingClientRect(); const toggle = aside.querySelector("button[aria-controls]").getBoundingClientRect(); const labels = [...aside.querySelectorAll(".lobby-label")].map((l) => l.getBoundingClientRect().width); const names = [...aside.querySelectorAll("a, [data-nav-item] > button")].map((i) => (i.getAttribute("aria-label") || i.textContent).trim()); return { top: a.top, height: a.height, vh: innerHeight, width: a.width, right: a.right, header: h.left, main: m.left, toggleInside: toggle.width > 0 && toggle.bottom <= 64 && toggle.right <= a.right, hidden: labels.every((w) => w <= 1), shown: labels.every((w) => w > 1), named: names.length === 9 && names.every(Boolean), overflow: document.documentElement.scrollWidth > innerWidth }; })()`;
+  const layout = `(() => { const aside = document.querySelector("#lobby-sidebar"); const a = aside.getBoundingClientRect(); const h = document.querySelector("header").getBoundingClientRect(); const m = document.querySelector("main#content").getBoundingClientRect(); const toggle = aside.querySelector("button[aria-controls]").getBoundingClientRect(); const labels = [...aside.querySelectorAll(".lobby-label")].map((l) => l.getBoundingClientRect().width); const names = [...aside.querySelectorAll("a, [data-nav-item] > button")].map((i) => (i.getAttribute("aria-label") || i.textContent).trim()); return { top: a.top, height: a.height, vh: innerHeight, width: a.width, right: a.right, header: h.left, main: m.left, toggleInside: toggle.width > 0 && toggle.bottom <= 64 && toggle.right <= a.right, hidden: labels.every((w) => w <= 1), shown: labels.every((w) => w > 1), named: names.length === 10 && names.every(Boolean), overflow: document.documentElement.scrollWidth > innerWidth }; })()`;
   await send("Page.enable");
   for (const width of [1440, 1024]) {
     await send("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -265,6 +266,15 @@ for (const [lang, titles] of Object.entries(playerTitles)) {
     );
   }
 }
+// Missions: sidebar-only "Coming soon" page (not in the top bar), in the sitemap.
+for (const lang of Object.keys(comingSoon)) {
+  const { status, html } = await page(`/${lang}/missions`);
+  check(
+    `/${lang}/missions responds 200 with "${comingSoon[lang]}", not in the top bar, no search bar`,
+    status === 200 && html.includes(comingSoon[lang]) && topNavLinks(html).every((link) => !link.current && !link.href?.endsWith("/missions")) && !html.includes('id="lobby-search"'),
+  );
+}
+check("sitemap lists /en/missions", sitemap.html.includes("/en/missions</loc>"));
 check("sitemap has no /recent or /favourites", !/\/(recent|favourites)<\/loc>/.test(sitemap.html));
 
 // Lucky Pick (categories with luckyPick: true, only slots): reel + Spin on /casino/slots only.
@@ -272,6 +282,40 @@ for (const [path, want] of [["/en/casino/slots", true], ["/de/casino/slots", tru
   const { html } = await page(path);
   const has = html.includes('id="lucky-pick-title"') && /<button[^>]*class="lucky-spin"[^>]*>/.test(html);
   check(`${path} ${want ? "has" : "has no"} Lucky Pick${want ? " with a Spin button" : ""}`, want ? has : !html.includes("lucky-pick"));
+}
+
+// Game page (/casino/{category}/game/{id}, id = the game's id; static ids are 7-digit strings from
+// config/lobby.ts#staticGameId): every tile links there; the page holds the iframe
+// (TEST_GAME_URL in static mode), its control bar and the "Recommended Games" row.
+// TEST_GAME_URL as written in src/config/site.ts (the static-mode iframe src of every game).
+const testGameUrl = /export const TEST_GAME_URL = "([^"]+)"/.exec(readFileSync(new URL("../src/config/site.ts", import.meta.url), "utf8"))?.[1] ?? "";
+const tileHref = (html, prefix) => [...html.matchAll(/<a[^>]*class="game-card[^"]*"[^>]*>/g)].map((m) => /href="([^"]+)"/.exec(m[0])?.[1]).filter((href) => href?.startsWith(prefix));
+{
+  const home = tileHref((await page("/en")).html, "/en/casino/trending-games/");
+  const byId = (hrefs) => hrefs.length > 0 && hrefs.every((href) => /^\/en\/casino\/[a-z-]+\/game\/\d{7}$/.test(href));
+  check("/en home tiles link to /en/casino/{category}/game/{id} (numeric id)", byId(home));
+  const slots = tileHref((await page("/en/casino/slots")).html, "/en/casino/slots/game/");
+  check("/en/casino/slots grid tiles link to /en/casino/slots/game/{id} (numeric id)", byId(slots));
+  const recent = tileHref((await page("/en/recent")).html, "/en/casino/");
+  check("/en/recent tiles link to game pages by id", byId(recent));
+  const found = await page("/api/games/search?q=dragon");
+  check("Explore search results carry an id and the category their card opens under", /"id":"\d{7}"/.test(found.html) && /"category":"(slots|live-dealer|trending-games)"/.test(found.html));
+  for (const lang of ["en", "cn"]) {
+    const href = slots[0]?.replace(/^\/en\//, `/${lang}/`) ?? `/${lang}/casino/slots/none`;
+    const { status, html } = await page(href);
+    const iframe = /<iframe[^>]*>/.exec(html)?.[0] ?? "";
+    const srcOk = testGameUrl === "/demo-game.html" ? /data-src="\/demo-game\.html\?name=[^"]+"/.test(iframe) : iframe.includes(`data-src="${testGameUrl}"`);
+    check(`${href} responds 200 with the game iframe (src = TEST_GAME_URL ${testGameUrl}), title = game name`, status === 200 && /<title>[^<\d]+[^<]*<\/title>/.test(html) && srcOk && /sandbox="[^"]*allow-scripts[^"]*"/.test(iframe) && ["allow-same-origin", "allow-presentation", "allow-popups"].every((token) => /sandbox="([^"]*)"/.exec(iframe)?.[1].split(" ").includes(token)) && ["autoplay", "encrypted-media", "picture-in-picture", "fullscreen"].every((feature) => /allow="([^"]*)"/.exec(iframe)?.[1].includes(feature)) && /referrerPolicy="strict-origin-when-cross-origin"|referrerpolicy="strict-origin-when-cross-origin"/.test(iframe) && / title="[^"]+"/.test(iframe));
+    const buttons = [...html.matchAll(/<button[^>]*class="gp-btn[^"]*"[^>]*>/g)].map((m) => m[0]);
+    check(`${href} control dock: favourite + theatre (aria-pressed), close (aria-label)`, html.includes('class="gp-dock"') && buttons.length >= 3 && buttons.filter((b) => /aria-pressed="false"/.test(b)).length >= 2 && buttons.every((b) => /aria-label="[^"]+"/.test(b)));
+    check(`${href} has the side panel (info card, stat tiles) and the Recommended list with arrows`, html.includes('class="gp-side"') && /class="gp-stats"[\s\S]*?<dt>[^<]+<\/dt><dd>[^<]+<\/dd>/.test(html) && html.includes('id="gp-title"') && html.includes('id="gp-recommended"') && (html.match(/class="gp-arrow"/g) ?? []).length === 2 && /class="gp-row"[\s\S]*?<a[^>]*href="\/[a-z]+\/casino\/slots\/game\/\d{7}"[^>]*class="gp-rec-item"|class="gp-row"[\s\S]*?<a[^>]*class="gp-rec-item"[^>]*href="\/[a-z]+\/casino\/slots\/game\/\d{7}"/.test(html));
+  }
+  const slotsId = slots[0]?.split("/").pop() ?? "0";
+  for (const path of ["/en/casino/slots/game/9999999", "/en/casino/slots/game/wild-tiger-gold", `/en/casino/live-dealer/game/${slotsId}`, `/en/casino/nope/game/${slotsId}`, "/en/casino/slots/game", `/en/casino/slots/${slotsId}`, "/en/casino/slots/wild-tiger-gold", `/en/casino/slots/game/${slotsId}/x`]) {
+    check(`${path} responds 404`, (await page(path)).status === 404);
+  }
+  const demo = await page("/demo-game.html");
+  check("/demo-game.html serves the demo game", demo.status === 200 && demo.html.includes("Click to start"));
 }
 
 const search = await page("/api/games/search?q=dragon");

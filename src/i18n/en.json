@@ -7,6 +7,7 @@
     "home": "Home",
     "recent": "Recent Games",
     "favourites": "Favourites",
+    "missions": "Missions",
     "promotions": "Promotions",
     "hide": "Hide menu",
     "show": "Show menu",
@@ -196,7 +197,8 @@
     "text": "Coming soon",
     "sportsMeta": "Sports betting is coming soon.",
     "vipMeta": "The VIP club is coming soon.",
-    "zAiMeta": "Z-AI is coming soon."
+    "zAiMeta": "Z-AI is coming soon.",
+    "missionsMeta": "Missions are coming soon."
   },
   "playerGames": {
     "recentEmpty": "No recent games yet",
@@ -213,5 +215,26 @@
     "by": "by {provider}",
     "picked": "Your lucky pick: {name}",
     "close": "Close"
+  },
+  "gamePage": {
+    "favourite": "Favourite",
+    "theatre": "Theatre mode",
+    "fullscreen": "Full screen",
+    "close": "Close game",
+    "leaveTitle": "Leave game?",
+    "stay": "Stay",
+    "leave": "Leave",
+    "recommended": "Recommended",
+    "previous": "Previous games",
+    "next": "Next games",
+    "nowPlaying": "Now playing",
+    "statRtp": "RTP",
+    "statEdge": "House edge",
+    "statCategory": "Category",
+    "percent": "{value}%",
+    "description": "Spin {name} for real-money wins. Check the game rules inside the game for paylines, features and limits.",
+    "loadError": "This game could not be loaded. Please try again later.",
+    "signIn": "Sign in to play this game.",
+    "loading": "Loading game…"
   }
 }
