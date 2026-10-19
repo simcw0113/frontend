@@ -88,6 +88,9 @@
     "body": "Cookie 用于维持网站运行。此提示不会保存账户。",
     "accept": "接受"
   },
+  "partners": {
+    "title": "合作伙伴"
+  },
   "howTo": {
     "title": "如何注册",
     "steps": {

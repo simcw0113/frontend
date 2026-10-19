@@ -4,6 +4,10 @@ export const siteConfig = {
   name: "Game Lobby",
   description: "Casino games and sports markets together in one lobby.",
   url: siteUrl.replace(/\/$/, ""),
+  // Top bar logo (an image in public/). To change it, replace the file or point `src` at a new
+  // one and update width/height (the file's pixel size); the alt text is the translated site name.
+  // NOTE: the current file is a neon mark used as a placeholder; swap in the real brand logo.
+  logo: { src: "/brand/logo.png", width: 288, height: 168 },
 };
 
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
@@ -16,6 +20,8 @@ export const apiConfig = {
   useStaticGames: !apiBaseUrl,
   // Same switch for "Top wins of the month" (src/lib/topWins.ts).
   useStaticTopWins: !apiBaseUrl,
+  // Same switch for "Our Partners" (src/lib/partners.ts).
+  useStaticPartners: !apiBaseUrl,
   loginPath: "/auth/login",
   registerPath: "/auth/register",
   // TODO(API): placeholder. {category} is replaced by the slug ("slots", "trending-games");
@@ -25,4 +31,6 @@ export const apiConfig = {
   searchGamesPath: "/games/search",
   // TODO(API): placeholder for the monthly top wins list; lang is sent as a query parameter.
   topWinsPath: "/wins/top-month",
+  // TODO(API): placeholder for the partner list (id, name, logo URL); lang is sent as a query parameter.
+  partnersPath: "/partners",
 };

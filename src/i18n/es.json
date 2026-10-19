@@ -88,6 +88,9 @@
     "body": "Las cookies mantienen el sitio en funcionamiento. Este aviso no guarda una cuenta.",
     "accept": "Aceptar"
   },
+  "partners": {
+    "title": "Nuestros socios"
+  },
   "howTo": {
     "title": "Cómo registrarse",
     "steps": {
@@ -100,11 +103,11 @@
         "text": "Deposita con dinero o cripto"
       },
       "win": {
-        "title": "Empieza a ganar",
+        "title": "Gana premios",
         "text": "Juega a tus juegos favoritos"
       },
       "reward": {
-        "title": "Consigue tu premio",
+        "title": "Tu recompensa",
         "text": "Reclama tus bonos"
       }
     }

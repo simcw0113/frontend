@@ -16,7 +16,7 @@ export type TopWin = {
   game: Game;
   playerId: string; // already masked, e.g. "50••••••7"
   amount: number;
-  currency: string; // from the data, e.g. "MYR"
+  currency: string; // from the data, e.g. "USDT"
 };
 
 export type TopWinsResult = { wins: TopWin[]; error?: boolean };
@@ -27,7 +27,7 @@ export type TopWinDto = {
   game: GameDto;
   player_id: string | number;
   amount: number;
-  currency: string;
+  currency?: string; // defaults to USDT
 };
 
 // Keeps the first two and the last digit. Raw ids must never reach the page.
@@ -45,10 +45,11 @@ export function mapTopWins(payload: { data?: TopWinDto[] } | TopWinDto[]): TopWi
     game: mapGame(item.game),
     playerId: maskPlayerId(item.player_id),
     amount: item.amount,
-    currency: item.currency,
+    currency: item.currency || DEFAULT_CURRENCY,
   }));
 }
 
+const DEFAULT_CURRENCY = "USDT";
 const REQUEST_TIMEOUT_MS = 8000;
 const DEFAULT_TOP_WINS_PATH = "/wins/top-month";
 

@@ -3,6 +3,7 @@ import { LobbyScreen } from "@/components/lobby/LobbyScreen";
 import { casinoCategories } from "@/config/categories";
 import { siteConfig } from "@/config/site";
 import { getCategoryGames } from "@/lib/games";
+import { getPartners } from "@/lib/partners";
 import { getTopWins } from "@/lib/topWins";
 import { isSlug, languageAlternates, localizedPath } from "@/i18n/routing";
 
@@ -23,5 +24,5 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   const games = Object.fromEntries(
     casinoCategories.map(({ slug }) => [slug, getCategoryGames(slug, { lang })]),
   );
-  return <LobbyScreen games={games} topWins={getTopWins({ lang })} />;
+  return <LobbyScreen games={games} topWins={getTopWins({ lang })} partners={getPartners({ lang })} />;
 }

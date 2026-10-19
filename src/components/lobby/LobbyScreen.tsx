@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, use, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { Suspense, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import type { AuthView } from "@/components/auth/AuthFormPanel";
 import { SignInDialog } from "@/components/SignInDialog";
 import { useI18n } from "@/components/I18nProvider";
 import { bannerSlides } from "@/config/banners";
-import { casinoCategories, defaultCasinoCategory, findCasinoCategory } from "@/config/categories";
-import { GameCover } from "@/components/lobby/GameCover";
+import { siteConfig } from "@/config/site";
+import { defaultCasinoCategory, findCasinoCategory } from "@/config/categories";
+import { HOME_SCROLL_KEY, HomeGameContent } from "@/components/lobby/HomeGameContent";
 import { HowToRegister } from "@/components/lobby/HowToRegister";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
@@ -16,17 +17,13 @@ import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
 import { fill, localeChoices } from "@/i18n";
 import { toSlug } from "@/i18n/routing";
 import type { CategoryGamesResult } from "@/lib/games";
+import type { PartnersResult } from "@/lib/partners";
 import type { TopWinsResult } from "@/lib/topWins";
 import { animate, reduceMotion } from "@/lib/motion";
 import { setSidebarOpen, useSidebarOpen } from "@/lib/sidebarState";
 
-const PREVIEW_COUNT = 8;
 const NAV_ITEM =
   "flex h-11 w-full items-center rounded-lg px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
-// Placeholders on a category page: about as many as a full list, so the page height
-// does not jump when the games arrive.
-const CATEGORY_SKELETON_COUNT = 16;
-const HOME_SCROLL_KEY = "lobby-home-scroll";
 
 
 export type LobbyFocus = "home" | "casino";
@@ -38,11 +35,13 @@ export function LobbyScreen({
   category,
   games,
   topWins,
+  partners,
 }: {
   focus?: LobbyFocus;
   category?: string;
   games: Record<string, Promise<CategoryGamesResult>>;
   topWins?: Promise<TopWinsResult>; // home only
+  partners?: Promise<PartnersResult>; // home only
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
@@ -104,37 +103,40 @@ export function LobbyScreen({
   }
 
   const casino = (category && findCasinoCategory(category)) || defaultCasinoCategory;
-  const sections = (focus === "home" ? casinoCategories : [casino]).map((item) => ({
-    id: item.slug,
-    title: t.lobby[item.titleKey],
-    href: `/casino/${item.slug}`,
-    // `games` is required by the types; the optional chain only keeps a stale dev
-    // module graph (page from an older version) from crashing the render.
-    games: games?.[item.slug] as Promise<CategoryGamesResult> | undefined,
-  }));
   const route = focus === "home" ? "/" : `/casino/${casino.slug}`;
-  const preview = focus === "home";
 
   return (
     <div className="min-h-full bg-lobby text-ink">
       <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} initialView={authView} />
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
-      <header style={{ viewTransitionName: "lobby-header" }} className="sticky top-0 z-40 grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-white/10 bg-lobby px-3">
-        <div>
-          <button
-            type="button"
-            aria-label={sidebarOpen ? t.menu.hide : t.menu.show}
-            aria-expanded={sidebarOpen}
-            onClick={toggleSidebar}
-            className="grid size-10 place-items-center rounded-lg hover:bg-white/10"
+      <header style={{ viewTransitionName: "lobby-header" }} className="sticky top-0 z-40 flex h-16 items-center gap-2 border-b border-white/10 bg-lobby px-3">
+        <button
+          type="button"
+          aria-label={sidebarOpen ? t.menu.hide : t.menu.show}
+          aria-expanded={sidebarOpen}
+          onClick={toggleSidebar}
+          className="grid size-10 shrink-0 place-items-center rounded-lg hover:bg-white/10"
+        >
+          <MenuIcon />
+        </button>
+        <h1 className="min-w-0">
+          <LobbyLink
+            href="/"
+            className="flex items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
-            <MenuIcon />
-          </button>
-        </div>
-        <h1 className="font-serif text-3xl tracking-tight italic">
-          {t.brand}
+            {/* Plain img with explicit width/height (no layout shift): the file may be swapped for any host/format. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={siteConfig.logo.src}
+              width={siteConfig.logo.width}
+              height={siteConfig.logo.height}
+              alt={t.siteName}
+              className="h-9 w-auto max-w-[40vw] object-contain"
+              draggable={false}
+            />
+          </LobbyLink>
         </h1>
-        <div className="flex items-center justify-end gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={() => {
@@ -279,19 +281,7 @@ export function LobbyScreen({
 
           <div className="lobby-vt-content">
           {focus === "casino" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
-          <div className="mt-6 space-y-8">
-            {sections.map((section) => (
-              <CardRow key={section.id} title={section.title} href={focus === "home" ? section.href : undefined}>
-                {section.games ? (
-                  <Suspense fallback={<GridSkeleton count={preview ? PREVIEW_COUNT : CATEGORY_SKELETON_COUNT} />}>
-                    <GameGrid promise={section.games} limit={preview ? PREVIEW_COUNT : undefined} />
-                  </Suspense>
-                ) : (
-                  <Notice>{t.lobby.empty}</Notice>
-                )}
-              </CardRow>
-            ))}
-          </div>
+          <HomeGameContent focus={focus} category={casino} games={games} partners={partners} />
           <LobbyFooter />
           </div>
         </main>
@@ -429,65 +419,6 @@ function Hero() {
         <span aria-hidden="true">→</span>
       </button>
     </section>
-  );
-}
-
-function CardRow({ title, href, children }: { title: string; href?: string; children: ReactNode }) {
-  const { t } = useI18n();
-
-  return (
-    <section aria-label={title}>
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold">{title}</h2>
-        {href ? (
-          <LobbyLink
-            href={href}
-            onGo={() => window.sessionStorage.setItem(HOME_SCROLL_KEY, String(Math.round(window.scrollY)))}
-            className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-brand hover:underline"
-          >
-            {t.lobby.viewAll}
-            <span aria-hidden="true">›</span>
-          </LobbyLink>
-        ) : null}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8";
-
-function Notice({ children }: { children: ReactNode }) {
-  return (
-    <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-8 text-center text-sm text-muted">{children}</p>
-  );
-}
-
-// The games of one category: the list, "nothing here yet" for an empty category,
-// or the error state.
-function GameGrid({ promise, limit }: { promise: Promise<CategoryGamesResult>; limit?: number }) {
-  const { t } = useI18n();
-  const result = use(promise);
-
-  if (result.error) return <Notice>{t.lobby.loadError}</Notice>;
-  if (result.games.length === 0) return <Notice>{t.lobby.empty}</Notice>;
-
-  return (
-    <div className={GRID}>
-      {(limit ? result.games.slice(0, limit) : result.games).map((game) => (
-        <GameCover key={game.id} game={game} fluid />
-      ))}
-    </div>
-  );
-}
-
-function GridSkeleton({ count }: { count: number }) {
-  return (
-    <div className={GRID} aria-hidden="true" data-skeleton="">
-      {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="aspect-[3/4] rounded-xl bg-white/5 motion-safe:animate-pulse" />
-      ))}
-    </div>
   );
 }
 

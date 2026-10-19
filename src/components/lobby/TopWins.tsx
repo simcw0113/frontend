@@ -76,7 +76,9 @@ function Thumb({ game, className }: { game: Game; className: string }) {
 
 function useAmount() {
   const { locale } = useI18n();
-  return (win: TopWin) => `${win.amount.toLocaleString(htmlLang(locale))} ${win.currency}`;
+  // Stablecoin amounts show two decimals, e.g. "54,884.00 USDT".
+  return (win: TopWin) =>
+    `${win.amount.toLocaleString(htmlLang(locale), { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${win.currency}`;
 }
 
 export function TopWins({ promise }: { promise: Promise<TopWinsResult> }) {

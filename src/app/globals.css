@@ -879,7 +879,7 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    padding: 1rem 1.5rem;
+    padding: 1.625rem 1.5rem;
   }
 
   .howto-label {
@@ -930,5 +930,80 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
 
   .howto-action::after {
     inset: -0.5rem -0.25rem;
+  }
+}
+
+/* "Our Partners" (src/components/lobby/Partners.tsx): one row of white logo tiles that ping-pongs
+   sideways by itself (script: scrollLeft, see Partners.tsx). Without JS or with reduced motion it
+   is a plain scroll-snap row the visitor scrolls by hand. Tiles are white so the placeholder
+   wordmarks keep their contrast. */
+.partners-panel {
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, var(--lobby-soft), var(--lobby));
+  padding: 0.75rem;
+}
+
+.partners-scroll {
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  /* room for the hover lift and its shadow, which the scroll container would clip */
+  margin: -0.25rem;
+  padding: 0.25rem 0.25rem 0.5rem;
+}
+
+/* snapping would fight the script that moves the row */
+.partners-scroll[data-auto] {
+  scroll-snap-type: none;
+}
+
+.partners-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.partners-scroll:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 0.75rem;
+}
+
+.partners-list {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.partners-tile {
+  display: grid;
+  flex: 0 0 8.5rem;
+  height: 4rem;
+  place-items: center;
+  overflow: hidden;
+  scroll-snap-align: start;
+  border-radius: 0.75rem;
+  background: #f4f8f8;
+  padding: 0 0.625rem;
+}
+
+/* the same hover lift as the other cards; hover-capable pointers only, none with reduced motion */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .partners-tile {
+    transition:
+      transform 200ms ease-out,
+      box-shadow 200ms ease-out;
+  }
+
+  .partners-tile:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 0 0 1px rgb(2 239 240 / 0.55),
+      0 14px 22px -12px rgb(0 0 0 / 0.65);
   }
 }

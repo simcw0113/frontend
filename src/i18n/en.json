@@ -88,6 +88,9 @@
     "body": "Cookies keep the site working. This notice does not store an account.",
     "accept": "Accept"
   },
+  "partners": {
+    "title": "Our Partners"
+  },
   "howTo": {
     "title": "How to Register",
     "steps": {
