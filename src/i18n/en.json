@@ -88,6 +88,27 @@
     "body": "Cookies keep the site working. This notice does not store an account.",
     "accept": "Accept"
   },
+  "howTo": {
+    "title": "How to Register",
+    "steps": {
+      "create": {
+        "title": "Create account",
+        "text": "Click Join Us and sign up"
+      },
+      "deposit": {
+        "title": "Make a deposit",
+        "text": "Deposit with money or crypto"
+      },
+      "win": {
+        "title": "Start winning",
+        "text": "Play your favourite games"
+      },
+      "reward": {
+        "title": "Get reward",
+        "text": "Claim your bonuses"
+      }
+    }
+  },
   "footer": {
     "payment": "Payment Method",
     "follow": "Follow us",

@@ -88,6 +88,27 @@
     "body": "Cookies halten die Seite am Laufen. Dieser Hinweis speichert kein Konto.",
     "accept": "Akzeptieren"
   },
+  "howTo": {
+    "title": "So registrierst du dich",
+    "steps": {
+      "create": {
+        "title": "Konto erstellen",
+        "text": "„Mach mit“ klicken, anmelden"
+      },
+      "deposit": {
+        "title": "Einzahlen",
+        "text": "Mit Geld oder Krypto einzahlen"
+      },
+      "win": {
+        "title": "Gewinnen",
+        "text": "Lieblingsspiele spielen"
+      },
+      "reward": {
+        "title": "Belohnung holen",
+        "text": "Boni abholen"
+      }
+    }
+  },
   "footer": {
     "payment": "Zahlungsmethode",
     "follow": "Folgen Sie uns",

@@ -88,6 +88,27 @@
     "body": "Las cookies mantienen el sitio en funcionamiento. Este aviso no guarda una cuenta.",
     "accept": "Aceptar"
   },
+  "howTo": {
+    "title": "Cómo registrarse",
+    "steps": {
+      "create": {
+        "title": "Crea tu cuenta",
+        "text": "Pulsa Únete y regístrate"
+      },
+      "deposit": {
+        "title": "Haz un depósito",
+        "text": "Deposita con dinero o cripto"
+      },
+      "win": {
+        "title": "Empieza a ganar",
+        "text": "Juega a tus juegos favoritos"
+      },
+      "reward": {
+        "title": "Consigue tu premio",
+        "text": "Reclama tus bonos"
+      }
+    }
+  },
   "footer": {
     "payment": "Método de pago",
     "follow": "Síguenos",

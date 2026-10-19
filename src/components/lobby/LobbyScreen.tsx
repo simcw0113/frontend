@@ -7,6 +7,7 @@ import { useI18n } from "@/components/I18nProvider";
 import { bannerSlides } from "@/config/banners";
 import { casinoCategories, defaultCasinoCategory, findCasinoCategory } from "@/config/categories";
 import { GameCover } from "@/components/lobby/GameCover";
+import { HowToRegister } from "@/components/lobby/HowToRegister";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
@@ -225,14 +226,26 @@ export function LobbyScreen({
                 {t.lobby.back}
               </LobbyLink>
             )}
-            {/* Home only: banner -> Top wins -> search bar. Part of the "top" transition group so it
-                fades with the banner. The wrapper collapses (empty:hidden) when the section hides
-                itself (no data / error), so no gap is left behind. */}
+            {/* Home only: banner -> Top wins -> How to Register -> search bar. Both sections are part
+                of the "top" transition group, so they fade with the banner. Each wrapper adds its
+                own 24px above; the Top wins wrapper collapses (empty:hidden) when that section hides
+                itself (no data / error), so How to Register then follows the banner with no gap
+                left behind. The extra pb-2 plus the search bar's mt-4 make the last gap 24px too. */}
             {focus === "home" && topWins ? (
-              <div className="pt-6 pb-2 empty:hidden">
+              <div className="pt-6 empty:hidden">
                 <Suspense fallback={<TopWinsSkeleton />}>
                   <TopWins promise={topWins} />
                 </Suspense>
+              </div>
+            ) : null}
+            {focus === "home" ? (
+              <div className="pt-6 pb-2">
+                <HowToRegister
+                  onRegister={() => {
+                    setAuthView("register");
+                    setSignInOpen(true);
+                  }}
+                />
               </div>
             ) : null}
           </div>
