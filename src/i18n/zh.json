@@ -75,7 +75,6 @@
     "all": "全部",
     "viewAll": "查看全部",
     "back": "返回",
-    "noMatches": "没有符合的结果。",
     "empty": "这里暂时没有内容。",
     "loadError": "无法加载游戏，请稍后再试。",
     "promotions": "优惠",
@@ -120,5 +119,28 @@
     "api_unexpected": "API 返回了无法识别的响应。",
     "api_failed": "请求未能完成。",
     "token_missing": "登录响应中没有令牌。"
+  },
+  "search": {
+    "title": "探索",
+    "placeholder": "搜索游戏",
+    "clear": "清除搜索",
+    "close": "关闭",
+    "open": "打开游戏搜索",
+    "categoriesLabel": "游戏分类",
+    "showMore": "显示更多",
+    "loading": "正在加载",
+    "retry": "重试",
+    "empty": "未找到游戏",
+    "shown": "已显示 {count} / {total} 款游戏",
+    "categories": {
+      "all": "全部游戏",
+      "slots": "老虎机",
+      "liveCasino": "真人娱乐场",
+      "baccarat": "百家乐",
+      "blackjack": "二十一点",
+      "roulette": "轮盘",
+      "gameShows": "游戏秀",
+      "sicBo": "骰宝"
+    }
   }
 }

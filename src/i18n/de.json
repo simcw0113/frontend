@@ -75,7 +75,6 @@
     "all": "Alle",
     "viewAll": "Alle anzeigen",
     "back": "Zurück",
-    "noMatches": "Nichts passt zu dieser Suche.",
     "empty": "Hier ist noch nichts.",
     "loadError": "Die Spiele konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
     "promotions": "Aktionen",
@@ -120,5 +119,28 @@
     "api_unexpected": "Die API hat eine unerwartete Antwort geliefert.",
     "api_failed": "Die Anfrage konnte nicht abgeschlossen werden.",
     "token_missing": "Die Anmeldeantwort enthielt kein Token."
+  },
+  "search": {
+    "title": "Entdecken",
+    "placeholder": "Spiele suchen",
+    "clear": "Suche löschen",
+    "close": "Schließen",
+    "open": "Spielesuche öffnen",
+    "categoriesLabel": "Spielkategorien",
+    "showMore": "Mehr anzeigen",
+    "loading": "Wird geladen",
+    "retry": "Erneut versuchen",
+    "empty": "Keine Spiele gefunden",
+    "shown": "{count} von {total} Spielen angezeigt",
+    "categories": {
+      "all": "Alle Spiele",
+      "slots": "Spielautomaten",
+      "liveCasino": "Live-Casino",
+      "baccarat": "Baccarat",
+      "blackjack": "Blackjack",
+      "roulette": "Roulette",
+      "gameShows": "Gameshows",
+      "sicBo": "Sic Bo"
+    }
   }
 }

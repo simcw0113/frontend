@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:lobby": "node scripts/check-lobby.mjs"
   },
   "dependencies": {
     "animejs": "^4.5.0",

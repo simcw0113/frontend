@@ -10,6 +10,7 @@ import { GameCover } from "@/components/lobby/GameCover";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
+import { SearchModal } from "@/components/lobby/SearchModal";
 import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
 import { fill, localeChoices } from "@/i18n";
 import { toSlug } from "@/i18n/routing";
@@ -42,7 +43,7 @@ export function LobbyScreen({
   games: Record<string, Promise<CategoryGamesResult>>;
   topWins?: Promise<TopWinsResult>; // home only
 }) {
-  const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
   const { locale, setLocale, t } = useI18n();
   const sidebarOpen = useSidebarOpen();
@@ -66,16 +67,27 @@ export function LobbyScreen({
     if (saved > 0) window.scrollTo({ top: saved, behavior: "instant" });
   }, [focus]);
 
+  // Ctrl/Cmd+K opens the Explore search from anywhere on the lobby pages. While it
+  // is open the pop-up handles the shortcut itself (it toggles closed). Not taken
+  // while another dialog is open or while typing in a field other than the search bar.
   useEffect(() => {
+    if (searchOpen || signInOpen) return;
     function onKey(event: KeyboardEvent) {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        document.getElementById("lobby-search")?.focus();
+      if (!(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey || event.key.toLowerCase() !== "k") return;
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        target.id !== "lobby-search" &&
+        (target.isContentEditable || target.matches("input, textarea, select"))
+      ) {
+        return;
       }
+      event.preventDefault();
+      setSearchOpen(true);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [searchOpen, signInOpen]);
 
   function toggleSidebar() {
     setSidebarOpen((open) => !open);
@@ -90,20 +102,22 @@ export function LobbyScreen({
     setCookiesOn(false);
   }
 
-  const needle = query.trim().toLowerCase();
   const casino = (category && findCasinoCategory(category)) || defaultCasinoCategory;
   const sections = (focus === "home" ? casinoCategories : [casino]).map((item) => ({
     id: item.slug,
     title: t.lobby[item.titleKey],
     href: `/casino/${item.slug}`,
-    games: games[item.slug],
+    // `games` is required by the types; the optional chain only keeps a stale dev
+    // module graph (page from an older version) from crashing the render.
+    games: games?.[item.slug] as Promise<CategoryGamesResult> | undefined,
   }));
   const route = focus === "home" ? "/" : `/casino/${casino.slug}`;
-  const preview = focus === "home" && !needle;
+  const preview = focus === "home";
 
   return (
     <div className="min-h-full bg-lobby text-ink">
       <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} initialView={authView} />
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
       <header style={{ viewTransitionName: "lobby-header" }} className="sticky top-0 z-40 grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-white/10 bg-lobby px-3">
         <div>
           <button
@@ -217,12 +231,23 @@ export function LobbyScreen({
             <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted">
               <SearchIcon />
             </span>
+            {/* Looks like a search field but only opens the Explore pop-up. It does not open
+                on plain keyboard focus (WCAG 3.2.1): click, Enter, Space or Ctrl/Cmd+K do. */}
             <input
               id="lobby-search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              readOnly
+              value=""
+              aria-haspopup="dialog"
+              aria-keyshortcuts="Control+K Meta+K"
+              onClick={() => setSearchOpen(true)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
+                  event.preventDefault();
+                  setSearchOpen(true);
+                }
+              }}
               placeholder={fill(t.lobby.searchPlaceholder, { name: t.siteName })}
-              className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pr-24 pl-10 text-sm outline-none placeholder:text-muted focus:border-brand"
+              className="h-12 w-full cursor-pointer rounded-xl border border-white/10 bg-white/5 pr-24 pl-10 text-sm outline-none placeholder:text-muted hover:border-white/25 focus-visible:border-brand"
             />
             <kbd className="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 rounded-md border border-white/10 px-2 py-1 text-xs text-muted sm:inline">
               Ctrl K
@@ -239,9 +264,13 @@ export function LobbyScreen({
             ) : null}
             {sections.map((section) => (
               <CardRow key={section.id} title={section.title} href={focus === "home" ? section.href : undefined}>
-                <Suspense fallback={<GridSkeleton count={preview ? PREVIEW_COUNT : CATEGORY_SKELETON_COUNT} />}>
-                  <GameGrid promise={section.games} needle={needle} limit={preview ? PREVIEW_COUNT : undefined} />
-                </Suspense>
+                {section.games ? (
+                  <Suspense fallback={<GridSkeleton count={preview ? PREVIEW_COUNT : CATEGORY_SKELETON_COUNT} />}>
+                    <GameGrid promise={section.games} limit={preview ? PREVIEW_COUNT : undefined} />
+                  </Suspense>
+                ) : (
+                  <Notice>{t.lobby.empty}</Notice>
+                )}
               </CardRow>
             ))}
           </div>
@@ -416,20 +445,18 @@ function Notice({ children }: { children: ReactNode }) {
   );
 }
 
-// The games of one category: the list, "nothing matches" for a search without
-// hits, "nothing here yet" for an empty category, or the error state.
-function GameGrid({ promise, needle, limit }: { promise: Promise<CategoryGamesResult>; needle: string; limit?: number }) {
+// The games of one category: the list, "nothing here yet" for an empty category,
+// or the error state.
+function GameGrid({ promise, limit }: { promise: Promise<CategoryGamesResult>; limit?: number }) {
   const { t } = useI18n();
   const result = use(promise);
 
   if (result.error) return <Notice>{t.lobby.loadError}</Notice>;
   if (result.games.length === 0) return <Notice>{t.lobby.empty}</Notice>;
-  const matches = result.games.filter((game) => !needle || game.title.toLowerCase().includes(needle));
-  if (matches.length === 0) return <Notice>{t.lobby.noMatches}</Notice>;
 
   return (
     <div className={GRID}>
-      {(limit ? matches.slice(0, limit) : matches).map((game) => (
+      {(limit ? result.games.slice(0, limit) : result.games).map((game) => (
         <GameCover key={game.id} game={game} fluid />
       ))}
     </div>

@@ -75,7 +75,6 @@
     "all": "Todos",
     "viewAll": "Ver todo",
     "back": "Volver",
-    "noMatches": "Nada coincide con esa búsqueda.",
     "empty": "Todavía no hay nada aquí.",
     "loadError": "No se pudieron cargar los juegos. Inténtalo de nuevo más tarde.",
     "promotions": "Promociones",
@@ -120,5 +119,28 @@
     "api_unexpected": "La API devolvió una respuesta inesperada.",
     "api_failed": "No se pudo completar la solicitud.",
     "token_missing": "La respuesta de inicio de sesión no incluía un token."
+  },
+  "search": {
+    "title": "Explorar",
+    "placeholder": "Buscar juegos",
+    "clear": "Borrar búsqueda",
+    "close": "Cerrar",
+    "open": "Abrir búsqueda de juegos",
+    "categoriesLabel": "Categorías de juegos",
+    "showMore": "Mostrar más",
+    "loading": "Cargando",
+    "retry": "Reintentar",
+    "empty": "No se encontraron juegos",
+    "shown": "Mostrando {count} de {total} juegos",
+    "categories": {
+      "all": "Todos los juegos",
+      "slots": "Tragaperras",
+      "liveCasino": "Casino en vivo",
+      "baccarat": "Bacará",
+      "blackjack": "Blackjack",
+      "roulette": "Ruleta",
+      "gameShows": "Game shows",
+      "sicBo": "Sic Bo"
+    }
   }
 }

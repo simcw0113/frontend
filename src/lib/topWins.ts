@@ -4,6 +4,7 @@ import { houseGames, slotGames, slotsGames, trendingGames, type Game } from "@/c
 import { topWinEntries } from "@/config/topWins";
 import { mapGame, type GameDto } from "@/lib/games";
 import { apiJson } from "@/lib/api";
+import { useStaticData as isStaticData } from "@/lib/apiMode";
 
 // "Top wins of the month" for the lobby home page. Server only. Same pattern as
 // lib/games.ts: static sample data while there is no API address
@@ -49,6 +50,7 @@ export function mapTopWins(payload: { data?: TopWinDto[] } | TopWinDto[]): TopWi
 }
 
 const REQUEST_TIMEOUT_MS = 8000;
+const DEFAULT_TOP_WINS_PATH = "/wins/top-month";
 
 function fromStatic(): TopWinsResult {
   const games = [...slotsGames, ...slotGames, ...houseGames, ...trendingGames];
@@ -68,7 +70,7 @@ async function fromApi(lang: string): Promise<TopWinsResult> {
   try {
     // TODO(API): endpoint path lives in apiConfig.topWinsPath (config/site.ts).
     const payload = await apiJson<{ data?: TopWinDto[] } | TopWinDto[]>(
-      `${apiConfig.topWinsPath}?${new URLSearchParams({ lang })}`,
+      `${apiConfig.topWinsPath || DEFAULT_TOP_WINS_PATH}?${new URLSearchParams({ lang })}`,
       { auth: false, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) },
     );
     const wins = mapTopWins(payload).sort((a, b) => a.rank - b.rank);
@@ -82,5 +84,8 @@ async function fromApi(lang: string): Promise<TopWinsResult> {
 
 // Never throws. The section hides itself on `error` or an empty list.
 export async function getTopWins({ lang }: { lang: string }): Promise<TopWinsResult> {
-  return apiConfig.useStaticTopWins ? fromStatic() : fromApi(lang);
+  // Static data when forced by the switch or whenever there is no API address
+  // (see lib/apiMode.ts), so a missing switch can never hide the section.
+  const config: Partial<typeof apiConfig> = apiConfig;
+  return isStaticData(config.useStaticTopWins) ? fromStatic() : fromApi(lang);
 }

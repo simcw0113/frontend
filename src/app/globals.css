@@ -602,3 +602,106 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
       0 14px 22px -12px rgb(0 0 0 / 0.65);
   }
 }
+
+/* "Explore" search pop-up (src/components/lobby/SearchModal.tsx) */
+.explore-dialog {
+  width: min(100% - 2rem, 68rem);
+  height: min(85dvh, 60rem);
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  overflow: visible;
+}
+
+.explore-dialog[open] {
+  display: flex;
+}
+
+.explore-dialog::backdrop {
+  background: rgb(2 12 15 / 0.72);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.explore-card {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 1.5rem;
+  background: var(--lobby-deep);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 0.55);
+}
+
+/* Phones: full screen. */
+@media (max-width: 639px) {
+  .explore-dialog {
+    width: 100%;
+    height: 100dvh;
+  }
+
+  .explore-card {
+    border: 0;
+    border-radius: 0;
+  }
+}
+
+.explore-tabs,
+.explore-scroll {
+  scrollbar-width: none;
+}
+
+.explore-tabs::-webkit-scrollbar,
+.explore-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.explore-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.explore-spinner {
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid rgb(255 255 255 / 0.25);
+  border-top-color: var(--brand);
+  border-radius: 999px;
+  animation: loader-spin 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .explore-dialog[open] .explore-card {
+    animation: explore-in 0.2s ease-out;
+  }
+
+  .explore-dialog[open]::backdrop {
+    animation: auth-backdrop-in 0.2s ease-out;
+  }
+
+  .explore-dialog.is-closing::backdrop {
+    animation: auth-backdrop-out 0.16s ease-in forwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .explore-spinner {
+    animation-duration: 2s;
+  }
+}
+
+@keyframes explore-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}

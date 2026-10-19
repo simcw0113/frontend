@@ -1,7 +1,10 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { apiConfig } from "@/config/site";
+import { gameCatalog, type CatalogGame } from "@/config/gameCatalog";
 import { categoryGames, type Game, type GameSymbol, type GameTag } from "@/config/lobby";
+import type { SearchCategoryId } from "@/config/searchCategories";
 import { apiJson } from "@/lib/api";
+import { useStaticData as isStaticData } from "@/lib/apiMode";
 
 // Game lists per casino category (/{lang}/casino/{category} and the home rows).
 // This is the ONE place that talks to the games API; pages only call
@@ -111,6 +114,17 @@ export function mapResponse(payload: CategoryGamesDto | GameDto[]): CategoryGame
 
 const REQUEST_TIMEOUT_MS = 8000;
 
+// Defensive reads of apiConfig: a stale dev module graph (HMR) can hand us an older
+// config object without these keys. A missing switch then means "static data unless
+// an API address exists", and a missing path falls back to the documented default,
+// instead of throwing while the page renders.
+const DEFAULT_CATEGORY_PATH = "/games/category/{category}";
+const DEFAULT_SEARCH_PATH = "/games/search";
+function staticGamesEnabled(): boolean {
+  const config: Partial<typeof apiConfig> = apiConfig;
+  return isStaticData(config.useStaticGames);
+}
+
 function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
@@ -136,10 +150,11 @@ async function fromApi(category: string, opts: CategoryGamesOptions): Promise<Ca
   if (opts.provider) query.set("provider", opts.provider);
   if (opts.page && opts.page > 1) query.set("page", String(opts.page));
   if (opts.q) query.set("q", opts.q);
-  // TODO(API): endpoint path lives in apiConfig.categoryGamesPath (config/site.ts).
-  const path = apiConfig.categoryGamesPath.replace("{category}", encodeURIComponent(category));
 
   try {
+    // TODO(API): endpoint path lives in apiConfig.categoryGamesPath (config/site.ts).
+    const template = apiConfig.categoryGamesPath || DEFAULT_CATEGORY_PATH;
+    const path = template.replace("{category}", encodeURIComponent(category));
     const payload = await apiJson<CategoryGamesDto | GameDto[]>(`${path}?${query}`, {
       auth: false,
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), // timeouts and network errors land in catch
@@ -160,5 +175,77 @@ export async function getCategoryGames(
   category: string,
   opts: CategoryGamesOptions,
 ): Promise<CategoryGamesResult> {
-  return apiConfig.useStaticGames ? fromStatic(category, opts) : fromApi(category, opts);
+  return staticGamesEnabled() ? fromStatic(category, opts) : fromApi(category, opts);
+}
+
+// --- "Explore" search -------------------------------------------------------
+// Called from the browser through the route handler app/api/games/search/route.ts
+// (never directly), so the API address, and later the auth token, stay on the
+// server. Searches are not cached (the query space is open-ended); the handler
+// answers with Cache-Control: no-store.
+//
+// TODO(API): when the endpoint needs the signed-in user, read the HttpOnly cookie
+// with cookies() in the route handler and pass the token in here as an
+// Authorization header. Do not add token handling in the browser.
+
+export const SEARCH_PAGE_SIZE = 24;
+
+export type SearchGamesOptions = {
+  q: string; // already trimmed and length-capped by the caller
+  category: SearchCategoryId;
+  page: number; // 1-based
+  pageSize: number;
+  lang: string; // URL language slug: en | cn | de | es
+  signal?: AbortSignal;
+};
+
+export type SearchGamesResult = {
+  games: Game[];
+  total: number;
+  nextPage?: number; // absent on the last page
+};
+
+// Drops the catalog-only category tags.
+function toGame({ id, title, provider, playing, tags, from, to, symbol }: CatalogGame): Game {
+  return { id, title, provider, playing, tags, from, to, symbol };
+}
+
+function searchStatic({ q, category, page, pageSize }: SearchGamesOptions): SearchGamesResult {
+  const needle = q.toLowerCase();
+  const matches = gameCatalog.filter(
+    (game) =>
+      (category === "all" || game.categories.some((id) => id === category)) &&
+      (!needle || game.title.toLowerCase().includes(needle) || game.provider.toLowerCase().includes(needle)),
+  );
+  const start = (page - 1) * pageSize;
+  return {
+    games: matches.slice(start, start + pageSize).map(toGame),
+    total: matches.length,
+    nextPage: start + pageSize < matches.length ? page + 1 : undefined,
+  };
+}
+
+async function searchApi(opts: SearchGamesOptions): Promise<SearchGamesResult> {
+  // TODO(API): endpoint path is apiConfig.searchGamesPath (config/site.ts); rename
+  // the query parameters here if the API uses other names.
+  const query = new URLSearchParams({
+    category: opts.category,
+    page: String(opts.page),
+    pageSize: String(opts.pageSize),
+    lang: opts.lang,
+  });
+  if (opts.q) query.set("q", opts.q);
+  const payload = await apiJson<CategoryGamesDto | GameDto[]>(`${apiConfig.searchGamesPath || DEFAULT_SEARCH_PATH}?${query}`, {
+    auth: false,
+    signal: opts.signal ? AbortSignal.any([opts.signal, AbortSignal.timeout(REQUEST_TIMEOUT_MS)]) : AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  });
+  // TODO(API): mapResponse is the shared (placeholder) mapper; replace it if the
+  // search response differs from the category list response.
+  const result = mapResponse(payload);
+  return { games: result.games, total: result.total ?? result.games.length, nextPage: result.nextPage };
+}
+
+// Throws when the API fails (the route handler turns that into a 502).
+export async function searchGames(opts: SearchGamesOptions): Promise<SearchGamesResult> {
+  return staticGamesEnabled() ? searchStatic(opts) : searchApi(opts);
 }

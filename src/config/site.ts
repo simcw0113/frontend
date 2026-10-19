@@ -21,6 +21,8 @@ export const apiConfig = {
   // TODO(API): placeholder. {category} is replaced by the slug ("slots", "trending-games");
   // lang, provider, page and q are sent as query parameters.
   categoryGamesPath: "/games/category/{category}",
+  // TODO(API): placeholder for the Explore search. Query: q, category, page, pageSize, lang.
+  searchGamesPath: "/games/search",
   // TODO(API): placeholder for the monthly top wins list; lang is sent as a query parameter.
   topWinsPath: "/wins/top-month",
 };
