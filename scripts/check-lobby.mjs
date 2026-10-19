@@ -55,6 +55,10 @@ for (const [lang, heading] of Object.entries(headings)) {
   const toggle = header.indexOf("aria-expanded");
   const logo = header.indexOf('src="/brand/logo.png"');
   check(
+    `/${lang} sidebar toggle is a labelled button with aria-expanded and aria-controls=lobby-sidebar`,
+    header.includes('aria-controls="lobby-sidebar"') && html.includes('id="lobby-sidebar"'),
+  );
+  check(
     `/${lang} header logo image sits right after the sidebar toggle, linking to /${lang}`,
     toggle > -1 && logo > toggle && !header.includes("font-serif") && header.slice(toggle, logo).includes(`href="/${lang}"`),
   );

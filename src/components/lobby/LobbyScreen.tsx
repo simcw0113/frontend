@@ -109,17 +109,18 @@ export function LobbyScreen({
     <div className="min-h-full bg-lobby text-ink">
       <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} initialView={authView} />
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
-      <header style={{ viewTransitionName: "lobby-header" }} className="sticky top-0 z-40 flex h-16 items-center gap-2 border-b border-white/10 bg-lobby px-3">
+      <header style={{ viewTransitionName: "lobby-header" }} className="sticky top-0 z-40 flex h-16 items-center gap-1 border-b border-white/10 bg-lobby px-3">
         <button
           type="button"
           aria-label={sidebarOpen ? t.menu.hide : t.menu.show}
           aria-expanded={sidebarOpen}
+          aria-controls="lobby-sidebar"
           onClick={toggleSidebar}
-          className="grid size-10 shrink-0 place-items-center rounded-lg hover:bg-white/10"
+          className="grid size-11 shrink-0 place-items-center rounded-lg text-brand hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           <MenuIcon />
         </button>
-        <h1 className="min-w-0">
+        <h1 className="ml-1.5 min-w-0 md:ml-[13px]">
           <LobbyLink
             href="/"
             className="flex items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
@@ -163,6 +164,7 @@ export function LobbyScreen({
       <div className={`lobby-shell flex${sidebarOpen ? " is-open" : ""}`}>
         <div className="lobby-slot sticky top-16 h-[calc(100vh-4rem)] self-start">
           <aside
+            id="lobby-sidebar"
             aria-hidden={!sidebarOpen}
             inert={!sidebarOpen}
             className="lobby-aside flex h-full w-64 flex-col border-r border-white/10 bg-lobby p-3"
@@ -442,8 +444,9 @@ function GlobeIcon() {
 
 function MenuIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="M4 7 H20 M4 12 H20 M4 17 H20" />
+    // Three thin, wide, equal lines in the brand cyan (the button sets the colour).
+    <svg viewBox="0 0 30 20" aria-hidden="true" className="h-5 w-[30px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
+      <path d="M1 2 H29 M1 10 H29 M1 18 H29" />
     </svg>
   );
 }
