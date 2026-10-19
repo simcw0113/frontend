@@ -15,12 +15,14 @@ export function LobbyLink({
   onGo,
   className,
   children,
+  "aria-current": ariaCurrent,
 }: {
   href: string;
   scroll?: boolean;
   onGo?: () => void;
   className?: string;
   children: ReactNode;
+  "aria-current"?: "page";
 }) {
   const router = useRouter();
   const { href: localized } = useI18n();
@@ -43,8 +45,23 @@ export function LobbyLink({
     withLobbyTransition(href, () => router.push(target, { scroll }));
   }
 
+  // Warm the route up before the click (hover, keyboard focus, touch) so the
+  // transition does not have to hold the old page while it loads.
+  function warm() {
+    router.prefetch(target);
+  }
+
   return (
-    <Link href={target} scroll={scroll} onClick={onClick} className={className}>
+    <Link
+      href={target}
+      scroll={scroll}
+      onClick={onClick}
+      onMouseEnter={warm}
+      onFocus={warm}
+      onTouchStart={warm}
+      aria-current={ariaCurrent}
+      className={className}
+    >
       {children}
     </Link>
   );

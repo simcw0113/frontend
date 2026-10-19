@@ -171,20 +171,28 @@ export function GameCover({ game, fluid = false }: { game: Game; fluid?: boolean
   const { locale, t } = useI18n();
 
   return (
-    <article className={fluid ? "min-w-0" : "w-[132px] shrink-0 sm:w-[148px]"}>
+    <article className={`game-card ${fluid ? "min-w-0" : "w-[132px] shrink-0 sm:w-[148px]"}`}>
       <div
-        className="relative aspect-[3/4] overflow-hidden rounded-xl shadow-lg"
+        className="game-cover relative aspect-[3/4] overflow-hidden rounded-xl"
         style={{ background: `linear-gradient(180deg, ${game.from}, ${game.to})` }}
       >
         <p className="absolute top-2 right-2 left-2 truncate text-[9px] font-semibold tracking-[0.14em] text-white/75 uppercase">
           {game.provider}
         </p>
-        <div className="absolute inset-0 flex items-center justify-center pt-2">
+        <div className="game-art absolute inset-0 flex items-center justify-center pt-2">
           <SymbolMark symbol={game.symbol} />
         </div>
         <h3 className="absolute inset-x-2 bottom-3 text-[15px] leading-[0.95] font-black tracking-tight text-white uppercase drop-shadow-md">
           {game.title}
         </h3>
+        <span
+          aria-hidden="true"
+          className="game-play absolute right-2 bottom-2 grid size-7 place-items-center rounded-full bg-brand text-lobby"
+        >
+          <svg viewBox="0 0 24 24" className="size-3.5 translate-x-px" fill="currentColor">
+            <path d="M8 5.5v13l11-6.5z" />
+          </svg>
+        </span>
       </div>
       <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted">
         <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />

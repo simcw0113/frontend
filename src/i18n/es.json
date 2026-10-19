@@ -4,6 +4,7 @@
   "loading": "Cargando",
   "skip": "Saltar al contenido",
   "menu": {
+    "home": "Inicio",
     "hide": "Ocultar menú",
     "show": "Mostrar menú"
   },
@@ -73,6 +74,8 @@
     "viewAll": "Ver todo",
     "back": "Volver",
     "noMatches": "Nada coincide con esa búsqueda.",
+    "empty": "Todavía no hay nada aquí.",
+    "loadError": "No se pudieron cargar los juegos. Inténtalo de nuevo más tarde.",
     "promotions": "Promociones",
     "showBanner": "Mostrar banner {n}",
     "previous": "Diapositiva anterior",

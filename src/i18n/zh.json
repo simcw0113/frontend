@@ -4,6 +4,7 @@
   "loading": "加载中",
   "skip": "跳到内容",
   "menu": {
+    "home": "首页",
     "hide": "隐藏菜单",
     "show": "显示菜单"
   },
@@ -73,6 +74,8 @@
     "viewAll": "查看全部",
     "back": "返回",
     "noMatches": "没有符合的结果。",
+    "empty": "这里暂时没有内容。",
+    "loadError": "无法加载游戏，请稍后再试。",
     "promotions": "优惠",
     "showBanner": "显示横幅 {n}",
     "previous": "上一张",

@@ -15,7 +15,14 @@ import { findCasinoCategory } from "@/config/categories";
 export type LobbyRoute = string;
 
 const SETTLE_MS = 40;
-const GIVE_UP_MS = 1500;
+// How long the old page is held while the new route loads. Instant in production;
+// the first visit of a route in `next dev` has to compile it first, and giving up
+// early would end the transition on the old page and swap it in later without any
+// animation.
+const GIVE_UP_MS = 4000;
+// Extra time to wait for the new page's game lists (Suspense skeletons) to resolve,
+// so the transition lands on content instead of placeholders.
+const CONTENT_WAIT_MS = 800;
 
 let token = 0;
 let replaying = false;
@@ -43,12 +50,24 @@ function shownRoute(): string | null {
   return shownPage()?.route ?? null;
 }
 
+// True while the shown page still has loading skeletons (see GridSkeleton).
+function isLoading(): boolean {
+  const shown = Array.from(document.querySelectorAll<HTMLElement>("main[data-route]")).find((el) =>
+    el.checkVisibility(),
+  );
+  return !!shown?.querySelector("[data-skeleton]");
+}
+
 function whenShown(path: string): Promise<void> {
   return new Promise((resolve) => {
     const started = performance.now();
+    let shownAt = 0;
     // Rendering is paused inside a transition callback, so poll with timers.
     const poll = () => {
-      if (shownRoute() === path || performance.now() - started > GIVE_UP_MS) {
+      const now = performance.now();
+      if (!shownAt && shownRoute() === path) shownAt = now;
+      const ready = shownAt && (!isLoading() || now - shownAt > CONTENT_WAIT_MS);
+      if (ready || now - started > GIVE_UP_MS) {
         window.setTimeout(resolve, SETTLE_MS); // let layout effects and scroll settle
       } else {
         window.setTimeout(poll, 10);
@@ -60,7 +79,8 @@ function whenShown(path: string): Promise<void> {
 
 // Runs `go` (which must start the navigation to `path`) inside a view transition.
 export function withLobbyTransition(path: LobbyRoute, go: () => void) {
-  if (typeof document.startViewTransition !== "function" || reduceMotion()) {
+  // Already on that page (e.g. the sidebar's Home while on the lobby): nothing to swap.
+  if (typeof document.startViewTransition !== "function" || reduceMotion() || shownRoute() === path) {
     go();
     return;
   }

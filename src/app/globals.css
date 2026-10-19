@@ -514,3 +514,74 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
     opacity: 0;
   }
 }
+
+/* Game cards (GameCover): on hover / keyboard focus the cover lifts clearly
+   (-8px) while a deeper shadow with a cyan tint grows underneath. Transform,
+   opacity and box-shadow only, so nothing reflows. Only the cover moves (the
+   caption stays), the artwork zooms a hair inside its clipped frame and a play
+   badge fades in. Pointer devices only, so touch screens get no sticky hover;
+   with reduced motion nothing moves and only the static highlight remains.
+   The grid has no overflow clipping and 12px gaps, so the lift and shadow are
+   not cut off; the lifted card is raised above its neighbours. */
+.game-cover {
+  box-shadow: 0 6px 14px -8px rgb(0 0 0 / 0.55);
+}
+
+.game-play {
+  opacity: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .game-card:is(:hover, :focus-within),
+  .game-card:has(:focus-visible) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .game-card:is(:hover, :focus-within) .game-cover,
+  .game-card:has(:focus-visible) .game-cover {
+    box-shadow:
+      0 0 0 1px rgb(2 239 240 / 0.6),
+      0 18px 26px -12px rgb(0 0 0 / 0.65),
+      0 14px 30px -10px rgb(2 239 240 / 0.38);
+  }
+
+  .game-card:is(:hover, :focus-within) .game-play,
+  .game-card:has(:focus-visible) .game-play {
+    opacity: 1;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .game-cover {
+    transition:
+      transform 200ms ease-out,
+      box-shadow 200ms ease-out;
+  }
+
+  .game-art {
+    transition: transform 220ms ease-out;
+  }
+
+  .game-play {
+    transform: scale(0.85);
+    transition:
+      opacity 180ms ease-out,
+      transform 200ms ease-out;
+  }
+
+  .game-card:is(:hover, :focus-within) .game-cover,
+  .game-card:has(:focus-visible) .game-cover {
+    transform: translateY(-8px);
+  }
+
+  .game-card:is(:hover, :focus-within) .game-art,
+  .game-card:has(:focus-visible) .game-art {
+    transform: scale(1.04);
+  }
+
+  .game-card:is(:hover, :focus-within) .game-play,
+  .game-card:has(:focus-visible) .game-play {
+    transform: scale(1);
+  }
+}

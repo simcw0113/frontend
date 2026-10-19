@@ -6,8 +6,17 @@ export const siteConfig = {
   url: siteUrl.replace(/\/$/, ""),
 };
 
+const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
+
 export const apiConfig = {
-  baseUrl: (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, ""),
+  baseUrl: apiBaseUrl,
+  // Single switch for the game lists (src/lib/games.ts): true = static data from
+  // config/lobby.ts (automatic while there is no API address), false = the API.
+  // Replace the expression with a literal to force one or the other.
+  useStaticGames: !apiBaseUrl,
   loginPath: "/auth/login",
   registerPath: "/auth/register",
+  // TODO(API): placeholder. {category} is replaced by the slug ("slots", "trending-games");
+  // lang, provider, page and q are sent as query parameters.
+  categoryGamesPath: "/games/category/{category}",
 };

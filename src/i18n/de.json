@@ -4,6 +4,7 @@
   "loading": "Wird geladen",
   "skip": "Zum Inhalt springen",
   "menu": {
+    "home": "Startseite",
     "hide": "Menü ausblenden",
     "show": "Menü anzeigen"
   },
@@ -73,6 +74,8 @@
     "viewAll": "Alle anzeigen",
     "back": "Zurück",
     "noMatches": "Nichts passt zu dieser Suche.",
+    "empty": "Hier ist noch nichts.",
+    "loadError": "Die Spiele konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
     "promotions": "Aktionen",
     "showBanner": "Banner {n} anzeigen",
     "previous": "Vorheriges Bild",

@@ -4,6 +4,7 @@
   "loading": "Loading",
   "skip": "Skip to content",
   "menu": {
+    "home": "Home",
     "hide": "Hide menu",
     "show": "Show menu"
   },
@@ -73,6 +74,8 @@
     "viewAll": "View all",
     "back": "Back",
     "noMatches": "Nothing matches that search.",
+    "empty": "Nothing here yet.",
+    "loadError": "Could not load the games. Please try again later.",
     "promotions": "Promotions",
     "showBanner": "Show banner {n}",
     "previous": "Previous slide",

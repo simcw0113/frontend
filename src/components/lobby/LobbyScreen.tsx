@@ -1,31 +1,47 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { Suspense, use, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import type { AuthView } from "@/components/auth/AuthFormPanel";
 import { SignInDialog } from "@/components/SignInDialog";
 import { useI18n } from "@/components/I18nProvider";
 import { bannerSlides } from "@/config/banners";
 import { casinoCategories, defaultCasinoCategory, findCasinoCategory } from "@/config/categories";
-import { categoryGames } from "@/config/lobby";
 import { GameCover } from "@/components/lobby/GameCover";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { fill, localeChoices } from "@/i18n";
 import { toSlug } from "@/i18n/routing";
+import type { CategoryGamesResult } from "@/lib/games";
 import { animate, reduceMotion } from "@/lib/motion";
+import { setSidebarOpen, useSidebarOpen } from "@/lib/sidebarState";
 
 const PREVIEW_COUNT = 8;
+const NAV_ITEM =
+  "flex h-11 w-full items-center rounded-lg px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
+// Placeholders on a category page: about as many as a full list, so the page height
+// does not jump when the games arrive.
+const CATEGORY_SKELETON_COUNT = 16;
 const HOME_SCROLL_KEY = "lobby-home-scroll";
 
 
 export type LobbyFocus = "home" | "casino";
 
-export function LobbyScreen({ focus = "home", category }: { focus?: LobbyFocus; category?: string }) {
+// `games` holds one promise per category slug, started on the server (lib/games.ts)
+// and read here with use() inside <Suspense>, so the page shell shows at once.
+export function LobbyScreen({
+  focus = "home",
+  category,
+  games,
+}: {
+  focus?: LobbyFocus;
+  category?: string;
+  games: Record<string, Promise<CategoryGamesResult>>;
+}) {
   const [query, setQuery] = useState("");
   const [languageOpen, setLanguageOpen] = useState(false);
   const { locale, setLocale, t } = useI18n();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const sidebarOpen = useSidebarOpen();
   const [signInOpen, setSignInOpen] = useState(false);
   const [authView, setAuthView] = useState<AuthView>("login");
   const [cookiesOn, setCookiesOn] = useState(true);
@@ -61,6 +77,11 @@ export function LobbyScreen({ focus = "home", category }: { focus?: LobbyFocus; 
     setSidebarOpen((open) => !open);
   }
 
+  // The sidebar floats over the page below md: close it after choosing a page.
+  function closeSidebarOnSmallScreens() {
+    if (window.matchMedia("(max-width: 767px)").matches) setSidebarOpen(false);
+  }
+
   function dismissCookies() {
     setCookiesOn(false);
   }
@@ -71,7 +92,7 @@ export function LobbyScreen({ focus = "home", category }: { focus?: LobbyFocus; 
     id: item.slug,
     title: t.lobby[item.titleKey],
     href: `/casino/${item.slug}`,
-    games: (categoryGames[item.slug] ?? []).filter((game) => !needle || game.title.toLowerCase().includes(needle)),
+    games: games[item.slug],
   }));
   const route = focus === "home" ? "/" : `/casino/${casino.slug}`;
   const preview = focus === "home" && !needle;
@@ -125,14 +146,27 @@ export function LobbyScreen({ focus = "home", category }: { focus?: LobbyFocus; 
             inert={!sidebarOpen}
             className="lobby-aside flex h-full w-64 flex-col border-r border-white/10 bg-lobby p-3"
           >
+            <LobbyLink
+              href="/"
+              onGo={closeSidebarOnSmallScreens}
+              aria-current={focus === "home" ? "page" : undefined}
+              className={`${NAV_ITEM} mb-1 gap-3 ${focus === "home" ? "bg-brand/15 text-brand" : "hover:bg-white/10"}`}
+            >
+              <HomeIcon />
+              {t.menu.home}
+            </LobbyLink>
             <div className="relative" data-nav-item>
               <button
                 type="button"
                 aria-expanded={languageOpen}
+                aria-label={`${t.language.label}: ${t.language[locale]}`}
                 onClick={() => setLanguageOpen((open) => !open)}
-                className="flex h-11 w-full items-center justify-between rounded-lg px-3 text-sm font-medium hover:bg-white/10"
+                className={`${NAV_ITEM} justify-between hover:bg-white/10`}
               >
-                {t.language.label}: {t.language[locale]}
+                <span className="flex items-center gap-3">
+                  <GlobeIcon />
+                  {t.language[locale]}
+                </span>
                 <span aria-hidden="true" className={`inline-block transition-transform duration-300 ${languageOpen ? "rotate-180" : ""}`}>
                   ▾
                 </span>
@@ -195,15 +229,10 @@ export function LobbyScreen({ focus = "home", category }: { focus?: LobbyFocus; 
           {focus === "casino" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
           <div className="mt-6 space-y-8">
             {sections.map((section) => (
-              <CardRow
-                key={section.id}
-                title={section.title}
-                count={section.games.length}
-                href={focus === "home" ? section.href : undefined}
-              >
-                {(preview ? section.games.slice(0, PREVIEW_COUNT) : section.games).map((game) => (
-                  <GameCover key={game.id} game={game} fluid />
-                ))}
+              <CardRow key={section.id} title={section.title} href={focus === "home" ? section.href : undefined}>
+                <Suspense fallback={<GridSkeleton count={preview ? PREVIEW_COUNT : CATEGORY_SKELETON_COUNT} />}>
+                  <GameGrid promise={section.games} needle={needle} limit={preview ? PREVIEW_COUNT : undefined} />
+                </Suspense>
               </CardRow>
             ))}
           </div>
@@ -347,17 +376,7 @@ function Hero() {
   );
 }
 
-function CardRow({
-  title,
-  count,
-  href,
-  children,
-}: {
-  title: string;
-  count: number;
-  href?: string;
-  children: ReactNode;
-}) {
+function CardRow({ title, href, children }: { title: string; href?: string; children: ReactNode }) {
   const { t } = useI18n();
 
   return (
@@ -375,16 +394,64 @@ function CardRow({
           </LobbyLink>
         ) : null}
       </div>
-      {count === 0 ? (
-        <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-8 text-center text-sm text-muted">
-          {t.lobby.noMatches}
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
-          {children}
-        </div>
-      )}
+      {children}
     </section>
+  );
+}
+
+const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8";
+
+function Notice({ children }: { children: ReactNode }) {
+  return (
+    <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-8 text-center text-sm text-muted">{children}</p>
+  );
+}
+
+// The games of one category: the list, "nothing matches" for a search without
+// hits, "nothing here yet" for an empty category, or the error state.
+function GameGrid({ promise, needle, limit }: { promise: Promise<CategoryGamesResult>; needle: string; limit?: number }) {
+  const { t } = useI18n();
+  const result = use(promise);
+
+  if (result.error) return <Notice>{t.lobby.loadError}</Notice>;
+  if (result.games.length === 0) return <Notice>{t.lobby.empty}</Notice>;
+  const matches = result.games.filter((game) => !needle || game.title.toLowerCase().includes(needle));
+  if (matches.length === 0) return <Notice>{t.lobby.noMatches}</Notice>;
+
+  return (
+    <div className={GRID}>
+      {(limit ? matches.slice(0, limit) : matches).map((game) => (
+        <GameCover key={game.id} game={game} fluid />
+      ))}
+    </div>
+  );
+}
+
+function GridSkeleton({ count }: { count: number }) {
+  return (
+    <div className={GRID} aria-hidden="true" data-skeleton="">
+      {Array.from({ length: count }, (_, i) => (
+        <div key={i} className="aspect-[3/4] rounded-xl bg-white/5 motion-safe:animate-pulse" />
+      ))}
+    </div>
+  );
+}
+
+function HomeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 11 L12 4 L20 11" />
+      <path d="M6 10 V20 H10 V14 H14 V20 H18 V10" />
+    </svg>
+  );
+}
+
+function GlobeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M3.5 12 H20.5 M12 3.5 C9 7 9 17 12 20.5 M12 3.5 C15 7 15 17 12 20.5" />
+    </svg>
   );
 }
 
