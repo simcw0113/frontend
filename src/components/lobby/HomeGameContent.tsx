@@ -57,7 +57,7 @@ export function HomeGameContent({
       </div>
       {home && partners ? (
         <div className="mt-10 empty:hidden">
-          <Suspense fallback={<PartnersSkeleton />}>
+          <Suspense fallback={<PartnersSkeleton />}> 
             <Partners promise={partners} />
           </Suspense>
         </div>
