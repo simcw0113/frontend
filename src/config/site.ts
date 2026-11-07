@@ -30,7 +30,7 @@ export const apiConfig = {
   useStaticPlayerGames: !apiBaseUrl,
   // Same switch for the game page's launch URL (src/lib/gameLaunch.ts): true = TEST_GAME_URL.
   useStaticGameLaunch: !apiBaseUrl,
-  loginPath: "/auth/login",
+  loginPath: "/signin",
   registerPath: "/auth/register",
   // TODO(API): placeholder. {category} is replaced by the slug ("slots", "trending-games");
   // lang, provider, page and q are sent as query parameters.

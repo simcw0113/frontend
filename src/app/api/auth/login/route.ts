@@ -15,9 +15,11 @@ function errorJson(message: string, status: number, code?: ApiError["code"]) {
 }
 
 // POST /api/auth/login
-// Forwards credentials to the backend login endpoint, then stores the returned
-// token in an HttpOnly; Secure; SameSite=Lax cookie. The token is never sent
-// back in the JSON body, so client JavaScript cannot read it.
+// Forwards { username, password } to the backend sign-in endpoint
+// (apiConfig.loginPath, POST /api/signin), then stores the returned token in
+// an HttpOnly; Secure; SameSite=Lax cookie. The token is never sent back in
+// the JSON body, so client JavaScript cannot read it. `remember` is only used
+// for the cookie maxAge and is not sent to the backend.
 export async function POST(request: Request) {
   let body: LoginBody;
   try {
@@ -39,7 +41,7 @@ export async function POST(request: Request) {
       method: "POST",
       auth: false,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password, remember }),
+      body: JSON.stringify({ username, password }),
       cache: "no-store",
     });
 
