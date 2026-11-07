@@ -1,5 +1,4 @@
 import { apiConfig } from "@/config/site";
-import { getAuthToken } from "@/lib/token";
 
 type ApiOptions = RequestInit & {
   auth?: boolean;
@@ -55,7 +54,8 @@ export function readApiMessage(payload: unknown): string | null {
 }
 
 export async function apiFetch(path: string, init: ApiOptions = {}) {
-  const { auth = true, headers: initHeaders, ...rest } = init;
+  const { headers: initHeaders, ...rest } = init;
+  delete (rest as { auth?: boolean }).auth;
 
   if (!apiConfig.baseUrl) {
     throw new ApiError("The API address is not configured yet.", 0, "api_unconfigured");
@@ -64,12 +64,9 @@ export async function apiFetch(path: string, init: ApiOptions = {}) {
   const headers = new Headers(initHeaders);
   if (!headers.has("Accept")) headers.set("Accept", "application/json");
 
-  if (auth) {
-    const token = getAuthToken();
-    if (token && !headers.has("Authorization")) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
-  }
+  // The auth token lives in an HttpOnly cookie (set by /api/auth/login). Client
+  // JavaScript cannot read it; server callers that need auth pass
+  // `Authorization: Bearer <token>` themselves after reading the cookie.
 
   const url = path.startsWith("http")
     ? path

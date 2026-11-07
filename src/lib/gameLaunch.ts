@@ -7,10 +7,10 @@ import { useStaticData as isStaticData } from "@/lib/apiMode";
 // used as it is (only the local demo public/demo-game.html gets ?name=). Server only.
 //
 // Per player and per session, so NOT cached (no "use cache", fetch with cache: "no-store").
-// TODO(API): the token lives in localStorage today (lib/token.ts), which the server cannot
-// read. Once it is an httpOnly cookie, read it in the page and pass it as `token` (sent as
-// `Authorization: Bearer <token>`). Without a token the API is not called and the page asks
-// the guest to sign in (Register); a provider "demo" launch for guests could replace that.
+// The token is an HttpOnly cookie (set by /api/auth/login). The page reads it with
+// getAuthTokenFromCookie() and passes it as `token` (sent as `Authorization: Bearer <token>`).
+// Without a token the API is not called and the page asks the guest to sign in (Register);
+// a provider "demo" launch for guests could replace that.
 
 export type GameLaunch = { url: string } | { error: "signin" | "failed" };
 

@@ -10,10 +10,10 @@ import { mapResponse, type CategoryGamesDto, type CategoryGamesResult, type Game
 //
 // User-specific, so NOT cached: no "use cache", fetch with cache: "no-store". The pages pass
 // the promise to the lobby, which streams it behind <Suspense> (skeleton, then the grid).
-// TODO(API): the token lives in localStorage today (lib/token.ts), which the server cannot
-// read. Once it is an httpOnly cookie, read it in the page (cookies(), inside the promise
-// chain) and pass it as `token`; it is sent as `Authorization: Bearer <token>`. Without a
-// token the API is not called and the list is empty (the page shows the empty state).
+// The token is an HttpOnly cookie (set by /api/auth/login). Pages read it with
+// getAuthTokenFromCookie() and pass it as `token`; it is sent as
+// `Authorization: Bearer <token>`. Without a token the API is not called and the
+// list is empty (the page shows the empty state).
 
 export type PlayerGamesOptions = {
   lang: string; // URL language slug: en | cn | de | es

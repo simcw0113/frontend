@@ -1,6 +1,6 @@
 import { apiConfig } from "@/config/site";
-import { ApiError, apiJson, extractAuthToken } from "@/lib/api";
-import { saveAuthToken } from "@/lib/token";
+import { ApiError, apiJson, type ApiErrorCode } from "@/lib/api";
+import { markSignedIn } from "@/lib/token";
 
 export type LoginInput = {
   /** Username, email or phone number, exactly as typed (trimmed by the caller). */
@@ -9,34 +9,51 @@ export type LoginInput = {
   remember: boolean;
 };
 
-// TODO(API): the login endpoint does not exist yet. While this is true, sign-in
-// is a local stub: no network request, no token saved. Set it to false (or
-// delete the stub branch below) once the API address is configured.
-const MOCK_LOGIN = true;
+const ERROR_CODES: ReadonlySet<string> = new Set([
+  "api_unconfigured",
+  "api_unexpected",
+  "api_failed",
+  "token_missing",
+]);
 
-const MOCK_LATENCY_MS = 700;
+function asErrorCode(value: unknown): ApiErrorCode | undefined {
+  return typeof value === "string" && ERROR_CODES.has(value) ? (value as ApiErrorCode) : undefined;
+}
 
 export async function loginWithPassword({ identifier, password, remember }: LoginInput) {
-  if (MOCK_LOGIN) {
-    await new Promise((resolve) => setTimeout(resolve, MOCK_LATENCY_MS));
-    return;
+  let response: Response;
+  try {
+    response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({ username: identifier, password, remember }),
+    });
+  } catch {
+    throw new ApiError("Could not reach the API.", 0);
   }
 
-  // TODO(API): confirm the request field names and how `remember` should
-  // affect token storage (persistent vs session) with the backend contract.
-  const payload = await apiJson(apiConfig.loginPath, {
-    method: "POST",
-    auth: false,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: identifier, password, remember }),
-  });
-
-  const token = extractAuthToken(payload);
-  if (!token) {
-    throw new ApiError("The sign-in response did not include a token.", 200, "token_missing");
+  const text = await response.text();
+  let payload: unknown = null;
+  if (text) {
+    try {
+      payload = JSON.parse(text) as unknown;
+    } catch {
+      throw new ApiError("The API returned an unexpected response.", response.status, "api_unexpected");
+    }
   }
 
-  saveAuthToken(token);
+  if (!response.ok) {
+    const record = payload && typeof payload === "object" ? (payload as { message?: unknown; code?: unknown }) : {};
+    throw new ApiError(
+      typeof record.message === "string" && record.message.trim()
+        ? record.message.trim()
+        : "The request could not be completed.",
+      response.status,
+      asErrorCode(record.code) ?? (record.message ? undefined : "api_failed"),
+    );
+  }
+
+  markSignedIn();
 }
 
 export type RegisterInput = {
@@ -54,6 +71,8 @@ export type RegisterInput = {
 // registering is a local stub: no network request, no account, no token saved.
 const MOCK_REGISTER = true;
 
+const MOCK_LATENCY_MS = 700;
+
 export async function registerAccount(input: RegisterInput) {
   if (MOCK_REGISTER) {
     await new Promise((resolve) => setTimeout(resolve, MOCK_LATENCY_MS));
@@ -61,15 +80,14 @@ export async function registerAccount(input: RegisterInput) {
   }
 
   // TODO(API): confirm the request fields with the backend contract.
+  // After register, the token should be stored by a route handler in the same
+  // HttpOnly cookie as login — never written to localStorage.
   const identity =
     input.method === "email" ? { email: input.email } : { phone: `+${input.countryDial}${input.phone}` };
-  const payload = await apiJson(apiConfig.registerPath, {
+  await apiJson(apiConfig.registerPath, {
     method: "POST",
     auth: false,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...identity, password: input.password, referral: input.referral || undefined }),
   });
-
-  const token = extractAuthToken(payload);
-  if (token) saveAuthToken(token);
 }

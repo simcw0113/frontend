@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LobbyScreen } from "@/components/lobby/LobbyScreen";
 import { dictionaries } from "@/i18n";
 import { fromSlug, isSlug, languageAlternates, localizedPath } from "@/i18n/routing";
+import { getAuthTokenFromCookie } from "@/lib/authCookie";
 import { getRecentGames } from "@/lib/playerGames";
 
 const PATH = "/recent";
@@ -24,8 +25,10 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/recent">):
 // The lobby shell (header, sidebar, title bar, footer) with the game grid. `params` is not
 // awaited here (Instant navigation: URL data stays out of the shared App Shell); the list is a
 // promise chained on it, streamed through <Suspense> (skeleton until it resolves).
-// TODO(API): pass the signed-in player's token once it is readable on the server (lib/playerGames.ts).
 export default function RecentGamesPage({ params }: PageProps<"/[lang]/recent">) {
-  const games = params.then(({ lang }) => getRecentGames({ lang }));
+  const games = params.then(async ({ lang }) => {
+    const token = await getAuthTokenFromCookie();
+    return getRecentGames({ lang, token });
+  });
   return <LobbyScreen focus="recent" games={{}} playerGames={games} />;
 }

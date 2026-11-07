@@ -1,0 +1,66 @@
+import { NextResponse } from "next/server";
+import { apiConfig } from "@/config/site";
+import { ApiError, apiJson, extractAuthToken } from "@/lib/api";
+import { authCookieOptions } from "@/lib/authCookie";
+import { AUTH_TOKEN_KEY } from "@/lib/token";
+
+type LoginBody = {
+  username?: unknown;
+  password?: unknown;
+  remember?: unknown;
+};
+
+function errorJson(message: string, status: number, code?: ApiError["code"]) {
+  return NextResponse.json({ message, code }, { status });
+}
+
+// POST /api/auth/login
+// Forwards credentials to the backend login endpoint, then stores the returned
+// token in an HttpOnly; Secure; SameSite=Lax cookie. The token is never sent
+// back in the JSON body, so client JavaScript cannot read it.
+export async function POST(request: Request) {
+  let body: LoginBody;
+  try {
+    body = (await request.json()) as LoginBody;
+  } catch {
+    return errorJson("The request could not be completed.", 400, "api_failed");
+  }
+
+  const username = typeof body.username === "string" ? body.username.trim() : "";
+  const password = typeof body.password === "string" ? body.password : "";
+  const remember = body.remember === true;
+
+  if (!username || !password) {
+    return errorJson("The request could not be completed.", 400, "api_failed");
+  }
+
+  try {
+    const payload = await apiJson(apiConfig.loginPath, {
+      method: "POST",
+      auth: false,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password, remember }),
+      cache: "no-store",
+    });
+
+    const token = extractAuthToken(payload);
+    if (!token) {
+      return errorJson("The sign-in response did not include a token.", 502, "token_missing");
+    }
+
+    const response = NextResponse.json({ ok: true });
+    response.cookies.set(AUTH_TOKEN_KEY, token, authCookieOptions(remember));
+    return response;
+  } catch (cause) {
+    if (cause instanceof ApiError) {
+      const status =
+        cause.status >= 400 && cause.status < 600
+          ? cause.status
+          : cause.code === "api_unconfigured"
+            ? 503
+            : 502;
+      return errorJson(cause.message, status, cause.code);
+    }
+    return errorJson("The request could not be completed.", 502, "api_failed");
+  }
+}

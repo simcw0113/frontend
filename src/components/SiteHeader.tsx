@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/components/I18nProvider";
 import { siteConfig } from "@/config/site";
-import { AUTH_TOKEN_EVENT, clearAuthToken, getAuthToken } from "@/lib/token";
+import { AUTH_TOKEN_EVENT, clearAuthToken, isSignedIn } from "@/lib/token";
 
 export function SiteHeader() {
   const [signedIn, setSignedIn] = useState(false);
   const { href } = useI18n();
 
   useEffect(() => {
-    const sync = () => setSignedIn(Boolean(getAuthToken()));
+    const sync = () => setSignedIn(isSignedIn());
     sync();
     window.addEventListener(AUTH_TOKEN_EVENT, sync);
     window.addEventListener("storage", sync);

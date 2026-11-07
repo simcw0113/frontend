@@ -7,7 +7,7 @@ import type { PromotionIcon } from "@/config/promotions";
 import { fill, htmlLang } from "@/i18n";
 import type { Promotion, PromotionsResult } from "@/lib/promotions";
 import { animate, reduceMotion } from "@/lib/motion";
-import { AUTH_TOKEN_EVENT, getAuthToken } from "@/lib/token";
+import { AUTH_TOKEN_EVENT, isSignedIn } from "@/lib/token";
 
 // Promotions page (/{lang}/promotions): header bar, a grid of promo cards and a detail pop-up.
 // "Learn More" opens the pop-up and puts ?promo=<id> in the URL (replaceState), so a link
@@ -290,7 +290,7 @@ function PromoModal({
   useLayoutEffect(() => {
     onCloseRef.current = onClose;
   });
-  const loggedIn = useSyncExternalStore(subscribeAuth, () => Boolean(getAuthToken()), () => false);
+  const loggedIn = useSyncExternalStore(subscribeAuth, () => isSignedIn(), () => false);
   const open = promo !== null;
 
   function requestClose() {

@@ -6,6 +6,7 @@ import { findCasinoCategory } from "@/config/categories";
 import { gameCatalog } from "@/config/gameCatalog";
 import { categoryGames } from "@/config/lobby";
 import { getGameDetails } from "@/lib/games";
+import { getAuthTokenFromCookie } from "@/lib/authCookie";
 import { getGameLaunch } from "@/lib/gameLaunch";
 import { isSlug, languageAlternates, localizedPath } from "@/i18n/routing";
 
@@ -45,8 +46,8 @@ export default function GamePage({ params }: Props) {
   const game = params.then(async ({ lang, category, id }) => {
     const details = findCasinoCategory(category) ? await getGameDetails(category, id, { lang }) : null;
     if (!details) return null;
-    // TODO(API): pass the signed-in player's token once it is readable on the server.
-    const launch = await getGameLaunch({ id, name: details.game.title, lang });
+    const token = await getAuthTokenFromCookie();
+    const launch = await getGameLaunch({ id, name: details.game.title, lang, token });
     return { ...details, launch };
   });
   return (
