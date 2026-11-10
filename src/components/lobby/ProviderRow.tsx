@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/components/I18nProvider";
-import { providers, type Provider } from "@/config/providers";
+import type { Provider } from "@/config/providers";
 
 // Heading + "All" reset on one line, then one horizontally scrollable row of
 // pills. Scrollbar hidden; pills are real buttons, so the row scrolls with the
@@ -9,11 +9,15 @@ import { providers, type Provider } from "@/config/providers";
 export function ProviderRow({
   selected,
   onSelect,
+  providers,
 }: {
   selected: string | null;
   onSelect: (id: string | null) => void;
+  providers: Provider[];
 }) {
   const { t } = useI18n();
+
+  if (providers.length === 0) return null;
 
   return (
     <section aria-labelledby="provider-heading" className="mt-5">
@@ -67,13 +71,18 @@ function ProviderPill({
           : "border-white/10 bg-white/[0.07] text-white hover:border-brand/60 hover:bg-white/10"
       }`}
     >
-      <span
-        aria-hidden="true"
-        className="grid size-7 place-items-center rounded-full text-[0.6875rem] leading-none font-black tracking-tight"
-        style={{ color: provider.accent, backgroundColor: `color-mix(in srgb, ${provider.accent} 20%, #081a1f)` }}
-      >
-        {provider.mark}
-      </span>
+      {provider.image ? (
+        // eslint-disable-next-line @next/next/no-img-element -- provider logos come from any API host
+        <img src={provider.image} alt="" className="size-7 rounded-full object-cover bg-white/10" />
+      ) : (
+        <span
+          aria-hidden="true"
+          className="grid size-7 place-items-center rounded-full text-[0.6875rem] leading-none font-black tracking-tight"
+          style={{ color: provider.accent, backgroundColor: `color-mix(in srgb, ${provider.accent} 20%, #081a1f)` }}
+        >
+          {provider.mark}
+        </span>
+      )}
       {provider.name}
     </button>
   );

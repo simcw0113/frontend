@@ -23,7 +23,8 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
     if (pending) return;
 
     const trimmed = identifier.trim();
-    const errors = { identifier: !trimmed, password: !password };
+    // Email is not a sign-in identity. "@" is rejected before the request.
+    const errors = { identifier: !trimmed || trimmed.includes("@"), password: !password };
     setFieldErrors(errors);
     setError(null);
     if (errors.identifier || errors.password) {

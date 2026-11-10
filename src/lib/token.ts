@@ -16,9 +16,12 @@ export function markSignedIn() {
   window.dispatchEvent(new Event(AUTH_TOKEN_EVENT));
 }
 
-export function clearAuthToken() {
+export async function clearAuthToken() {
   window.localStorage.removeItem(AUTH_SIGNED_IN_KEY);
   window.localStorage.removeItem(AUTH_TOKEN_KEY);
-  window.dispatchEvent(new Event(AUTH_TOKEN_EVENT));
-  void fetch("/api/auth/logout", { method: "POST" });
+  try {
+    await fetch("/api/auth/logout", { method: "POST", cache: "no-store" });
+  } finally {
+    window.dispatchEvent(new Event(AUTH_TOKEN_EVENT));
+  }
 }

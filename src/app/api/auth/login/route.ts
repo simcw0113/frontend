@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiConfig } from "@/config/site";
-import { ApiError, apiJson, extractAuthToken } from "@/lib/api";
+import { ApiError, apiJson, extractAuthToken, isApiStatusFailure, readApiMessage } from "@/lib/api";
 import { authCookieOptions } from "@/lib/authCookie";
 import { AUTH_TOKEN_KEY } from "@/lib/token";
 
@@ -16,10 +16,11 @@ function errorJson(message: string, status: number, code?: ApiError["code"]) {
 
 // POST /api/auth/login
 // Forwards { username, password } to the backend sign-in endpoint
-// (apiConfig.loginPath, POST /api/signin), then stores the returned token in
-// an HttpOnly; Secure; SameSite=Lax cookie. The token is never sent back in
-// the JSON body, so client JavaScript cannot read it. `remember` is only used
-// for the cookie maxAge and is not sent to the backend.
+// (apiConfig.loginPath, POST /api/signin). Username and phone both go in
+// `username`; the backend matches either. Email is not accepted.
+// The returned token is stored in an HttpOnly; Secure; SameSite=Lax cookie
+// and is never sent back in the JSON body.
+// `remember` is only used for the cookie maxAge and is not sent to the backend.
 export async function POST(request: Request) {
   let body: LoginBody;
   try {
@@ -28,11 +29,11 @@ export async function POST(request: Request) {
     return errorJson("The request could not be completed.", 400, "api_failed");
   }
 
-  const username = typeof body.username === "string" ? body.username.trim() : "";
+  const identifier = typeof body.username === "string" ? body.username.trim() : "";
   const password = typeof body.password === "string" ? body.password : "";
   const remember = body.remember === true;
 
-  if (!username || !password) {
+  if (!identifier || identifier.includes("@") || !password) {
     return errorJson("The request could not be completed.", 400, "api_failed");
   }
 
@@ -41,9 +42,13 @@ export async function POST(request: Request) {
       method: "POST",
       auth: false,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username: identifier, password }),
       cache: "no-store",
     });
+
+    if (isApiStatusFailure(payload)) {
+      return errorJson(readApiMessage(payload) ?? "The request could not be completed.", 401);
+    }
 
     const token = extractAuthToken(payload);
     if (!token) {

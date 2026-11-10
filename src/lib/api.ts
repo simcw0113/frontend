@@ -42,6 +42,10 @@ export function extractAuthToken(payload: unknown): string | null {
   return null;
 }
 
+export function isApiStatusFailure(payload: unknown): boolean {
+  return Boolean(payload && typeof payload === "object" && (payload as { status?: unknown }).status === false);
+}
+
 export function readApiMessage(payload: unknown): string | null {
   if (!payload || typeof payload !== "object") return null;
   const message = (payload as { message?: unknown }).message;

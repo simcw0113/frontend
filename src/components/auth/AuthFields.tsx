@@ -58,6 +58,7 @@ export function TextField({
   inputMode,
   maxLength,
   autofocus,
+  autoCapitalize = "none",
 }: TextFieldProps & {
   name: string;
   type?: "text" | "email" | "tel";
@@ -65,6 +66,7 @@ export function TextField({
   inputMode?: "text" | "email" | "tel" | "numeric";
   maxLength?: number;
   autofocus?: boolean;
+  autoCapitalize?: "none" | "words";
 }) {
   return (
     <Field id={id} label={label} error={error}>
@@ -74,7 +76,7 @@ export function TextField({
         type={type}
         inputMode={inputMode}
         autoComplete={autoComplete}
-        autoCapitalize="none"
+        autoCapitalize={autoCapitalize}
         autoCorrect="off"
         spellCheck={false}
         maxLength={maxLength}
@@ -97,13 +99,14 @@ export function IdentifierField(props: TextFieldProps) {
 
 export function PasswordField({
   id,
+  name = "password",
   label,
   value,
   onChange,
   error,
   busy,
   autoComplete = "current-password",
-}: TextFieldProps & { autoComplete?: "current-password" | "new-password" }) {
+}: TextFieldProps & { name?: string; autoComplete?: "current-password" | "new-password" }) {
   const { t } = useI18n();
   const [visible, setVisible] = useState(false);
 
@@ -112,7 +115,7 @@ export function PasswordField({
       <div className="relative">
         <input
           id={id}
-          name="password"
+          name={name}
           type={visible ? "text" : "password"}
           autoComplete={autoComplete}
           autoCapitalize="none"

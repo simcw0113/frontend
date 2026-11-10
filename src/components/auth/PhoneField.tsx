@@ -16,6 +16,7 @@ export function PhoneField({
   onChange,
   error,
   busy,
+  autofocus,
 }: {
   id: string;
   label: string;
@@ -25,6 +26,7 @@ export function PhoneField({
   onChange: (digits: string) => void;
   error?: string | null;
   busy?: boolean;
+  autofocus?: boolean;
 }) {
   const { t } = useI18n();
 
@@ -63,7 +65,7 @@ export function PhoneField({
           readOnly={busy}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${id}-error` : undefined}
-          data-autofocus
+          data-autofocus={autofocus ? "" : undefined}
           onChange={(event) => onChange(event.target.value.replace(/\D/g, ""))}
           className={`${fieldClass} ${borderFor(error)} min-w-0 flex-1`}
         />

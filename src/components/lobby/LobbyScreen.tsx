@@ -15,6 +15,7 @@ import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { GiftIcon, PromotionsGrid, PromotionsHeader, PromotionsSkeleton } from "@/components/lobby/Promotions";
 import { LuckyPick } from "@/components/lobby/LuckyPick";
 import { GameView, GameViewSkeleton, type GamePageData } from "@/components/lobby/GameView";
+import { ProviderGames, ProviderGamesSkeleton } from "@/components/lobby/ProviderGames";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { SearchModal } from "@/components/lobby/SearchModal";
 import { ComingSoonHeader, TopNav } from "@/components/lobby/TopNav";
@@ -23,11 +24,14 @@ import { PlayerGameList } from "@/components/lobby/HomeGameContent";
 import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
 import { fill, localeChoices } from "@/i18n";
 import { toSlug } from "@/i18n/routing";
+import type { Provider } from "@/config/providers";
 import type { CategoryGamesResult } from "@/lib/games";
+import { providersForCategory } from "@/lib/lobbyApi";
 import type { PartnersResult } from "@/lib/partners";
 import type { PromotionsResult } from "@/lib/promotions";
 import type { TopWinsResult } from "@/lib/topWins";
 import { animate, reduceMotion } from "@/lib/motion";
+import { useSession } from "@/lib/useSession";
 import { setDrawerOpen, setSidebarOpen, useDrawerOpen, useSidebarOpen, useSidebarRail } from "@/lib/sidebarState";
 
 // px-[14px] keeps the 20px icon centred in the 72px rail (12px aside padding + 14px), so the
@@ -77,8 +81,36 @@ export function LobbyScreen({
   const drawerToggleRef = useRef<HTMLButtonElement>(null);
   const [signInOpen, setSignInOpen] = useState(false);
   const [authView, setAuthView] = useState<AuthView>("login");
+  const { user, signOut } = useSession();
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef<HTMLDivElement>(null);
   const [cookiesOn, setCookiesOn] = useState(true);
   const [provider, setProvider] = useState<string | null>(null);
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [providersStatus, setProvidersStatus] = useState<"loading" | "ready" | "error">("loading");
+  // Casino category where the player clicked "All". Cleared on leaving that page so the
+  // next visit starts on the first provider again.
+  const [allSlug, setAllSlug] = useState<string | null>(null);
+  const [trackedSlug, setTrackedSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setProvidersStatus("loading");
+    fetch(`/api/lobby/products?locale=${locale}`, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("failed");
+        return (await response.json()) as { providers?: Provider[] };
+      })
+      .then((payload) => {
+        setProviders(Array.isArray(payload.providers) ? payload.providers : []);
+        setProvidersStatus("ready");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setProvidersStatus("error");
+      });
+    return () => controller.abort();
+  }, [locale]);
 
   // The router may keep the lobby mounted while a "View all" page is open and
   // show it again on the way back. Put the scroll position where it was before
@@ -140,6 +172,23 @@ export function LobbyScreen({
     return () => window.removeEventListener("keydown", onKey);
   }, [drawerOpen, rail, searchOpen, signInOpen]);
 
+  useEffect(() => {
+    if (!accountOpen) return;
+    function onPointerDown(event: PointerEvent) {
+      if (accountRef.current?.contains(event.target as Node)) return;
+      setAccountOpen(false);
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setAccountOpen(false);
+    }
+    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [accountOpen]);
+
   function dismissCookies() {
     setCookiesOn(false);
   }
@@ -155,6 +204,34 @@ export function LobbyScreen({
   const route = focus === "game" ? `${navRoute}/game/${params?.id ?? ""}` : navRoute;
   const gamesPage = focus === "home" || focus === "casino";
   const playerPage = focus === "recent" || focus === "favourites";
+  const casinoSlug = focus === "casino" ? casino.slug : null;
+  // A new casino category starts with no pick, so the first provider is selected below.
+  // Leaving the casino page forgets an "All" click, so the next visit does the same.
+  if (casinoSlug && trackedSlug !== casinoSlug) {
+    setTrackedSlug(casinoSlug);
+    setProvider(null);
+    setAllSlug(null);
+  } else if (!casinoSlug && allSlug) {
+    setAllSlug(null);
+  }
+  const visibleProviders = providersForCategory(providers, casinoSlug ?? undefined);
+  const providerInList = provider != null && visibleProviders.some((item) => item.id === provider);
+  const explicitAll = casinoSlug != null && allSlug === casinoSlug && provider === null;
+  // Casino pages open on the first provider and load its games. Home stays on All
+  // until the player picks one. "All" is only the view they asked for on this visit.
+  const activeProvider = casinoSlug
+    ? providerInList
+      ? provider
+      : explicitAll
+        ? null
+        : (visibleProviders[0]?.id ?? null)
+    : gamesPage && providerInList
+      ? provider
+      : null;
+  function selectProvider(id: string | null) {
+    setProvider(id);
+    setAllSlug(id === null && casinoSlug ? casinoSlug : null);
+  }
   const sideGroups: { path: string; label: string; Icon: () => ReactNode }[][] = [
     [
       { path: "/", label: t.menu.home, Icon: HomeIcon },
@@ -316,26 +393,60 @@ export function LobbyScreen({
         </h1>
         <TopNav route={navRoute} />
         <div className="ml-auto flex h-16 shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setAuthView("login");
-              setSignInOpen(true);
-            }}
-            className="rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap hover:bg-white/10"
-          >
-            {t.auth.signIn}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setAuthView("register");
-              setSignInOpen(true);
-            }}
-            className="join-glow rounded-lg bg-brand px-3.5 py-2 text-sm font-extrabold tracking-wide whitespace-nowrap text-lobby uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            {t.auth.joinUs}
-          </button>
+          {user?.username ? (
+            <div className="relative" ref={accountRef}>
+              <button
+                type="button"
+                aria-expanded={accountOpen}
+                aria-haspopup="menu"
+                onClick={() => setAccountOpen((open) => !open)}
+                className="rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap hover:bg-white/10"
+              >
+                {user.username}
+              </button>
+              {accountOpen ? (
+                <div
+                  role="menu"
+                  className="absolute right-0 z-50 mt-1 min-w-full rounded-lg border border-white/10 bg-lobby p-1 shadow-lg"
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setAccountOpen(false);
+                      void signOut();
+                    }}
+                    className="block w-full rounded-md px-3 py-2 text-left text-sm font-semibold whitespace-nowrap hover:bg-white/10"
+                  >
+                    {t.auth.signOut}
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthView("login");
+                  setSignInOpen(true);
+                }}
+                className="rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap hover:bg-white/10"
+              >
+                {t.auth.signIn}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthView("register");
+                  setSignInOpen(true);
+                }}
+                className="join-glow rounded-lg bg-brand px-3.5 py-2 text-sm font-extrabold tracking-wide whitespace-nowrap text-lobby uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                {t.auth.joinUs}
+              </button>
+            </>
+          )}
         </div>
       </header>
 
@@ -431,13 +542,21 @@ export function LobbyScreen({
             ) : null
           ) : gamesPage ? (
             <>
-              {focus === "casino" ? <ProviderRow selected={provider} onSelect={setProvider} /> : null}
-              {focus === "casino" && casino.luckyPick && luckyGames ? (
-                <Suspense fallback={null}>
-                  <LuckyPick promise={luckyGames} category={casino.slug} />
-                </Suspense>
-              ) : null}
-              <HomeGameContent focus={focus} category={casino} games={listGames} partners={partners} />
+              <ProviderRow selected={activeProvider} onSelect={selectProvider} providers={visibleProviders} />
+              {activeProvider ? (
+                <ProviderGames code={activeProvider} category={casino.slug} />
+              ) : focus === "casino" && providersStatus === "loading" ? (
+                <ProviderGamesSkeleton />
+              ) : (
+                <>
+                  {focus === "casino" && casino.luckyPick && luckyGames ? (
+                    <Suspense fallback={null}>
+                      <LuckyPick promise={luckyGames} category={casino.slug} />
+                    </Suspense>
+                  ) : null}
+                  <HomeGameContent focus={focus} category={casino} games={listGames} partners={partners} />
+                </>
+              )}
             </>
           ) : null}
           <LobbyFooter />

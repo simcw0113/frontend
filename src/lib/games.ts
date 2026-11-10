@@ -47,7 +47,7 @@ export type CategoryGamesDto = {
 
 export type CategoryGamesOptions = {
   lang: string; // URL language slug: en | cn | de | es
-  provider?: string; // provider id from config/providers.ts
+  provider?: string; // product code from the game list API
   page?: number; // 1-based
   q?: string; // server-side search text (the lobby filters client-side for now)
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useRef, useState } from "react";
 import { PasswordField, TextField, fieldClass, borderFor } from "@/components/auth/AuthFields";
 import { ChevronIcon } from "@/components/auth/icons";
 import { PhoneField } from "@/components/auth/PhoneField";
@@ -10,22 +10,41 @@ import { countries, DEFAULT_COUNTRY } from "@/config/countries";
 import { ApiError } from "@/lib/api";
 import { registerAccount } from "@/lib/auth";
 
-type Method = "email" | "phone";
-type Errors = { email?: boolean; phone?: boolean; password?: boolean; agree?: boolean };
+type Errors = {
+  username?: boolean;
+  password?: boolean;
+  confirm?: boolean;
+  phone?: boolean;
+  realName?: boolean;
+  agree?: boolean;
+};
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Matches the backend member create rules: username /^[a-zA-Z0-9_-]+$/ (6–20),
+// full_name letters/spaces/apostrophes, password min 6 (kept at 8 here).
+const USERNAME_PATTERN = /^[A-Za-z0-9_-]{6,20}$/;
+const REAL_NAME_PATTERN = /^[A-Za-z]+(?:[ '][A-Za-z]+)*$/;
 const PHONE_MIN = 6;
 const PHONE_MAX = 12;
 const PASSWORD_MIN = 8;
 
+const FOCUS_NAME: Record<keyof Errors, string> = {
+  username: "username",
+  password: "password",
+  confirm: "confirm",
+  phone: "phone",
+  realName: "realName",
+  agree: "agree",
+};
+
 export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter();
   const { t, href } = useI18n();
-  const [method, setMethod] = useState<Method>("email");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+  const [realName, setRealName] = useState("");
   const [referralOpen, setReferralOpen] = useState(false);
   const [referral, setReferral] = useState("");
   const [agree, setAgree] = useState(false);
@@ -33,56 +52,43 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const tabRefs = useRef<Record<Method, HTMLButtonElement | null>>({ email: null, phone: null });
 
   const clear = (key: keyof Errors) => {
     if (errors[key]) setErrors((current) => ({ ...current, [key]: false }));
   };
-
-  function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    const order: Method[] = ["email", "phone"];
-    const index = order.indexOf(method);
-    let next = index;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (index + 1) % order.length;
-    else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (index - 1 + order.length) % order.length;
-    else if (event.key === "Home") next = 0;
-    else if (event.key === "End") next = order.length - 1;
-    else return;
-    event.preventDefault();
-    setMethod(order[next]);
-    tabRefs.current[order[next]]?.focus();
-  }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending) return;
 
     const next: Errors = {
-      email: method === "email" && !EMAIL_PATTERN.test(email.trim()),
-      phone: method === "phone" && (phone.length < PHONE_MIN || phone.length > PHONE_MAX),
+      username: !USERNAME_PATTERN.test(username.trim()),
       password: password.length < PASSWORD_MIN,
+      confirm: confirm !== password,
+      phone: phone.length < PHONE_MIN || phone.length > PHONE_MAX,
+      realName: !REAL_NAME_PATTERN.test(realName.trim()),
       agree: !agree,
     };
     setErrors(next);
     setError(null);
-    const first = (["email", "phone", "password", "agree"] as const).find((key) => next[key]);
+    const first = (Object.keys(FOCUS_NAME) as (keyof Errors)[]).find((key) => next[key]);
     if (first) {
-      const name = first === "agree" ? "agree" : first;
-      formRef.current?.querySelector<HTMLElement>(`[name="${name}"]`)?.focus();
+      formRef.current?.querySelector<HTMLElement>(`[name="${FOCUS_NAME[first]}"]`)?.focus();
       return;
     }
 
     setPending(true);
     try {
       await registerAccount({
-        method,
-        email: email.trim(),
+        username: username.trim(),
+        password,
         countryDial: countries.find((item) => item.iso === country)?.dial ?? "",
         phone,
-        password,
+        realName: realName.trim(),
         referral: referral.trim(),
       });
       setPassword("");
+      setConfirm("");
       if (onSuccess) onSuccess();
       else router.push(href("/"));
     } catch (cause) {
@@ -94,78 +100,24 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
     }
   }
 
-  const tabs: { id: Method; label: string }[] = [
-    { id: "email", label: t.auth.emailAddress },
-    { id: "phone", label: t.auth.phoneNumber },
-  ];
-
   return (
     <form ref={formRef} onSubmit={onSubmit} noValidate aria-busy={pending} className="space-y-4">
-      <div
-        role="tablist"
-        aria-label={t.auth.registerWith}
-        className="grid grid-cols-2 gap-1 rounded-xl bg-lobby p-1"
-      >
-        {tabs.map((tab) => {
-          const selected = method === tab.id;
-          return (
-            <button
-              key={tab.id}
-              ref={(node) => {
-                tabRefs.current[tab.id] = node;
-              }}
-              type="button"
-              role="tab"
-              id={`register-tab-${tab.id}`}
-              aria-selected={selected}
-              aria-controls="register-tabpanel"
-              tabIndex={selected ? 0 : -1}
-              onClick={() => setMethod(tab.id)}
-              onKeyDown={onTabKeyDown}
-              className={`h-10 rounded-lg px-2 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
-                selected ? "bg-lobby-soft text-ink" : "text-muted hover:text-ink"
-              }`}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <div role="tabpanel" id="register-tabpanel" aria-labelledby={`register-tab-${method}`}>
-        {method === "email" ? (
-          <TextField
-            id="register-email"
-            name="email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            label={t.auth.emailAddress}
-            value={email}
-            onChange={(value) => {
-              setEmail(value);
-              clear("email");
-            }}
-            error={errors.email ? t.auth.errorEmail : null}
-            busy={pending}
-            autofocus
-          />
-        ) : (
-          <PhoneField
-            id="register-phone"
-            label={t.auth.phoneNumber}
-            country={country}
-            onCountry={setCountry}
-            value={phone}
-            onChange={(value) => {
-              setPhone(value);
-              clear("phone");
-            }}
-            error={errors.phone ? t.auth.errorPhone : null}
-            busy={pending}
-          />
-        )}
-      </div>
+      <TextField
+        id="register-username"
+        name="username"
+        autoComplete="username"
+        autoCapitalize="none"
+        maxLength={20}
+        label={t.auth.username}
+        value={username}
+        onChange={(value) => {
+          setUsername(value);
+          clear("username");
+        }}
+        error={errors.username ? t.auth.errorUsername : null}
+        busy={pending}
+        autofocus
+      />
 
       <PasswordField
         id="register-password"
@@ -177,6 +129,49 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
           clear("password");
         }}
         error={errors.password ? t.auth.errorPasswordShort : null}
+        busy={pending}
+      />
+
+      <PasswordField
+        id="register-confirm"
+        name="confirm"
+        label={t.auth.confirmPassword}
+        autoComplete="new-password"
+        value={confirm}
+        onChange={(value) => {
+          setConfirm(value);
+          clear("confirm");
+        }}
+        error={errors.confirm ? t.auth.errorConfirm : null}
+        busy={pending}
+      />
+
+      <PhoneField
+        id="register-phone"
+        label={t.auth.phoneNumber}
+        country={country}
+        onCountry={setCountry}
+        value={phone}
+        onChange={(value) => {
+          setPhone(value);
+          clear("phone");
+        }}
+        error={errors.phone ? t.auth.errorPhone : null}
+        busy={pending}
+      />
+
+      <TextField
+        id="register-real-name"
+        name="realName"
+        autoComplete="name"
+        autoCapitalize="words"
+        label={t.auth.realName}
+        value={realName}
+        onChange={(value) => {
+          setRealName(value);
+          clear("realName");
+        }}
+        error={errors.realName ? t.auth.errorRealName : null}
         busy={pending}
       />
 

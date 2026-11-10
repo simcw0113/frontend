@@ -26,3 +26,4 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   );
   return <LobbyScreen games={games} topWins={getTopWins({ lang })} partners={getPartners({ lang })} />;
 }
+5

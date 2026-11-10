@@ -31,7 +31,12 @@ export const apiConfig = {
   // Same switch for the game page's launch URL (src/lib/gameLaunch.ts): true = TEST_GAME_URL.
   useStaticGameLaunch: !apiBaseUrl,
   loginPath: "/signin",
-  registerPath: "/auth/register",
+  registerPath: "/signup",
+  infoPath: "/info",
+  configPath: "/config",
+  gameListPath: "/game_list",
+  // Sent as the `country-id` header on POST /game_list.
+  lobbyCountryId: process.env.NEXT_PUBLIC_LOBBY_COUNTRY_ID ?? "1",
   // TODO(API): placeholder. {category} is replaced by the slug ("slots", "trending-games");
   // lang, provider, page and q are sent as query parameters.
   categoryGamesPath: "/games/category/{category}",

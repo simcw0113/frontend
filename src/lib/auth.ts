@@ -1,9 +1,8 @@
-import { apiConfig } from "@/config/site";
-import { ApiError, apiJson, type ApiErrorCode } from "@/lib/api";
+import { ApiError, type ApiErrorCode } from "@/lib/api";
 import { markSignedIn } from "@/lib/token";
 
 export type LoginInput = {
-  /** Username, email or phone number, exactly as typed (trimmed by the caller). */
+  /** Username or phone number, exactly as typed (trimmed by the caller). */
   identifier: string;
   password: string;
   remember: boolean;
@@ -20,13 +19,13 @@ function asErrorCode(value: unknown): ApiErrorCode | undefined {
   return typeof value === "string" && ERROR_CODES.has(value) ? (value as ApiErrorCode) : undefined;
 }
 
-export async function loginWithPassword({ identifier, password, remember }: LoginInput) {
+async function postAuth(url: string, body: unknown) {
   let response: Response;
   try {
-    response = await fetch("/api/auth/login", {
+    response = await fetch(url, {
       method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify({ username: identifier, password, remember }),
+      body: JSON.stringify(body),
     });
   } catch {
     throw new ApiError("Could not reach the API.", 0);
@@ -52,42 +51,35 @@ export async function loginWithPassword({ identifier, password, remember }: Logi
       asErrorCode(record.code) ?? (record.message ? undefined : "api_failed"),
     );
   }
+}
 
+export async function loginWithPassword({ identifier, password, remember }: LoginInput) {
+  await postAuth("/api/auth/login", { username: identifier, password, remember });
   markSignedIn();
 }
 
 export type RegisterInput = {
-  method: "email" | "phone";
-  email: string;
+  username: string;
+  password: string;
   /** Dial code without "+", e.g. "60". */
   countryDial: string;
   /** National number, digits only. */
   phone: string;
-  password: string;
+  realName: string;
   referral: string;
 };
 
-// TODO(API): the registration endpoint does not exist yet. While this is true,
-// registering is a local stub: no network request, no account, no token saved.
-const MOCK_REGISTER = true;
-
-const MOCK_LATENCY_MS = 700;
-
 export async function registerAccount(input: RegisterInput) {
-  if (MOCK_REGISTER) {
-    await new Promise((resolve) => setTimeout(resolve, MOCK_LATENCY_MS));
-    return;
-  }
-
-  // TODO(API): confirm the request fields with the backend contract.
-  // After register, the token should be stored by a route handler in the same
-  // HttpOnly cookie as login — never written to localStorage.
-  const identity =
-    input.method === "email" ? { email: input.email } : { phone: `+${input.countryDial}${input.phone}` };
-  await apiJson(apiConfig.registerPath, {
-    method: "POST",
-    auth: false,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...identity, password: input.password, referral: input.referral || undefined }),
+  // The form already requires confirm to equal password. Signup still needs
+  // `password_confirmation` because the backend rule is `password|confirmed`.
+  // `real_name` is stored by the backend as full_name.
+  await postAuth("/api/auth/register", {
+    username: input.username,
+    password: input.password,
+    password_confirmation: input.password,
+    phone: `+${input.countryDial}${input.phone}`,
+    real_name: input.realName,
+    referral: input.referral || undefined,
   });
+  markSignedIn();
 }
