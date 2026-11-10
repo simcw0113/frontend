@@ -18,7 +18,25 @@ export class ApiError extends Error {
   }
 }
 
+// Member `token` only. Ignore `session_token`; this lobby does not use it.
 const TOKEN_KEYS = ["token", "access_token", "accessToken", "jwt"] as const;
+
+function readNamedField(payload: unknown, keys: readonly string[]): string | null {
+  if (!payload || typeof payload !== "object") return null;
+
+  const record = payload as Record<string, unknown>;
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+
+  for (const key of ["data", "result"] as const) {
+    const nested = readNamedField(record[key], keys);
+    if (nested) return nested;
+  }
+
+  return null;
+}
 
 export function extractAuthToken(payload: unknown): string | null {
   if (typeof payload === "string") {
@@ -26,20 +44,7 @@ export function extractAuthToken(payload: unknown): string | null {
     return value ? value : null;
   }
 
-  if (!payload || typeof payload !== "object") return null;
-
-  const record = payload as Record<string, unknown>;
-  for (const key of TOKEN_KEYS) {
-    const value = record[key];
-    if (typeof value === "string" && value.trim()) return value.trim();
-  }
-
-  for (const key of ["data", "result"] as const) {
-    const nested = extractAuthToken(record[key]);
-    if (nested) return nested;
-  }
-
-  return null;
+  return readNamedField(payload, TOKEN_KEYS);
 }
 
 export function isApiStatusFailure(payload: unknown): boolean {
@@ -68,9 +73,10 @@ export async function apiFetch(path: string, init: ApiOptions = {}) {
   const headers = new Headers(initHeaders);
   if (!headers.has("Accept")) headers.set("Accept", "application/json");
 
-  // The auth token lives in an HttpOnly cookie (set by /api/auth/login). Client
-  // JavaScript cannot read it; server callers that need auth pass
-  // `Authorization: Bearer <token>` themselves after reading the cookie.
+  // The member token lives in an HttpOnly; Secure; SameSite=Lax cookie (set by
+  // /api/auth/login). Client JavaScript cannot read it. Server callers that need
+  // the member pass `Authorization: Bearer <token>` themselves. Do not read or
+  // send `session_token`.
 
   const url = path.startsWith("http")
     ? path

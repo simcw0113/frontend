@@ -36,6 +36,9 @@ import { setDrawerOpen, setSidebarOpen, useDrawerOpen, useSidebarOpen, useSideba
 
 // px-[14px] keeps the 20px icon centred in the 72px rail (12px aside padding + 14px), so the
 // icons do not move while the sidebar collapses or expands.
+// Survives refresh. Accept only hides this notice; it does not create an account cookie.
+const COOKIE_NOTICE_KEY = "cookie_notice_accepted";
+
 const NAV_ITEM =
   "flex h-11 w-full items-center rounded-lg px-[14px] text-sm font-medium whitespace-nowrap focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand";
 const TOGGLE =
@@ -72,6 +75,8 @@ export function LobbyScreen({
   gamePage?: Promise<GamePageData>; // game page only (/casino/{category}/game/{id})
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
+  // Category pages filter the open provider list in place. Home still opens Explore.
+  const [gameQuery, setGameQuery] = useState("");
   const [languageOpen, setLanguageOpen] = useState(false);
   const { locale, setLocale, t } = useI18n();
   const sidebarOpen = useSidebarOpen(); // lg+: expanded (icon + label) or the icon rail
@@ -81,10 +86,10 @@ export function LobbyScreen({
   const drawerToggleRef = useRef<HTMLButtonElement>(null);
   const [signInOpen, setSignInOpen] = useState(false);
   const [authView, setAuthView] = useState<AuthView>("login");
-  const { user, signOut } = useSession();
+  const { user, ready, signOut } = useSession();
   const [accountOpen, setAccountOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement>(null);
-  const [cookiesOn, setCookiesOn] = useState(true);
+  const [cookiesOn, setCookiesOn] = useState(false);
   const [provider, setProvider] = useState<string | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
   const [providersStatus, setProvidersStatus] = useState<"loading" | "ready" | "error">("loading");
@@ -127,8 +132,8 @@ export function LobbyScreen({
     if (saved > 0) window.scrollTo({ top: saved, behavior: "instant" });
   }, [focus]);
 
-  // Ctrl/Cmd+K opens the Explore search from anywhere on the lobby pages. While it
-  // is open the pop-up handles the shortcut itself (it toggles closed). Not taken
+  // Ctrl/Cmd+K: on a category page, focus the inline search. Elsewhere it opens
+  // Explore. While that pop-up is open it handles the shortcut itself. Not taken
   // while another dialog is open or while typing in a field other than the search bar.
   useEffect(() => {
     if (searchOpen || signInOpen) return;
@@ -143,11 +148,15 @@ export function LobbyScreen({
         return;
       }
       event.preventDefault();
+      if (focus === "casino") {
+        document.getElementById("lobby-search")?.focus();
+        return;
+      }
       setSearchOpen(true);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [searchOpen, signInOpen]);
+  }, [searchOpen, signInOpen, focus]);
 
   function toggleSidebar() {
     if (sidebarOpen) setLanguageOpen(false);
@@ -189,11 +198,16 @@ export function LobbyScreen({
     };
   }, [accountOpen]);
 
+  useEffect(() => {
+    if (window.localStorage.getItem(COOKIE_NOTICE_KEY) !== "1") setCookiesOn(true);
+  }, []);
+
   function dismissCookies() {
+    window.localStorage.setItem(COOKIE_NOTICE_KEY, "1");
     setCookiesOn(false);
   }
 
-  const params = useParams<{ category?: string; id?: string }>();
+  const params = useParams<{ category?: string; id?: string; provider?: string; game?: string }>();
   const slug = category ?? (focus === "casino" || focus === "game" ? params?.category : undefined);
   const casino = (slug && findCasinoCategory(slug)) || defaultCasinoCategory;
   const listGames = categoryGames ? { ...games, [casino.slug]: categoryGames } : games;
@@ -201,7 +215,12 @@ export function LobbyScreen({
   // `route`: the page shown (main[data-route], lobby transitions); `navRoute`: what the top bar
   // and sidebar highlight (a game page highlights its category).
   const navRoute = focus === "home" ? "/" : focus === "casino" || focus === "game" ? `/casino/${casino.slug}` : `/${focus}`;
-  const route = focus === "game" ? `${navRoute}/game/${params?.id ?? ""}` : navRoute;
+  const route =
+    focus === "game"
+      ? params?.provider && params?.game
+        ? `${navRoute}/provider/${params.provider}/game/${params.game}`
+        : `${navRoute}/game/${params?.id ?? ""}`
+      : navRoute;
   const gamesPage = focus === "home" || focus === "casino";
   const playerPage = focus === "recent" || focus === "favourites";
   const casinoSlug = focus === "casino" ? casino.slug : null;
@@ -211,6 +230,7 @@ export function LobbyScreen({
     setTrackedSlug(casinoSlug);
     setProvider(null);
     setAllSlug(null);
+    setGameQuery("");
   } else if (!casinoSlug && allSlug) {
     setAllSlug(null);
   }
@@ -228,6 +248,10 @@ export function LobbyScreen({
     : gamesPage && providerInList
       ? provider
       : null;
+  // `activeProvider` is public_code. Game list still needs the internal product code.
+  const activeProduct = activeProvider
+    ? visibleProviders.find((item) => item.id === activeProvider)
+    : undefined;
   function selectProvider(id: string | null) {
     setProvider(id);
     setAllSlug(id === null && casinoSlug ? casinoSlug : null);
@@ -470,7 +494,8 @@ export function LobbyScreen({
                 of the "top" transition group, so they fade with the banner. Each wrapper adds its
                 own 24px above; the Top wins wrapper collapses (empty:hidden) when that section hides
                 itself (no data / error), so How to Register then follows the banner with no gap
-                left behind. The extra pb-2 plus the search bar's mt-4 make the last gap 24px too. */}
+                left behind. The extra pb-2 plus the search bar's mt-4 make the last gap 24px too.
+                How to Register is omitted after login, and the search bar's mt-4 keeps the gap. */}
             {focus === "home" && topWins ? (
               <div className="pt-6 empty:hidden">
                 <Suspense fallback={<TopWinsSkeleton />}>
@@ -478,7 +503,8 @@ export function LobbyScreen({
                 </Suspense>
               </div>
             ) : null}
-            {focus === "home" ? (
+            {/* Shown only after /api/auth/me confirms there is no user, so a signed-in player never sees the register steps. */}
+            {focus === "home" && ready && !user ? (
               <div className="pt-6 pb-2">
                 <HowToRegister
                   onRegister={() => {
@@ -495,23 +521,31 @@ export function LobbyScreen({
             <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted">
               <SearchIcon />
             </span>
-            {/* Looks like a search field but only opens the Explore pop-up. It does not open
-                on plain keyboard focus (WCAG 3.2.1): click, Enter, Space or Ctrl/Cmd+K do. */}
+            {/* Category pages type into this field and filter the list below.
+                Home only opens Explore, and not on plain keyboard focus (WCAG 3.2.1). */}
             <input
               id="lobby-search"
-              readOnly
-              value=""
-              aria-haspopup="dialog"
+              readOnly={focus !== "casino"}
+              value={focus === "casino" ? gameQuery : ""}
+              aria-haspopup={focus === "casino" ? undefined : "dialog"}
               aria-keyshortcuts="Control+K Meta+K"
-              onClick={() => setSearchOpen(true)}
+              onChange={(event) => {
+                if (focus === "casino") setGameQuery(event.target.value);
+              }}
+              onClick={() => {
+                if (focus !== "casino") setSearchOpen(true);
+              }}
               onKeyDown={(event) => {
+                if (focus === "casino") return;
                 if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
                   event.preventDefault();
                   setSearchOpen(true);
                 }
               }}
               placeholder={fill(t.lobby.searchPlaceholder, { name: t.siteName })}
-              className="h-12 w-full cursor-pointer rounded-xl border border-white/10 bg-white/5 pr-24 pl-10 text-sm outline-none placeholder:text-muted hover:border-white/25 focus-visible:border-brand"
+              className={`h-12 w-full rounded-xl border border-white/10 bg-white/5 pr-24 pl-10 text-sm outline-none placeholder:text-muted hover:border-white/25 focus-visible:border-brand ${
+                focus === "casino" ? "cursor-text" : "cursor-pointer"
+              }`}
             />
             <kbd className="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 rounded-md border border-white/10 px-2 py-1 text-xs text-muted sm:inline">
               Ctrl K
@@ -543,8 +577,13 @@ export function LobbyScreen({
           ) : gamesPage ? (
             <>
               <ProviderRow selected={activeProvider} onSelect={selectProvider} providers={visibleProviders} />
-              {activeProvider ? (
-                <ProviderGames code={activeProvider} category={casino.slug} />
+              {activeProduct ? (
+                <ProviderGames
+                  code={activeProduct.code}
+                  publicCode={activeProduct.id}
+                  category={casino.slug}
+                  query={focus === "casino" ? gameQuery : ""}
+                />
               ) : focus === "casino" && providersStatus === "loading" ? (
                 <ProviderGamesSkeleton />
               ) : (

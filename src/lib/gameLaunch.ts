@@ -1,32 +1,47 @@
 import { apiConfig, TEST_GAME_URL } from "@/config/site";
-import { apiJson } from "@/lib/api";
+import { apiJson, isApiStatusFailure } from "@/lib/api";
 import { useStaticData as isStaticData } from "@/lib/apiMode";
+import { lobbyLocale } from "@/lib/lobbyApi";
 
 // The game page's iframe URL. Same static/API switch as the other lobby data
 // (apiConfig.useStaticGameLaunch): static = TEST_GAME_URL (config/site.ts) for every game,
 // used as it is (only the local demo public/demo-game.html gets ?name=). Server only.
 //
 // Per player and per session, so NOT cached (no "use cache", fetch with cache: "no-store").
-// The token is an HttpOnly cookie (set by /api/auth/login). The page reads it with
-// getAuthTokenFromCookie() and passes it as `token` (sent as `Authorization: Bearer <token>`).
-// Without a token the API is not called and the page asks the guest to sign in (Register);
-// a provider "demo" launch for guests could replace that.
+// The token is an HttpOnly; Secure; SameSite=Lax cookie (set by /api/auth/login).
+// The page reads it with getAuthTokenFromCookie() and sends `Authorization: Bearer <token>`.
+// This lobby does not send `session_token`. Without a token the API is not called and
+// the page asks the guest to sign in (Register).
 
 export type GameLaunch = { url: string } | { error: "signin" | "failed" };
 
 export type GameLaunchOptions = {
-  id: string; // the game id (from the API list; static: config/lobby.ts#staticGameId)
+  provider?: string; // product public_code
+  game?: string; // inner game code (game_list game_code)
   name: string; // shown by the local demo
   lang: string; // URL language slug: en | cn | de | es
   token?: string | null;
 };
 
 const REQUEST_TIMEOUT_MS = 8000;
-const DEFAULT_LAUNCH_PATH = "/games/{id}/launch";
+const DEFAULT_LAUNCH_PATH = "/opengame";
 
 export function testGameUrl(name: string): string {
   // Only the local demo reads ?name=; any other test URL is used as it is.
   return TEST_GAME_URL.startsWith("/demo-game.html") ? `${TEST_GAME_URL}?name=${encodeURIComponent(name)}` : TEST_GAME_URL;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+}
+
+// Current /launch puts the iframe URL on `launcher`. Also accept `url`.
+function readLaunchUrl(payload: unknown): string {
+  const root = asRecord(payload);
+  if (!root) return "";
+  const data = asRecord(root.data);
+  const launcher = root.launcher ?? data?.launcher ?? data?.url ?? root.url;
+  return typeof launcher === "string" ? launcher.trim() : "";
 }
 
 // Never throws.
@@ -34,16 +49,27 @@ export async function getGameLaunch(opts: GameLaunchOptions): Promise<GameLaunch
   const config: Partial<typeof apiConfig> = apiConfig;
   if (isStaticData(config.useStaticGameLaunch)) return { url: testGameUrl(opts.name) };
   if (!opts.token) return { error: "signin" };
+  const provider = opts.provider?.trim() ?? "";
+  const game = opts.game?.trim() ?? "";
+  if (!provider || !game) return { error: "failed" };
   try {
-    const path = (config.gameLaunchPath || DEFAULT_LAUNCH_PATH).replace("{id}", encodeURIComponent(opts.id));
-    // TODO(API): adjust to the real response (e.g. { url } or { data: { launch_url } }).
-    const payload = await apiJson<{ url?: string; data?: { url?: string } }>(`${path}?${new URLSearchParams({ lang: opts.lang })}`, {
+    const path = config.gameLaunchPath || DEFAULT_LAUNCH_PATH;
+    // POST /opengame { provider: public_code, game: game_code }.
+    const payload = await apiJson(`${path}?${new URLSearchParams({ lang: opts.lang })}`, {
+      method: "POST",
       auth: false, // the token is passed in explicitly (the browser token helper is client-only)
-      headers: { Authorization: `Bearer ${opts.token}` },
+      headers: {
+        Authorization: `Bearer ${opts.token}`,
+        "Content-Type": "application/json",
+        "country-id": config.lobbyCountryId || "1",
+        locale: lobbyLocale(opts.lang),
+      },
+      body: JSON.stringify({ provider, game }),
       cache: "no-store",
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
-    const url = payload?.url ?? payload?.data?.url;
+    if (isApiStatusFailure(payload)) return { error: "failed" };
+    const url = readLaunchUrl(payload);
     return url ? { url } : { error: "failed" };
   } catch {
     return { error: "failed" };

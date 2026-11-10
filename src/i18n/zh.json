@@ -60,7 +60,7 @@
     "loginNow": "立即登录",
     "errorEmail": "请输入有效的邮箱地址。",
     "errorPhone": "请输入有效的手机号码。",
-    "errorUsername": "用户名需为 6–20 位，只能包含字母、数字、下划线或连字符。",
+    "errorUsername": "用户名需为 6–20 位，必须同时包含字母和数字，可含下划线或连字符。",
     "errorConfirm": "两次输入的密码不一致。",
     "errorRealName": "请用英文字母填写真实姓名。",
     "errorPasswordShort": "密码至少 8 个字符。",

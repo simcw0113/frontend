@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { apiConfig } from "@/config/site";
 import { ApiError, apiJson, extractAuthToken, isApiStatusFailure, readApiMessage } from "@/lib/api";
-import { authCookieOptions } from "@/lib/authCookie";
-import { AUTH_TOKEN_KEY } from "@/lib/token";
+import { writeAuthCookie } from "@/lib/authCookie";
 
 type RegisterBody = {
   username?: unknown;
@@ -21,7 +20,8 @@ function errorJson(message: string, status: number, code?: ApiError["code"]) {
 // Forwards username, password, password_confirmation, phone and real_name
 // (plus optional referral) to the backend sign-up endpoint
 // (apiConfig.registerPath, POST /api/signup), then
-// stores the returned token in the same HttpOnly; Secure; SameSite=Lax cookie as login.
+// stores the returned `token` in the same HttpOnly; Secure; SameSite=Lax cookie as login.
+// `session_token` is ignored.
 export async function POST(request: Request) {
   let body: RegisterBody;
   try {
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     }
 
     const response = NextResponse.json({ ok: true });
-    response.cookies.set(AUTH_TOKEN_KEY, token, authCookieOptions(false));
+    writeAuthCookie(response, token, false);
     return response;
   } catch (cause) {
     if (cause instanceof ApiError) {

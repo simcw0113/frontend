@@ -19,9 +19,12 @@ type Errors = {
   agree?: boolean;
 };
 
-// Matches the backend member create rules: username /^[a-zA-Z0-9_-]+$/ (6–20),
-// full_name letters/spaces/apostrophes, password min 6 (kept at 8 here).
-const USERNAME_PATTERN = /^[A-Za-z0-9_-]{6,20}$/;
+// Length and character set match the backend member create rules
+// (username /^[a-zA-Z0-9_-]+$/, 6–20). The lookaheads are frontend-only:
+// a username must include at least one letter and one digit so a pure
+// number cannot be registered and later treated as a phone at login.
+// full_name is letters/spaces/apostrophes; password min 6 on the API (kept at 8 here).
+const USERNAME_PATTERN = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_-]{6,20}$/;
 const REAL_NAME_PATTERN = /^[A-Za-z]+(?:[ '][A-Za-z]+)*$/;
 const PHONE_MIN = 6;
 const PHONE_MAX = 12;

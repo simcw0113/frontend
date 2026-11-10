@@ -1,3 +1,5 @@
+// Member token from POST /signin `token`. Cookie: HttpOnly; Secure; SameSite=Lax.
+// Sent as `Authorization: Bearer <token>`. This lobby does not store session_token.
 export const AUTH_TOKEN_KEY = "auth_token";
 export const AUTH_TOKEN_EVENT = "auth-token-change";
 

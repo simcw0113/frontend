@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { apiConfig } from "@/config/site";
 import { ApiError, apiJson, extractAuthToken, isApiStatusFailure, readApiMessage } from "@/lib/api";
-import { authCookieOptions } from "@/lib/authCookie";
-import { AUTH_TOKEN_KEY } from "@/lib/token";
+import { writeAuthCookie } from "@/lib/authCookie";
 
 type LoginBody = {
   username?: unknown;
@@ -18,8 +17,8 @@ function errorJson(message: string, status: number, code?: ApiError["code"]) {
 // Forwards { username, password } to the backend sign-in endpoint
 // (apiConfig.loginPath, POST /api/signin). Username and phone both go in
 // `username`; the backend matches either. Email is not accepted.
-// The returned token is stored in an HttpOnly; Secure; SameSite=Lax cookie
-// and is never sent back in the JSON body.
+// The returned `token` is stored in an HttpOnly; Secure; SameSite=Lax cookie
+// and is never sent back in the JSON body. `session_token` is ignored.
 // `remember` is only used for the cookie maxAge and is not sent to the backend.
 export async function POST(request: Request) {
   let body: LoginBody;
@@ -56,7 +55,7 @@ export async function POST(request: Request) {
     }
 
     const response = NextResponse.json({ ok: true });
-    response.cookies.set(AUTH_TOKEN_KEY, token, authCookieOptions(remember));
+    writeAuthCookie(response, token, remember);
     return response;
   } catch (cause) {
     if (cause instanceof ApiError) {

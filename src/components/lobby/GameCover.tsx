@@ -170,8 +170,18 @@ export function SymbolMark({ symbol, className }: { symbol: GameSymbol; classNam
 }
 
 // Game page path of a tile (home rows, category grids, search, player lists, Lucky Pick).
-export function gameHref(game: { id: string; category?: string }, fallbackCategory: string) {
-  return `/casino/${game.category ?? fallbackCategory}/game/${game.id}`;
+// Lobby games: /casino/{category}/provider/{public_code}/game/{game_code}
+// Example: /casino/slots/provider/XYV9QF/game/ES073
+// Static catalog games stay on /casino/{category}/game/{id}.
+export function gameHref(
+  game: { id: string; category?: string; publicCode?: string; gameCode?: string },
+  fallbackCategory: string,
+) {
+  const category = game.category ?? fallbackCategory;
+  if (game.publicCode && game.gameCode) {
+    return `/casino/${category}/provider/${encodeURIComponent(game.publicCode)}/game/${encodeURIComponent(game.gameCode)}`;
+  }
+  return `/casino/${category}/game/${encodeURIComponent(game.id)}`;
 }
 
 // With `href` the whole tile is a link to the game page (lobby transition, same hover lift).

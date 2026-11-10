@@ -41,6 +41,8 @@ export type Game = {
   symbol: GameSymbol;
   image?: string; // cover image URL; without it GameCover draws the gradient + symbol
   category?: string; // casino category slug the game page lives under (/casino/{category}/game/{id})
+  gameCode?: string; // inner game code (game_list `game_code`), sent as `game` to POST /opengame
+  publicCode?: string; // provider public_code, sent as `provider` to POST /opengame
   rtp?: number; // return to player, % (game page chips; hidden when missing)
   edge?: number; // house edge, %
   description?: string; // short blurb for the game page (a translated generic line without it)

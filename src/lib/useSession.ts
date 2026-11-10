@@ -6,6 +6,9 @@ import { AUTH_TOKEN_EVENT, clearAuthToken } from "@/lib/token";
 
 export function useSession() {
   const [user, setUser] = useState<SessionUser | null>(null);
+  // False until the first /api/auth/me result. Callers that must not flash
+  // signed-out UI (the How to Register bar) wait on this.
+  const [ready, setReady] = useState(false);
   const requestIdRef = useRef(0);
 
   useEffect(() => {
@@ -18,13 +21,17 @@ export function useSession() {
         const payload = (await response.json().catch(() => null)) as { user?: SessionUser | null } | null;
         const next = payload && typeof payload === "object" ? payload.user : null;
         if (cancelled || requestId !== requestIdRef.current) return;
+        setReady(true);
         if (response.ok && next && typeof next.username === "string" && next.username.trim()) {
           setUser(next);
         } else {
           setUser(null);
         }
       } catch {
-        if (!cancelled && requestId === requestIdRef.current) setUser(null);
+        if (!cancelled && requestId === requestIdRef.current) {
+          setUser(null);
+          setReady(true);
+        }
       }
     }
 
@@ -44,5 +51,5 @@ export function useSession() {
     await clearAuthToken();
   }
 
-  return { user, signOut };
+  return { user, ready, signOut };
 }

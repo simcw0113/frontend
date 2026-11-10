@@ -12,10 +12,12 @@ import { isSlug, languageAlternates, localizedPath } from "@/i18n/routing";
 
 type Props = PageProps<"/[lang]/casino/[category]/game/[id]">;
 
-// /casino/{category}/game/{id} ("/game/" = the iframe page): `id` is the game's id from the list (the API's id; static data:
-// config/lobby.ts#staticGameId). The static games of the category are prerendered (the API's
-// render on demand). Cache Components needs at least one result per category, so a category
-// without samples prerenders one catalog game (a 404 there unless it belongs to it).
+// /casino/{category}/game/{id}. Static catalog games use their own id
+// (config/lobby.ts#staticGameId). Lobby games use
+// /casino/{category}/provider/{public_code}/game/{game_code} instead.
+// The static games of the category are prerendered (the API's render on demand). Cache
+// Components needs at least one result per category, so a category without samples
+// prerenders one catalog game (a 404 there unless it belongs to it).
 export function generateStaticParams({ params }: { params: { category: string } }) {
   const games = categoryGames[params.category] ?? [];
   return (games.length > 0 ? games : gameCatalog.slice(0, 1)).map((game) => ({ id: game.id }));
@@ -47,7 +49,13 @@ export default function GamePage({ params }: Props) {
     const details = findCasinoCategory(category) ? await getGameDetails(category, id, { lang }) : null;
     if (!details) return null;
     const token = await getAuthTokenFromCookie();
-    const launch = await getGameLaunch({ id, name: details.game.title, lang, token });
+    const launch = await getGameLaunch({
+      provider: details.game.publicCode,
+      game: details.game.gameCode,
+      name: details.game.title,
+      lang,
+      token,
+    });
     return { ...details, launch };
   });
   return (

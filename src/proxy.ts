@@ -13,9 +13,9 @@ export function proxy(request: NextRequest) {
   if (isSlug(first)) {
     // Unknown casino category: answer 404 right away. (The page also calls
     // notFound(), but with partial prerendering the first hit would stream a 200.)
-    // Game page /{lang}/casino/{category}/game/{id}: an unknown id, or one of another category,
-    // is a 404 (static data only; with the API the page's notFound() is the check). Other
-    // depths (/casino/{category}/game, /casino/{category}/{x}) match no route: 404 as well.
+    // Static game page /{lang}/casino/{category}/game/{id}: an unknown id is a 404
+    // (static data only; with the API the page's notFound() is the check).
+    // Lobby games use /{lang}/casino/{category}/provider/{public_code}/game/{game_code}.
     const [, , section, category, sub, id, ...rest] = pathname.split("/");
     const unknownGame = sub === "game" && id && rest.length === 0 && !hasApiBaseUrl() && !isStaticGame(category, id);
     if (section === "casino" && category && (!findCasinoCategory(category) || unknownGame)) {

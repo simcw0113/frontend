@@ -4,9 +4,10 @@ import type { Game, GameSymbol } from "@/config/lobby";
 import type { Provider } from "@/config/providers";
 
 // Product and game list helpers for the configured API (NEXT_PUBLIC_API_BASE_URL).
-// GET /config returns products at `data.product`.
-// POST /game_list returns games when the body is `{ code: "<product code>" }`
-// and the request includes a `country-id` header.
+// GET /config returns products at `data.product`. Each product has an internal
+// `code` and a `public_code`. The lobby locates a product by `public_code`.
+// POST /game_list still takes the internal code: `{ code: "<product code>" }`
+// plus a `country-id` header. `public_code` is not accepted there.
 
 const PALETTE: [string, string][] = [
   ["#f59e0b", "#7c2d12"],
@@ -32,6 +33,7 @@ function hash(text: string) {
 
 type RawProduct = {
   code?: unknown;
+  public_code?: unknown;
   name?: unknown;
   image?: unknown;
   status?: unknown;
@@ -68,14 +70,21 @@ function monogram(name: string): string {
   return name.slice(0, 2).toUpperCase() || "?";
 }
 
+function text(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 function toProvider(raw: RawProduct, group?: string): Provider | null {
-  const id = typeof raw.code === "string" ? raw.code.trim() : "";
-  const name = typeof raw.name === "string" ? raw.name.trim() : "";
-  if (!id || !name) return null;
+  // Locate by public_code. Keep `code` only for POST /game_list.
+  const id = text(raw.public_code);
+  const code = text(raw.code);
+  const name = text(raw.name);
+  if (!id || !code || !name) return null;
   if (raw.status != null && raw.status !== 1) return null;
   const image = typeof raw.image === "string" && raw.image ? raw.image : undefined;
   return {
     id,
+    code,
     name,
     mark: monogram(name),
     accent: ACCENTS[hash(id) % ACCENTS.length],
@@ -119,6 +128,7 @@ type RawGame = {
   name?: unknown;
   image?: unknown;
   code?: unknown;
+  game_code?: unknown;
 };
 
 function toGame(raw: RawGame): Game | null {
@@ -127,10 +137,12 @@ function toGame(raw: RawGame): Game | null {
   const [from, to] = PALETTE[hash(id) % PALETTE.length];
   const image = typeof raw.image === "string" && raw.image ? raw.image : undefined;
   const provider = typeof raw.code === "string" ? raw.code : "";
+  const gameCode = text(raw.game_code);
   return {
     id,
     title: raw.name.trim(),
     provider,
+    ...(gameCode ? { gameCode } : {}),
     playing: 0,
     tags: [],
     from,
@@ -182,6 +194,25 @@ export async function fetchLobbyProducts(locale: string): Promise<Provider[]> {
   } catch {
     return [];
   }
+}
+
+// One game from a provider's list, plus the other games in that list (the game page's
+// recommended row). `publicCode` is the product's public_code. `gameCode` is the inner
+// game code used in the page path (/casino/{category}/provider/{publicCode}/game/{gameCode}).
+export async function findLobbyGame(
+  publicCode: string,
+  gameCode: string,
+  locale: string,
+): Promise<{ game: Game; others: Game[] } | null> {
+  const product = (await fetchLobbyProducts(locale)).find((item) => item.id === publicCode);
+  if (!product) return null;
+  const games = (await fetchLobbyGames(product.code, locale)).map((game) => ({
+    ...game,
+    publicCode: product.id,
+  }));
+  const game = games.find((item) => item.gameCode === gameCode);
+  if (!game) return null;
+  return { game, others: games.filter((item) => item.gameCode !== gameCode) };
 }
 
 export async function fetchLobbyGames(code: string, locale: string): Promise<Game[]> {

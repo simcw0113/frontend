@@ -81,8 +81,8 @@ function hash(text: string) {
 // TODO(API): map the real response onto Game. `image` is the cover; without one the
 // card draws a gradient + symbol picked from the id.
 export function mapGame(dto: GameDto): Game {
-  // The API's id, unchanged: it is the game page URL (/casino/{category}/game/{id}) and the id
-  // sent to the launch endpoint (lib/gameLaunch.ts).
+  // The API's id, unchanged: it is the game page URL (/casino/{category}/game/{id}).
+  // POST /opengame uses public_code + game_code, not this id (lib/gameLaunch.ts).
   const id = String(dto.id);
   const [from, to] = PALETTE[hash(id) % PALETTE.length];
   return {

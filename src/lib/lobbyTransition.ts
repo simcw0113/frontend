@@ -35,10 +35,15 @@ const LOBBY_PAGES = new Set(["/", "/promotions", "/sports", "/vip", "/z-ai", "/r
 export function isLobbyRoute(path: string): path is LobbyRoute {
   if (LOBBY_PAGES.has(path)) return true;
   if (!path.startsWith("/casino/")) return false;
-  // /casino/{category} and a game page /casino/{category}/game/{id}
-  const [category, ...rest] = path.slice("/casino/".length).split("/");
+  // /casino/{category}
+  // /casino/{category}/game/{id}
+  // /casino/{category}/provider/{public_code}/game/{game_code}
+  const [category, ...rest] = path.split("?")[0].slice("/casino/".length).split("/");
   if (findCasinoCategory(category) === undefined) return false;
-  return rest.length === 0 || (rest.length === 2 && rest[0] === "game" && rest[1].length > 0);
+  const staticGame = rest.length === 2 && rest[0] === "game" && rest[1].length > 0;
+  const lobbyGame =
+    rest.length === 4 && rest[0] === "provider" && rest[1].length > 0 && rest[2] === "game" && rest[3].length > 0;
+  return rest.length === 0 || staticGame || lobbyGame;
 }
 
 function reduceMotion() {

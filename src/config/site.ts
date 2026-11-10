@@ -52,9 +52,9 @@ export const apiConfig = {
   // auth token as a Bearer header, never cached); lang is sent as a query parameter.
   recentGamesPath: "/player/games/recent",
   favouriteGamesPath: "/player/games/favourites",
-  // TODO(API): placeholder for the game launch URL (the iframe src). {id} is replaced by the
-  // game id; lang is a query parameter; sent with the player's token, never cached.
-  gameLaunchPath: "/games/{id}/launch",
+  // POST /opengame. Body is { provider: public_code, game: game_code }.
+  // Sent with Authorization: Bearer <token> and a country-id header. Never cached.
+  gameLaunchPath: "/opengame",
 };
 
 // TEMPORARY test URL for the game page iframe while there is no launch API (static mode), the
