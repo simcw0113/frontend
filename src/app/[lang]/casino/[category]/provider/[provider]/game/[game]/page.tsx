@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { LobbyScreen } from "@/components/lobby/LobbyScreen";
 import { findCasinoCategory } from "@/config/categories";
@@ -49,6 +50,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 // game and its launch URL stream behind Suspense.
 export default function ProviderGamePage({ params }: Props) {
   const game = params.then(async ({ lang, category, provider, game: gameCode }) => {
+    // fetch and AbortSignal.timeout call Date.now(). With cacheComponents that
+    // clock is only allowed after the render reaches the dynamic stage.
+    await connection();
     const details = await lobbyDetails(category, provider, gameCode, lang);
     if (!details) return null;
     const token = await getAuthTokenFromCookie();
@@ -72,6 +76,7 @@ export default function ProviderGamePage({ params }: Props) {
 }
 
 async function GameGuard({ params }: Pick<Props, "params">) {
+  await connection();
   const { lang, category, provider, game } = await params;
   if (!(await lobbyDetails(category, provider, game, lang))) notFound();
   return null;

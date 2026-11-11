@@ -1,7 +1,12 @@
 "use client";
 
 import { useI18n } from "@/components/I18nProvider";
+import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { fill } from "@/i18n";
+
+// Games column, same order in every language: Live Casino, Sports, Slots.
+// Paths match the top bar (config/topNav.ts). LobbyLink adds the language prefix.
+const GAME_LINKS = ["/casino/live-dealer", "/sports", "/casino/slots"];
 
 const socials = [
   { name: "Facebook", path: "M14 8h2V5h-2c-2.2 0-4 1.8-4 4v2H8v3h2v7h3v-7h2.2l.8-3H13V9c0-.6.4-1 1-1Z" },
@@ -16,13 +21,24 @@ export function LobbyFooter() {
   return (
     <footer className="mt-12 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-6 sm:px-8 sm:py-8">
       <div className="grid gap-8 sm:grid-cols-3">
-        {t.footer.columns.map((column) => (
+        {t.footer.columns.map((column, columnIndex) => (
           <section key={column.title} aria-label={column.title}>
             <h2 className="text-base font-semibold">{column.title}</h2>
             <ul className="mt-4 space-y-3 text-sm text-muted">
-              {column.items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
+              {column.items.map((item, itemIndex) => {
+                const href = columnIndex === 1 ? GAME_LINKS[itemIndex] : undefined;
+                return (
+                  <li key={item}>
+                    {href ? (
+                      <LobbyLink href={href} className="hover:text-white">
+                        {item}
+                      </LobbyLink>
+                    ) : (
+                      item
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </section>
         ))}

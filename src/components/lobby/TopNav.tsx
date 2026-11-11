@@ -70,7 +70,7 @@ export function TopNav({ route }: { route: string }) {
   );
 }
 
-// Title bar of a page that is not ready yet (Sports, VIP, Z-AI): the title and "Coming soon".
+// Title bar of a page that is not ready yet (Sports, Z-AI, Missions): the title and "Coming soon".
 export function ComingSoonHeader({ title }: { title: string }) {
   const { t } = useI18n();
   return (

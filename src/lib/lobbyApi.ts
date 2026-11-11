@@ -4,10 +4,9 @@ import type { Game, GameSymbol } from "@/config/lobby";
 import type { Provider } from "@/config/providers";
 
 // Product and game list helpers for the configured API (NEXT_PUBLIC_API_BASE_URL).
-// GET /config returns products at `data.product`. Each product has an internal
-// `code` and a `public_code`. The lobby locates a product by `public_code`.
-// POST /game_list still takes the internal code: `{ code: "<product code>" }`
-// plus a `country-id` header. `public_code` is not accepted there.
+// GET /config returns products at `data.product`. The lobby locates a product by
+// `public_code`. POST /game_list takes `{ public_code }` plus a `country-id` header.
+// Omit `public_code` to get every provider's games. The internal `code` is not sent.
 
 const PALETTE: [string, string][] = [
   ["#f59e0b", "#7c2d12"],
@@ -75,7 +74,7 @@ function text(value: unknown): string {
 }
 
 function toProvider(raw: RawProduct, group?: string): Provider | null {
-  // Locate by public_code. Keep `code` only for POST /game_list.
+  // Locate by public_code. `code` stays on the product record; game_list does not use it.
   const id = text(raw.public_code);
   const code = text(raw.code);
   const name = text(raw.name);
@@ -152,28 +151,41 @@ function toGame(raw: RawGame): Game | null {
   };
 }
 
+function pushGame(raw: unknown, publicCode: string | undefined, games: Game[], seen: Set<string>) {
+  const game = toGame(raw as RawGame);
+  if (!game || seen.has(game.id)) return;
+  seen.add(game.id);
+  // public_code comes from the provider wrapper, not from each game row.
+  games.push(publicCode ? { ...game, publicCode } : game);
+}
+
+// One provider is `{ public_code, games: [{ category, games: [game, ...] }] }`.
+// A category bucket is `{ category, games: [game, ...] }`. Flatten both.
+function collectGames(node: unknown, publicCode: string | undefined, games: Game[], seen: Set<string>) {
+  const rec = asRecord(node);
+  if (!rec) return;
+  const code = text(rec.public_code) || publicCode;
+  if (!Array.isArray(rec.games)) {
+    pushGame(rec, code, games, seen);
+    return;
+  }
+  for (const item of rec.games) {
+    const child = asRecord(item);
+    if (child && Array.isArray(child.games)) {
+      collectGames(child, code, games, seen);
+      continue;
+    }
+    pushGame(item, code, games, seen);
+  }
+}
+
 export function parseGameList(payload: unknown): Game[] {
   const root = asRecord(payload);
   const data = root?.data ?? payload;
-  const groups = Array.isArray(data) ? data : [];
+  const groups = Array.isArray(data) ? data : [data];
   const games: Game[] = [];
   const seen = new Set<string>();
-
-  for (const group of groups) {
-    const rec = asRecord(group);
-    const list = Array.isArray(rec?.games)
-      ? (rec?.games as RawGame[])
-      : rec && "name" in rec
-        ? [rec as RawGame]
-        : [];
-    for (const item of list) {
-      const game = toGame(item);
-      if (!game || seen.has(game.id)) continue;
-      seen.add(game.id);
-      games.push(game);
-    }
-  }
-
+  for (const group of groups) collectGames(group, undefined, games, seen);
   return games;
 }
 
@@ -206,7 +218,7 @@ export async function findLobbyGame(
 ): Promise<{ game: Game; others: Game[] } | null> {
   const product = (await fetchLobbyProducts(locale)).find((item) => item.id === publicCode);
   if (!product) return null;
-  const games = (await fetchLobbyGames(product.code, locale)).map((game) => ({
+  const games = (await fetchLobbyGames(locale, product.id)).map((game) => ({
     ...game,
     publicCode: product.id,
   }));
@@ -215,8 +227,12 @@ export async function findLobbyGame(
   return { game, others: games.filter((item) => item.gameCode !== gameCode) };
 }
 
-export async function fetchLobbyGames(code: string, locale: string): Promise<Game[]> {
-  if (!apiConfig.baseUrl) return [];
+// `publicCode` filters one provider. Omit it for every provider's games.
+export async function loadLobbyGames(
+  locale: string,
+  publicCode?: string,
+): Promise<{ games: Game[]; error?: boolean }> {
+  if (!apiConfig.baseUrl) return { games: [] };
   try {
     const payload = await apiJson(`${apiConfig.gameListPath}?locale=${encodeURIComponent(locale)}`, {
       method: "POST",
@@ -226,12 +242,18 @@ export async function fetchLobbyGames(code: string, locale: string): Promise<Gam
         "Content-Type": "application/json",
         "country-id": lobbyCountryId(),
       },
-      body: JSON.stringify({ code }),
+      // POST /game_list { public_code }. No public_code means all providers.
+      body: JSON.stringify(publicCode ? { public_code: publicCode } : {}),
     });
-    return parseGameList(payload);
+    return { games: parseGameList(payload) };
   } catch {
-    return [];
+    return { games: [], error: true };
   }
+}
+
+export async function fetchLobbyGames(locale: string, publicCode?: string): Promise<Game[]> {
+  const result = await loadLobbyGames(locale, publicCode);
+  return result.games;
 }
 
 export function providersForCategory(providers: Provider[], slug?: string): Provider[] {

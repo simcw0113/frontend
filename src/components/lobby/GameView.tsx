@@ -61,10 +61,10 @@ function subscribeFullscreen(listener: () => void) {
   return () => document.removeEventListener("fullscreenchange", listener);
 }
 
-export function GameView({ promise, onRegister }: { promise: Promise<GamePageData>; onRegister: () => void }) {
+export function GameView({ promise, onSignIn }: { promise: Promise<GamePageData>; onSignIn: () => void }) {
   const data = use(promise);
   if (!data) return null; // the page's notFound() answers
-  return <GameBody key={data.game.id} data={data} onRegister={onRegister} />;
+  return <GameBody key={data.game.id} data={data} onSignIn={onSignIn} />;
 }
 
 function Cover({ game, size }: { game: Game; size: number }) {
@@ -103,7 +103,7 @@ function DockButton({
 
 const ICON = "gp-icon";
 
-function GameBody({ data, onRegister }: { data: NonNullable<GamePageData>; onRegister: () => void }) {
+function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignIn: () => void }) {
   const { t, locale, href: localized } = useI18n();
   const router = useRouter();
   const { game, launch, recommended } = data;
@@ -204,11 +204,15 @@ function GameBody({ data, onRegister }: { data: NonNullable<GamePageData>; onReg
 
   const percent = (value: number) =>
     fill(t.gamePage.percent, { value: value.toLocaleString(htmlLang(locale), { minimumFractionDigits: 2 }) });
+  // Category is a link to that category's list, same as KickWin's Slots tag
+  // (/casino/category/slots). LobbyLink adds the language prefix.
   const stats = [
     game.rtp !== undefined ? { label: t.gamePage.statRtp, value: percent(game.rtp) } : null,
     game.edge !== undefined ? { label: t.gamePage.statEdge, value: percent(game.edge) } : null,
-    category ? { label: t.gamePage.statCategory, value: t.lobby[category.titleKey] } : null,
-  ].filter((stat): stat is { label: string; value: string } => stat !== null);
+    category
+      ? { label: t.gamePage.statCategory, value: t.lobby[category.titleKey], href: `/casino/${category.slug}` }
+      : null,
+  ].filter((stat): stat is { label: string; value: string; href?: string } => stat !== null);
 
   return (
     <div className={`gp${theatre ? " is-theatre" : ""}`}>
@@ -239,8 +243,8 @@ function GameBody({ data, onRegister }: { data: NonNullable<GamePageData>; onReg
               <div className="gp-error">
                 <p>{"error" in launch && launch.error === "signin" ? t.gamePage.signIn : t.gamePage.loadError}</p>
                 {"error" in launch && launch.error === "signin" ? (
-                  <button type="button" onClick={onRegister} className="gp-cta">
-                    {t.auth.joinUs}
+                  <button type="button" onClick={onSignIn} className="gp-cta">
+                    {t.auth.signIn}
                   </button>
                 ) : null}
               </div>
@@ -308,7 +312,15 @@ function GameBody({ data, onRegister }: { data: NonNullable<GamePageData>; onReg
               {stats.map((stat) => (
                 <div key={stat.label} className="gp-stat">
                   <dt>{stat.label}</dt>
-                  <dd>{stat.value}</dd>
+                  <dd>
+                    {stat.href ? (
+                      <LobbyLink href={stat.href} className="gp-stat-link">
+                        {stat.value}
+                      </LobbyLink>
+                    ) : (
+                      stat.value
+                    )}
+                  </dd>
                 </div>
               ))}
             </dl>

@@ -15,6 +15,14 @@ import { AUTH_TOKEN_EVENT, isSignedIn } from "@/lib/token";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+// CMS HTML from POST /promotion. Drop scripts, frames, and inline event handlers.
+function promoHtml(html: string) {
+  return html
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gi, "")
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+}
 const PROMO_PARAM = "promo";
 const PROMO_EVENT = "promo-param-change";
 
@@ -415,6 +423,10 @@ function PromoModal({
               </p>
             ) : null}
             {promo.summary ? <p className="text-sm text-white/85">{promo.summary}</p> : null}
+            {promo.content ? (
+              // CMS HTML from POST /promotion. Scripts are stripped before render.
+              <div className="promo-content" dangerouslySetInnerHTML={{ __html: promoHtml(promo.content) }} />
+            ) : null}
             {promo.terms.length > 0 ? (
               <div>
                 <h3 className="mb-1.5 text-xs font-bold tracking-wide text-muted uppercase">{t.promotions.terms}</h3>

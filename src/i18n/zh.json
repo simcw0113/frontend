@@ -200,10 +200,73 @@
     "vip": "VIP",
     "zAi": "Z-AI"
   },
+  "vip": {
+    "meta": "VIP 等级、返水与回馈。",
+    "sample": "这是示例进度。VIP 接口准备好之后，这里会显示你自己的等级。",
+    "current": "当前等级",
+    "progress": "你的 VIP 进度",
+    "wagered": "已投注",
+    "more": "再投注 {amount} 升到 {level}",
+    "nextReward": "下一级升级奖励",
+    "rakeback": "返水",
+    "claimed": "已领取奖金",
+    "claimedState": "已领取",
+    "details": "明细",
+    "redeem": "兑换码",
+    "redeemSubmit": "兑换",
+    "redeemUnavailable": "兑换码暂时还不能用。",
+    "bonus": "VIP 奖金",
+    "claim": "领取",
+    "locked": "未解锁",
+    "otherLevels": "其他等级",
+    "levelName": "{name} {tier}",
+    "levelCount": "{count} 个等级",
+    "tiers": "{filled} / {total}",
+    "reward": "奖励",
+    "play": "去娱乐场",
+    "faqTitle": "常见问题",
+    "levels": {
+      "silver": "白银",
+      "gold": "黄金",
+      "emerald": "翡翠",
+      "sapphire": "蓝宝石",
+      "ruby": "红宝石",
+      "diamond": "钻石"
+    },
+    "rewards": {
+      "reload": "再存奖金",
+      "instant": "即时返水",
+      "daily": "每日返水",
+      "weekly": "每周回馈",
+      "monthly": "每月回馈"
+    },
+    "faq": [
+      {
+        "q": "什么是即时返水？",
+        "a": "按投注产生的庄家优势返还一部分。比例跟 VIP 等级走，赢或输都会计算。"
+      },
+      {
+        "q": "什么是每日返水？",
+        "a": "同一套庄家优势返还，按一天累计，当天结算后再发放。"
+      },
+      {
+        "q": "什么是再存奖金？",
+        "a": "按你的投注额和当前 VIP 等级计算的一笔奖金。"
+      },
+      {
+        "q": "什么是每周回馈？",
+        "a": "每周结算一次，按当周的游戏和 VIP 等级计算。"
+      },
+      {
+        "q": "什么是每月回馈？",
+        "a": "每月结算一次，按当月的游戏和 VIP 等级计算。"
+      }
+    ]
+  },
   "comingSoon": {
     "text": "敬请期待",
     "sportsMeta": "体育投注即将上线。",
-    "vipMeta": "VIP 俱乐部即将上线。",
+    "vipMeta": "VIP 等级、返水与回馈。",
     "zAiMeta": "Z-AI 即将上线。",
     "missionsMeta": "任务即将推出。"
   },

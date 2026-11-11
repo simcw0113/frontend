@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/vip">): Pr
   const t = dictionaries[isSlug(lang) ? fromSlug(lang) : "en"];
   return {
     title: t.topNav.vip,
-    description: t.comingSoon.vipMeta,
+    description: t.vip.meta,
     alternates: {
       canonical: isSlug(lang) ? localizedPath(lang, PATH) : undefined,
       languages: languageAlternates(PATH),
@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/vip">): Pr
   };
 }
 
-// Placeholder inside the lobby shell (header, sidebar, footer): title + "Coming soon".
+// VIP club inside the lobby shell. Figures are the sample in config/vip.ts.
 export default function VipPage() {
   return <LobbyScreen focus="vip" games={{}} />;
 }

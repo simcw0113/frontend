@@ -2,7 +2,7 @@
 // monogram shown when `image` is missing.
 export type Provider = {
   id: string; // public_code — the lobby locates a product by this
-  code: string; // internal product code sent to POST /game_list
+  code: string; // internal product code from GET /config; game_list does not receive it
   name: string;
   mark: string;
   accent: string;

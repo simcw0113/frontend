@@ -35,6 +35,7 @@ export const apiConfig = {
   infoPath: "/info",
   configPath: "/config",
   gameListPath: "/game_list",
+  // POST /game_list body is `{ public_code }` or `{}` for every provider.
   // Sent as the `country-id` header on POST /game_list.
   lobbyCountryId: process.env.NEXT_PUBLIC_LOBBY_COUNTRY_ID ?? "1",
   // TODO(API): placeholder. {category} is replaced by the slug ("slots", "trending-games");
@@ -46,8 +47,9 @@ export const apiConfig = {
   topWinsPath: "/wins/top-month",
   // TODO(API): placeholder for the partner list (id, name, logo URL); lang is sent as a query parameter.
   partnersPath: "/partners",
-  // TODO(API): placeholder for the promotions list (already localized); lang is sent as a query parameter.
-  promotionsPath: "/promotions",
+  // POST /promotion. Body: { locale }. Header: country-id. Text is already localized.
+  // `data[0]` is every promo (category 0 = all); later indexes are category buckets.
+  promotionsPath: "/promotion",
   // TODO(API): placeholders for the signed-in player's lists (user-specific: sent with the
   // auth token as a Bearer header, never cached); lang is sent as a query parameter.
   recentGamesPath: "/player/games/recent",

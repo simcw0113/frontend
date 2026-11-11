@@ -200,10 +200,73 @@
     "vip": "VIP",
     "zAi": "Z-AI"
   },
+  "vip": {
+    "meta": "VIP-Stufen, Rakeback und Cashback.",
+    "sample": "Beispiel-Fortschritt. Deine echte VIP-Stufe erscheint hier, sobald die VIP-Schnittstelle bereit ist.",
+    "current": "Aktuelle Stufe",
+    "progress": "Dein VIP-Fortschritt",
+    "wagered": "Eingesetzt",
+    "more": "Noch {amount} bis {level}",
+    "nextReward": "Belohnung für die nächste Stufe",
+    "rakeback": "Rakeback",
+    "claimed": "Bereits erhalten",
+    "claimedState": "Erhalten",
+    "details": "Details",
+    "redeem": "Einlösecode",
+    "redeemSubmit": "Einlösen",
+    "redeemUnavailable": "Einlösecodes sind noch nicht verfügbar.",
+    "bonus": "VIP-Bonus",
+    "claim": "Abholen",
+    "locked": "Gesperrt",
+    "otherLevels": "Weitere Stufen",
+    "levelName": "{name} {tier}",
+    "levelCount": "{count} Stufen",
+    "tiers": "{filled} von {total}",
+    "reward": "Belohnung",
+    "play": "Zum Casino",
+    "faqTitle": "Häufige Fragen",
+    "levels": {
+      "silver": "Silber",
+      "gold": "Gold",
+      "emerald": "Smaragd",
+      "sapphire": "Saphir",
+      "ruby": "Rubin",
+      "diamond": "Diamant"
+    },
+    "rewards": {
+      "reload": "Reload",
+      "instant": "Sofort-Rakeback",
+      "daily": "Tägliches Rakeback",
+      "weekly": "Wöchentliches Cashback",
+      "monthly": "Monatliches Cashback"
+    },
+    "faq": [
+      {
+        "q": "Was ist Sofort-Rakeback?",
+        "a": "Ein Anteil der Hauskante aus deinen Einsätzen. Der Satz hängt von der VIP-Stufe ab und gilt unabhängig von Gewinn oder Verlust."
+      },
+      {
+        "q": "Was ist tägliches Rakeback?",
+        "a": "Derselbe Anteil der Hauskante, über den Tag gesammelt und nach dem Tagesabschluss ausgezahlt."
+      },
+      {
+        "q": "Was ist Reload?",
+        "a": "Ein Bonus nach Einsatzhöhe und VIP-Stufe."
+      },
+      {
+        "q": "Was ist wöchentliches Cashback?",
+        "a": "Eine Belohnung, die einmal pro Woche aus deinem Spiel und deiner VIP-Stufe berechnet wird."
+      },
+      {
+        "q": "Was ist monatliches Cashback?",
+        "a": "Eine Belohnung, die einmal im Monat aus deinem Spiel und deiner VIP-Stufe berechnet wird."
+      }
+    ]
+  },
   "comingSoon": {
     "text": "Demnächst verfügbar",
     "sportsMeta": "Sportwetten sind bald verfügbar.",
-    "vipMeta": "Der VIP-Club kommt bald.",
+    "vipMeta": "VIP-Stufen, Rakeback und Cashback.",
     "zAiMeta": "Z-AI kommt bald.",
     "missionsMeta": "Missionen sind bald verfügbar."
   },

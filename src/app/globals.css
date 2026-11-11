@@ -1491,6 +1491,30 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
   backdrop-filter: blur(10px);
 }
 
+.promo-content {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: rgb(255 255 255 / 0.85);
+}
+
+.promo-content :where(p, ul, ol) {
+  margin: 0.5rem 0;
+}
+
+.promo-content :where(ul, ol) {
+  padding-left: 1.1rem;
+}
+
+.promo-content :where(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.promo-content :where(a) {
+  color: var(--brand);
+}
+
 .promo-dialog-card {
   max-height: min(90dvh, 44rem);
   overflow-y: auto;
@@ -2025,6 +2049,14 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
 .gp-stat dd {
   font-weight: 700;
   color: #fff;
+}
+.gp-stat-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.gp-stat-link:hover {
+  color: var(--brand);
 }
 @media (min-width: 1280px) {
   /* Stat tiles: two per row; an odd last tile (Category) takes the full row. */

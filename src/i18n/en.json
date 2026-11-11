@@ -200,10 +200,73 @@
     "vip": "VIP",
     "zAi": "Z-AI"
   },
+  "vip": {
+    "meta": "VIP levels, rakeback and cashback.",
+    "sample": "Sample progress. Your real VIP level will show here once the VIP API is ready.",
+    "current": "Current level",
+    "progress": "Your VIP progress",
+    "wagered": "Wagered",
+    "more": "{amount} more to {level}",
+    "nextReward": "Next level up reward",
+    "rakeback": "Rakeback",
+    "claimed": "Total bonus claimed",
+    "claimedState": "Claimed",
+    "details": "Details",
+    "redeem": "Redemption code",
+    "redeemSubmit": "Redeem",
+    "redeemUnavailable": "Redemption codes are not available yet.",
+    "bonus": "VIP bonus",
+    "claim": "Claim",
+    "locked": "Locked",
+    "otherLevels": "Other levels",
+    "levelName": "{name} {tier}",
+    "levelCount": "{count} levels",
+    "tiers": "{filled} of {total}",
+    "reward": "Reward",
+    "play": "Go to casino",
+    "faqTitle": "Frequently asked questions",
+    "levels": {
+      "silver": "Silver",
+      "gold": "Gold",
+      "emerald": "Emerald",
+      "sapphire": "Sapphire",
+      "ruby": "Ruby",
+      "diamond": "Diamond"
+    },
+    "rewards": {
+      "reload": "Reload",
+      "instant": "Instant rakeback",
+      "daily": "Daily rakeback",
+      "weekly": "Weekly cashback",
+      "monthly": "Monthly cashback"
+    },
+    "faq": [
+      {
+        "q": "What is instant rakeback?",
+        "a": "A share of the house edge from your wagers. The rate follows your VIP level, and it is earned whether the bets win or lose."
+      },
+      {
+        "q": "What is daily rakeback?",
+        "a": "The same share of house edge, added up through the day and paid after that day closes."
+      },
+      {
+        "q": "What is reload?",
+        "a": "A bonus based on how much you wager and which VIP level you are on."
+      },
+      {
+        "q": "What is weekly cashback?",
+        "a": "A reward settled once a week from your play and your VIP level."
+      },
+      {
+        "q": "What is monthly cashback?",
+        "a": "A reward settled once a month from your play and your VIP level."
+      }
+    ]
+  },
   "comingSoon": {
     "text": "Coming soon",
     "sportsMeta": "Sports betting is coming soon.",
-    "vipMeta": "The VIP club is coming soon.",
+    "vipMeta": "VIP levels, rakeback and cashback.",
     "zAiMeta": "Z-AI is coming soon.",
     "missionsMeta": "Missions are coming soon."
   },

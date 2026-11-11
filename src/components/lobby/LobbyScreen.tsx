@@ -1,11 +1,11 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Suspense, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { Suspense, use, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import type { AuthView } from "@/components/auth/AuthFormPanel";
 import { SignInDialog } from "@/components/SignInDialog";
 import { useI18n } from "@/components/I18nProvider";
-import { bannerSlides } from "@/config/banners";
+import { bannerSlides, type BannerSlide } from "@/config/banners";
 import { siteConfig } from "@/config/site";
 import { defaultCasinoCategory, findCasinoCategory } from "@/config/categories";
 import { HOME_SCROLL_KEY, HomeGameContent } from "@/components/lobby/HomeGameContent";
@@ -19,6 +19,7 @@ import { ProviderGames, ProviderGamesSkeleton } from "@/components/lobby/Provide
 import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { SearchModal } from "@/components/lobby/SearchModal";
 import { ComingSoonHeader, TopNav } from "@/components/lobby/TopNav";
+import { VipClub, VipHeader } from "@/components/lobby/VipClub";
 import { sidebarMissionsItem, sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
 import { PlayerGameList } from "@/components/lobby/HomeGameContent";
 import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
@@ -63,6 +64,7 @@ export function LobbyScreen({
   partners,
   promotions,
   gamePage,
+  banners,
 }: {
   focus?: LobbyFocus;
   category?: string;
@@ -73,6 +75,7 @@ export function LobbyScreen({
   partners?: Promise<PartnersResult>; // home only
   promotions?: Promise<PromotionsResult>; // promotions page only
   gamePage?: Promise<GamePageData>; // game page only (/casino/{category}/game/{id})
+  banners?: Promise<BannerSlide[]>; // home only; GET /config data.banners
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
   // Category pages filter the open provider list in place. Home still opens Explore.
@@ -248,7 +251,7 @@ export function LobbyScreen({
     : gamesPage && providerInList
       ? provider
       : null;
-  // `activeProvider` is public_code. Game list still needs the internal product code.
+  // `activeProvider` is public_code, which POST /game_list accepts as `public_code`.
   const activeProduct = activeProvider
     ? visibleProviders.find((item) => item.id === activeProvider)
     : undefined;
@@ -476,9 +479,15 @@ export function LobbyScreen({
 
         <main id="content" data-route={route} data-lang={toSlug(locale)} className="min-w-0 px-3 py-4 sm:px-5">
           <div className="lobby-vt-top">
-            {focus === "home" ? <Hero /> : focus === "promotions" ? <PromotionsHeader /> : playerPage ? (
+            {focus === "home" ? (
+              <Suspense fallback={<BannerSkeleton />}>
+                <Hero banners={banners} />
+              </Suspense>
+            ) : focus === "promotions" ? <PromotionsHeader /> : playerPage ? (
               <PlayerHeader focus={focus} />
-            ) : focus === "sports" || focus === "vip" || focus === "z-ai" || focus === "missions" ? (
+            ) : focus === "vip" ? (
+              <VipHeader />
+            ) : focus === "sports" || focus === "z-ai" || focus === "missions" ? (
               <ComingSoonHeader title={focus === "z-ai" ? t.topNav.zAi : focus === "missions" ? t.menu.missions : t.topNav[focus]} />
             ) : focus === "game" ? null : (
               <LobbyLink
@@ -563,7 +572,13 @@ export function LobbyScreen({
           ) : focus === "game" ? (
             gamePage ? (
               <Suspense fallback={<GameViewSkeleton />}>
-                <GameView promise={gamePage} onRegister={openRegister} />
+                <GameView
+                  promise={gamePage}
+                  onSignIn={() => {
+                    setAuthView("login");
+                    setSignInOpen(true);
+                  }}
+                />
               </Suspense>
             ) : null
           ) : playerPage ? (
@@ -579,7 +594,6 @@ export function LobbyScreen({
               <ProviderRow selected={activeProvider} onSelect={selectProvider} providers={visibleProviders} />
               {activeProduct ? (
                 <ProviderGames
-                  code={activeProduct.code}
                   publicCode={activeProduct.id}
                   category={casino.slug}
                   query={focus === "casino" ? gameQuery : ""}
@@ -597,6 +611,8 @@ export function LobbyScreen({
                 </>
               )}
             </>
+          ) : focus === "vip" ? (
+            <VipClub />
           ) : null}
           <LobbyFooter />
           </div>
@@ -622,13 +638,21 @@ export function LobbyScreen({
   );
 }
 
-function Hero() {
+function BannerSkeleton() {
+  return <div className="aspect-[4/1] animate-pulse rounded-2xl bg-white/5" />;
+}
+
+// Stable fallback so Hero can always call use(). Home passes GET /config banners.
+const fallbackBanners = Promise.resolve(bannerSlides);
+
+function Hero({ banners = fallbackBanners }: { banners?: Promise<BannerSlide[]> }) {
   const { t } = useI18n();
+  const slides = use(banners);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const placed = useRef(false);
-  const count = bannerSlides.length;
+  const count = slides.length;
 
   useEffect(() => {
     const track = trackRef.current;
@@ -656,7 +680,7 @@ function Hero() {
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (media.matches || paused) return;
+    if (media.matches || paused || count < 2) return;
     const id = window.setInterval(() => {
       setIndex((current) => (current + 1) % count);
     }, 6000);
@@ -664,6 +688,7 @@ function Hero() {
   }, [count, paused]);
 
   function go(next: number) {
+    if (count < 1) return;
     setIndex(((next % count) + count) % count);
   }
 
@@ -677,6 +702,8 @@ function Hero() {
       go(index - 1);
     }
   }
+
+  if (count === 0) return null;
 
   return (
     <section
@@ -692,22 +719,30 @@ function Hero() {
       }}
     >
       <div ref={trackRef} className="flex">
-        {bannerSlides.map((slide, slideIndex) => {
+        {slides.map((slide, slideIndex) => {
           const active = slideIndex === index;
+          const alt = fill(t.lobby.bannerAlt, { n: slideIndex + 1 });
+          const image = (
+            <picture className="block h-full">
+              {slide.mobileUrl ? <source media="(max-width: 767px)" srcSet={slide.mobileUrl} /> : null}
+              <img src={slide.imageUrl} alt={alt} className="h-full w-full object-cover" draggable={false} />
+            </picture>
+          );
           return (
             <article key={slide.id} aria-hidden={!active} className="aspect-[4/1] w-full shrink-0">
-              <img
-                src={slide.imageUrl}
-                alt={fill(t.lobby.bannerAlt, { n: slideIndex + 1 })}
-                className="h-full w-full object-cover"
-                draggable={false}
-              />
+              {slide.href ? (
+                <a href={slide.href} className="block h-full w-full">
+                  {image}
+                </a>
+              ) : (
+                image
+              )}
             </article>
           );
         })}
       </div>
       <div className="absolute inset-x-0 bottom-3 flex items-center justify-center gap-2">
-        {bannerSlides.map((slide, slideIndex) => (
+        {slides.map((slide, slideIndex) => (
           <button
             key={slide.id}
             type="button"
@@ -718,22 +753,26 @@ function Hero() {
           />
         ))}
       </div>
-      <button
-        type="button"
-        aria-label={t.lobby.previous}
-        onClick={() => go(index - 1)}
-        className="absolute top-1/2 left-3 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white/15 text-lg text-white"
-      >
-        <span aria-hidden="true">‹</span>
-      </button>
-      <button
-        type="button"
-        aria-label={t.lobby.next}
-        onClick={() => go(index + 1)}
-        className="absolute top-1/2 right-3 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white/15 text-lg text-white"
-      >
-        <span aria-hidden="true">→</span>
-      </button>
+      {count > 1 ? (
+        <>
+          <button
+            type="button"
+            aria-label={t.lobby.previous}
+            onClick={() => go(index - 1)}
+            className="absolute top-1/2 left-3 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white/15 text-lg text-white"
+          >
+            <span aria-hidden="true">‹</span>
+          </button>
+          <button
+            type="button"
+            aria-label={t.lobby.next}
+            onClick={() => go(index + 1)}
+            className="absolute top-1/2 right-3 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white/15 text-lg text-white"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
+        </>
+      ) : null}
     </section>
   );
 }

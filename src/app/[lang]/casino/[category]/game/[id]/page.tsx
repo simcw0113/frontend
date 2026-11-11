@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { LobbyScreen } from "@/components/lobby/LobbyScreen";
 import { findCasinoCategory } from "@/config/categories";
@@ -46,6 +47,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 // proxy.ts in static mode; GameGuard keeps notFound() as a backstop (and for the API mode).
 export default function GamePage({ params }: Props) {
   const game = params.then(async ({ lang, category, id }) => {
+    // fetch and AbortSignal.timeout call Date.now(). With cacheComponents that
+    // clock is only allowed after the render reaches the dynamic stage.
+    await connection();
     const details = findCasinoCategory(category) ? await getGameDetails(category, id, { lang }) : null;
     if (!details) return null;
     const token = await getAuthTokenFromCookie();
@@ -69,6 +73,7 @@ export default function GamePage({ params }: Props) {
 }
 
 async function GameGuard({ params }: Pick<Props, "params">) {
+  await connection();
   const { lang, category, id } = await params;
   if (!findCasinoCategory(category) || !(await getGameDetails(category, id, { lang }))) notFound();
   return null;

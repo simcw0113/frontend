@@ -12,12 +12,10 @@ const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8";
 const PAGE_SIZE = 40;
 
 export function ProviderGames({
-  code,
   publicCode,
   category,
   query = "",
 }: {
-  code: string;
   publicCode: string;
   category: string;
   query?: string; // category page: filter the loaded list in place, no search dialog
@@ -35,7 +33,7 @@ export function ProviderGames({
     fetch("/api/lobby/games", {
       method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify({ code, locale }),
+      body: JSON.stringify({ publicCode, locale }),
       signal: controller.signal,
     })
       .then(async (response) => {
@@ -44,7 +42,7 @@ export function ProviderGames({
       })
       .then((payload) => {
         const games = Array.isArray(payload.games) ? payload.games : [];
-        setGames(games.map((game) => ({ ...game, publicCode })));
+        setGames(games.map((game) => ({ ...game, publicCode: game.publicCode || publicCode })));
         setState("ready");
       })
       .catch((error: unknown) => {
@@ -53,12 +51,12 @@ export function ProviderGames({
       });
 
     return () => controller.abort();
-  }, [code, publicCode, locale]);
+  }, [publicCode, locale]);
 
   // A new provider or a new search starts again at the first batch.
   useEffect(() => {
     setShown(PAGE_SIZE);
-  }, [code, query]);
+  }, [publicCode, query]);
 
   if (state === "loading") return <ProviderGamesSkeleton />;
   if (state === "error") return <Notice>{t.lobby.loadError}</Notice>;

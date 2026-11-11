@@ -130,7 +130,7 @@ check("sitemap lists /en/promotions", sitemap.html.includes("/en/promotions</loc
 
 // Top bar links (config/topNav.ts): 6 links in this order inside the header, the shown page's
 // link marked aria-current="page". Live Dealer is its own page but no home row; Sports and VIP
-// are "Coming soon" placeholders.
+// Sports and Z-AI are "Coming soon" placeholders. VIP is the sample club page.
 const topNavPaths = ["/casino/slots", "/casino/live-dealer", "/sports", "/promotions", "/vip", "/z-ai"];
 function topNavLinks(html) {
   const header = html.slice(html.indexOf("<header"), html.indexOf("</header>"));
@@ -147,7 +147,7 @@ for (const lang of Object.keys(comingSoon)) {
     `/${lang} top bar has 6 links in order (Slots, Live Dealer, Sports, Promotions, VIP, Z-AI), none current on home`,
     links.length === 6 && links.every((link, i) => link.href === `/${lang}${topNavPaths[i]}` && !link.current),
   );
-  for (const path of ["/sports", "/vip", "/z-ai"]) {
+  for (const path of ["/sports", "/z-ai"]) {
     const { status, html } = await page(`/${lang}${path}`);
     const current = topNavLinks(html).filter((link) => link.current).map((link) => link.href);
     check(
@@ -155,6 +155,12 @@ for (const lang of Object.keys(comingSoon)) {
       status === 200 && html.includes(comingSoon[lang]) && current.join() === `/${lang}${path}` && !html.includes('id="lobby-search"'),
     );
   }
+  const vip = await page(`/${lang}/vip`);
+  const vipCurrent = topNavLinks(vip.html).filter((link) => link.current).map((link) => link.href);
+  check(
+    `/${lang}/vip responds 200 with the sample club, its top link current, no search bar`,
+    vip.status === 200 && vip.html.includes("data-vip-page") && vipCurrent.join() === `/${lang}/vip` && !vip.html.includes('id="lobby-search"'),
+  );
 }
 {
   const header = (await page("/en")).html;

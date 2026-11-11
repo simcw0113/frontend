@@ -200,10 +200,73 @@
     "vip": "VIP",
     "zAi": "Z-AI"
   },
+  "vip": {
+    "meta": "Niveles VIP, rakeback y cashback.",
+    "sample": "Progreso de ejemplo. Tu nivel VIP real aparecerá aquí cuando la API de VIP esté lista.",
+    "current": "Nivel actual",
+    "progress": "Tu progreso VIP",
+    "wagered": "Apostado",
+    "more": "Faltan {amount} para {level}",
+    "nextReward": "Premio del siguiente nivel",
+    "rakeback": "Rakeback",
+    "claimed": "Bonos cobrados",
+    "claimedState": "Cobrado",
+    "details": "Detalles",
+    "redeem": "Código de canje",
+    "redeemSubmit": "Canjear",
+    "redeemUnavailable": "Los códigos de canje aún no están disponibles.",
+    "bonus": "Bono VIP",
+    "claim": "Cobrar",
+    "locked": "Bloqueado",
+    "otherLevels": "Otros niveles",
+    "levelName": "{name} {tier}",
+    "levelCount": "{count} niveles",
+    "tiers": "{filled} de {total}",
+    "reward": "Premio",
+    "play": "Ir al casino",
+    "faqTitle": "Preguntas frecuentes",
+    "levels": {
+      "silver": "Plata",
+      "gold": "Oro",
+      "emerald": "Esmeralda",
+      "sapphire": "Zafiro",
+      "ruby": "Rubí",
+      "diamond": "Diamante"
+    },
+    "rewards": {
+      "reload": "Recarga",
+      "instant": "Rakeback instantáneo",
+      "daily": "Rakeback diario",
+      "weekly": "Cashback semanal",
+      "monthly": "Cashback mensual"
+    },
+    "faq": [
+      {
+        "q": "¿Qué es el rakeback instantáneo?",
+        "a": "Una parte de la ventaja de la casa de tus apuestas. El porcentaje depende del nivel VIP y se gana ganes o pierdas."
+      },
+      {
+        "q": "¿Qué es el rakeback diario?",
+        "a": "La misma parte de la ventaja de la casa, sumada durante el día y pagada al cerrar ese día."
+      },
+      {
+        "q": "¿Qué es la recarga?",
+        "a": "Un bono según lo apostado y tu nivel VIP."
+      },
+      {
+        "q": "¿Qué es el cashback semanal?",
+        "a": "Un premio que se calcula una vez por semana con tu juego y tu nivel VIP."
+      },
+      {
+        "q": "¿Qué es el cashback mensual?",
+        "a": "Un premio que se calcula una vez al mes con tu juego y tu nivel VIP."
+      }
+    ]
+  },
   "comingSoon": {
     "text": "Próximamente",
     "sportsMeta": "Las apuestas deportivas llegan pronto.",
-    "vipMeta": "El club VIP llega pronto.",
+    "vipMeta": "Niveles VIP, rakeback y cashback.",
     "zAiMeta": "Z-AI llega pronto.",
     "missionsMeta": "Las misiones llegarán pronto."
   },
