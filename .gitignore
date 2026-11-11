@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# Build stamp. Rewritten by npm run build and kept out of the page.
+src/lib/buildMeta.generated.ts
+
 # production
 /build
 
