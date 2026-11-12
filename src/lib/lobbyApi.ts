@@ -1,6 +1,6 @@
 import { apiConfig } from "@/config/site";
-import { isLanguageCode } from "@/i18n/languages";
 import { apiJson } from "@/lib/api";
+import { isLanguageCode } from "@/i18n/languages";
 import type { Game, GameSymbol } from "@/config/lobby";
 import type { Provider } from "@/config/providers";
 
@@ -134,6 +134,7 @@ type RawGame = {
   image?: unknown;
   code?: unknown;
   game_code?: unknown;
+  public_code?: unknown;
 };
 
 function toGame(raw: RawGame): Game | null {
@@ -157,17 +158,29 @@ function toGame(raw: RawGame): Game | null {
   };
 }
 
-function pushGame(raw: unknown, publicCode: string | undefined, games: Game[], seen: Set<string>) {
+function pushGame(
+  raw: unknown,
+  publicCode: string | undefined,
+  games: Game[],
+  seen: Set<string>,
+) {
   const game = toGame(raw as RawGame);
   if (!game || seen.has(game.id)) return;
   seen.add(game.id);
-  // public_code comes from the provider wrapper, not from each game row.
-  games.push(publicCode ? { ...game, publicCode } : game);
+  // Nested lists put public_code on the provider wrapper; the paginated flat
+  // list puts it on each game row.
+  const code = text((raw as RawGame).public_code) || publicCode;
+  games.push(code ? { ...game, publicCode: code } : game);
 }
 
-// One provider is `{ public_code, games: [{ category, games: [game, ...] }] }`.
+// One provider is `{ public_code, name, games: [{ category, games: [game, ...] }] }`.
 // A category bucket is `{ category, games: [game, ...] }`. Flatten both.
-function collectGames(node: unknown, publicCode: string | undefined, games: Game[], seen: Set<string>) {
+function collectGames(
+  node: unknown,
+  publicCode: string | undefined,
+  games: Game[],
+  seen: Set<string>,
+) {
   const rec = asRecord(node);
   if (!rec) return;
   const code = text(rec.public_code) || publicCode;
@@ -188,11 +201,47 @@ function collectGames(node: unknown, publicCode: string | undefined, games: Game
 export function parseGameList(payload: unknown): Game[] {
   const root = asRecord(payload);
   const data = root?.data ?? payload;
+  // Paginated POST /game_list?limit=…: data is { games, total, page, limit, last_page }.
+  // Unpaginated (no limit): data is the nested provider + category tree.
+  const envelope = asRecord(data);
+  if (envelope && Array.isArray(envelope.games) && !Array.isArray(data)) {
+    const games: Game[] = [];
+    const seen = new Set<string>();
+    for (const item of envelope.games) pushGame(item, undefined, games, seen);
+    return games;
+  }
   const groups = Array.isArray(data) ? data : [data];
   const games: Game[] = [];
   const seen = new Set<string>();
   for (const group of groups) collectGames(group, undefined, games, seen);
   return games;
+}
+
+function readInt(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+export type LobbyGamesPage = {
+  games: Game[];
+  total?: number;
+  page?: number;
+  limit?: number;
+  lastPage?: number;
+  error?: boolean;
+};
+
+// Reads total/page/limit/last_page from data or the top level (either placement).
+export function parseGameListPage(payload: unknown): LobbyGamesPage {
+  const games = parseGameList(payload);
+  const root = asRecord(payload);
+  const data = asRecord(root?.data) ?? root;
+  return {
+    games,
+    total: readInt(data?.total) ?? readInt(root?.total),
+    page: readInt(data?.page) ?? readInt(root?.page),
+    limit: readInt(data?.limit) ?? readInt(root?.limit),
+    lastPage: readInt(data?.last_page) ?? readInt(root?.last_page),
+  };
 }
 
 function lobbyCountryId() {
@@ -233,14 +282,29 @@ export async function findLobbyGame(
   return { game, others: games.filter((item) => item.gameCode !== gameCode) };
 }
 
+export type LobbyGamesPaging = {
+  page?: number; // default 1 on the API
+  limit?: number; // max 100; omit to get the old nested all-at-once list
+};
+
 // `publicCode` filters one provider. Omit it for every provider's games.
+// Pass `paging.limit` to get the flat paginated list (data.games + total/page/limit/last_page).
+// Without limit the API keeps the old nested provider+category shape.
 export async function loadLobbyGames(
   locale: string,
   publicCode?: string,
-): Promise<{ games: Game[]; error?: boolean }> {
+  paging?: LobbyGamesPaging,
+): Promise<LobbyGamesPage> {
   if (!apiConfig.baseUrl) return { games: [] };
   try {
-    const payload = await apiJson(`${apiConfig.gameListPath}?locale=${encodeURIComponent(locale)}`, {
+    const body: Record<string, unknown> = {};
+    if (publicCode) body.public_code = publicCode;
+    if (paging?.page != null) body.page = paging.page;
+    if (paging?.limit != null) body.limit = paging.limit;
+    const query = new URLSearchParams({ locale });
+    if (typeof body.page === "number") query.set("page", String(body.page));
+    if (typeof body.limit === "number") query.set("limit", String(body.limit));
+    const payload = await apiJson(`${apiConfig.gameListPath}?${query}`, {
       method: "POST",
       auth: false,
       cache: "no-store",
@@ -248,17 +312,16 @@ export async function loadLobbyGames(
         "Content-Type": "application/json",
         "country-id": lobbyCountryId(),
       },
-      // POST /game_list { public_code }. No public_code means all providers.
-      body: JSON.stringify(publicCode ? { public_code: publicCode } : {}),
+      body: JSON.stringify(body),
     });
-    return { games: parseGameList(payload) };
+    return parseGameListPage(payload);
   } catch {
     return { games: [], error: true };
   }
 }
 
-export async function fetchLobbyGames(locale: string, publicCode?: string): Promise<Game[]> {
-  const result = await loadLobbyGames(locale, publicCode);
+export async function fetchLobbyGames(locale: string, publicCode?: string, paging?: LobbyGamesPaging): Promise<Game[]> {
+  const result = await loadLobbyGames(locale, publicCode, paging);
   return result.games;
 }
 

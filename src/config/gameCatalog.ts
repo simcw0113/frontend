@@ -146,7 +146,7 @@ function existing(): CatalogGame[] {
 export function catalogCasinoCategory(game: CatalogGame): string {
   if (game.categories.includes("slots")) return "slots";
   if (game.categories.includes("live-casino")) return "live-dealer";
-  return "trending-games";
+  return "hot-games";
 }
 
 // Static mode only: the game with this id in this casino category (the category's own list,

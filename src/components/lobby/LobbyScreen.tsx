@@ -8,6 +8,8 @@ import { useI18n } from "@/components/I18nProvider";
 import { bannerSlides, type BannerSlide } from "@/config/banners";
 import { siteConfig } from "@/config/site";
 import { defaultCasinoCategory, findCasinoCategory } from "@/config/categories";
+import { AllGamesFromPromise } from "@/components/lobby/AllGamesList";
+import { AllGamesIcon, CategoryIcon, HotGamesIcon, NewReleaseIcon } from "@/components/lobby/CategoryIcons";
 import { HOME_SCROLL_KEY, HomeGameContent } from "@/components/lobby/HomeGameContent";
 import { HowToRegister } from "@/components/lobby/HowToRegister";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
@@ -241,12 +243,13 @@ export function LobbyScreen({
   const visibleProviders = providersForCategory(providers, casinoSlug ?? undefined);
   const providerInList = provider != null && visibleProviders.some((item) => item.id === provider);
   const explicitAll = casinoSlug != null && allSlug === casinoSlug && provider === null;
-  // Casino pages open on the first provider and load its games. Home stays on All
-  // until the player picks one. "All" is only the view they asked for on this visit.
+  // Tagged lists (Hot Games, New Release) and All Games open on the full list, not
+  // the first provider. Slots / Live Dealer still open on the first provider.
+  const startOnAll = Boolean(casino.tagged) || casino.slug === "all-games";
   const activeProvider = casinoSlug
     ? providerInList
       ? provider
-      : explicitAll
+      : explicitAll || startOnAll
         ? null
         : (visibleProviders[0]?.id ?? null)
     : gamesPage && providerInList
@@ -493,14 +496,22 @@ export function LobbyScreen({
             ) : focus === "sports" || focus === "z-ai" || focus === "missions" ? (
               <ComingSoonHeader title={focus === "z-ai" ? t.topNav.zAi : focus === "missions" ? t.menu.missions : t.topNav[focus]} />
             ) : focus === "game" ? null : (
-              <LobbyLink
-                href="/"
-                scroll={false}
-                className="inline-flex items-center text-sm font-semibold text-muted hover:text-white"
-              >
-                <span aria-hidden="true" className="mr-1">‹</span>
-                {t.lobby.back}
-              </LobbyLink>
+              <div>
+                <LobbyLink
+                  href="/"
+                  scroll={false}
+                  className="inline-flex items-center text-sm font-semibold text-muted hover:text-white"
+                >
+                  <span aria-hidden="true" className="mr-1">‹</span>
+                  {t.lobby.back}
+                </LobbyLink>
+                {focus === "casino" ? (
+                  <h1 className="mt-3 flex items-center gap-2.5 text-xl font-semibold">
+                    <CategoryIcon slug={casino.slug} className="size-6 shrink-0 text-muted" />
+                    {t.lobby[casino.titleKey]}
+                  </h1>
+                ) : null}
+              </div>
             )}
             {/* Home only: banner -> Top wins -> How to Register -> search bar. Both sections are part
                 of the "top" transition group, so they fade with the banner. Each wrapper adds its
@@ -594,14 +605,24 @@ export function LobbyScreen({
             ) : null
           ) : gamesPage ? (
             <>
-              <ProviderRow selected={activeProvider} onSelect={selectProvider} providers={visibleProviders} />
+              {focus === "home" || (focus === "casino" && !casino.tagged) ? (
+                <ProviderRow selected={activeProvider} onSelect={selectProvider} providers={visibleProviders} />
+              ) : null}
               {activeProduct ? (
                 <ProviderGames
                   publicCode={activeProduct.id}
                   category={casino.slug}
                   query={focus === "casino" ? gameQuery : ""}
                 />
-              ) : focus === "casino" && providersStatus === "loading" ? (
+              ) : focus === "casino" && casino.slug === "all-games" ? (
+                <Suspense fallback={<ProviderGamesSkeleton />}>
+                  <AllGamesFromPromise
+                    promise={listGames[casino.slug] ?? Promise.resolve({ games: [] })}
+                    category={casino.slug}
+                    query={gameQuery}
+                  />
+                </Suspense>
+              ) : focus === "casino" && providersStatus === "loading" && !casino.tagged ? (
                 <ProviderGamesSkeleton />
               ) : (
                 <>
@@ -870,6 +891,9 @@ const SIDEBAR_ICONS: Record<
   promotions: GiftIcon,
   missions: MissionsIcon,
   vip: CrownIcon,
+  "hot-games": HotGamesIcon,
+  "new-release": NewReleaseIcon,
+  "all-games": AllGamesIcon,
   slots: SlotsIcon,
   "live-dealer": LiveDealerIcon,
   sports: SportsIcon,

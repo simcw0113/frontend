@@ -80,7 +80,9 @@
     "search": "Suche",
     "searchPlaceholder": "{name} suchen",
     "playing": "{count} spielen",
-    "trendingGames": "Beliebte Spiele",
+    "hotGames": "Beliebte Spiele",
+    "newRelease": "Neuerscheinungen",
+    "allGames": "Alle Spiele",
     "slots": "Spielautomaten",
     "liveDealer": "Live-Dealer",
     "providers": "Anbieter",
@@ -149,15 +151,29 @@
     "columns": [
       {
         "title": "Allgemein",
-        "items": ["AGB", "Datenschutz", "Partnerprogramm", "Blog"]
+        "items": [
+          "AGB",
+          "Datenschutz",
+          "Partnerprogramm",
+          "Blog"
+        ]
       },
       {
         "title": "Spiele",
-        "items": ["Live-Casino", "Sport", "Slots"]
+        "items": [
+          "Live-Casino",
+          "Sport",
+          "Slots"
+        ]
       },
       {
         "title": "Info",
-        "items": ["Verantwortungsvolles Spielen", "Faires Spiel", "Selbstsperre", "KYC-Richtlinie"]
+        "items": [
+          "Verantwortungsvolles Spielen",
+          "Faires Spiel",
+          "Selbstsperre",
+          "KYC-Richtlinie"
+        ]
       }
     ]
   },
@@ -193,6 +209,9 @@
   },
   "topNav": {
     "label": "Hauptmenü",
+    "hotGames": "Beliebte Spiele",
+    "newRelease": "Neuerscheinungen",
+    "allGames": "Alle Spiele",
     "slots": "Spielautomaten",
     "liveDealer": "Live-Dealer",
     "sports": "Sport",

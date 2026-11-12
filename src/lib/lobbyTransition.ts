@@ -10,7 +10,7 @@ import { isSlug, stripLocale } from "@/i18n/routing";
 
 import { findCasinoCategory } from "@/config/categories";
 
-// Routes are written without the language prefix ("/casino/trending-games");
+// Routes are written without the language prefix ("/casino/hot-games");
 // the page that is shown carries its own prefix in data-lang.
 export type LobbyRoute = string;
 

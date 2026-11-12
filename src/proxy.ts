@@ -77,7 +77,15 @@ export async function proxy(request: NextRequest) {
     // Static game page /{lang}/casino/{category}/game/{id}: an unknown id is a 404
     // (static data only; with the API the page's notFound() is the check).
     // Lobby games use /{lang}/casino/{category}/provider/{public_code}/game/{game_code}.
-    const [, , section, category, sub, id, ...rest] = pathname.split("/");
+    const segments = pathname.split("/");
+    const [, , section, category, sub, id, ...rest] = segments;
+    // Old "Trending games" URLs: /{lang}/casino/trending-games[/...] -> /hot-games.
+    if (section === "casino" && category === "trending-games") {
+      const url = request.nextUrl.clone();
+      segments[3] = "hot-games";
+      url.pathname = segments.join("/") || "/";
+      return NextResponse.redirect(url, 308);
+    }
     const unknownGame = sub === "game" && id && rest.length === 0 && !hasApiBaseUrl() && !isStaticGame(category, id);
     if (section === "casino" && category && (!findCasinoCategory(category) || unknownGame)) {
       return NextResponse.rewrite(new URL(`/${first}/not-found`, request.url));

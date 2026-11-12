@@ -136,6 +136,8 @@ export const gamesByCategory: Record<Exclude<CategoryId, "lobby">, Game[]> = {
 
 export const providers = ["Nova", "Orbit", "Summit", "Jolt", "House", "Peak"];
 
+// Static placeholder only (topWins.ts sample lookup, static-mode categoryGames).
+// Live Hot Games / New Release come from POST apiConfig.gameTagsPath (lib/gameTags.ts).
 export const trendingGames: Game[] = [
   ...slotGames,
   houseGames[0],
@@ -199,7 +201,9 @@ export function withGameInfo(game: Game): Game {
 // Games of each casino category, keyed by slug (see config/categories.ts). The game page is
 // /casino/{category}/game/{id} (static ids: see staticGameId).
 export const categoryGames: Record<string, Game[]> = {
-  "trending-games": withTestCover(trendingGames, "trending-games"),
+  "hot-games": withTestCover(trendingGames, "hot-games"),
+  "new-release": withTestCover([], "new-release"),
+  "all-games": withTestCover([], "all-games"),
   slots: withTestCover(slotsGames, "slots"),
   "live-dealer": withTestCover(liveDealerGames, "live-dealer"),
 };

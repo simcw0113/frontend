@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useI18n } from "@/components/I18nProvider";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
+import { CategoryIcon, categoryIcon } from "@/components/lobby/CategoryIcons";
 import { topNavItems } from "@/config/topNav";
 
 // The top bar links (config/topNav.ts). From lg they sit inline after the logo; below lg the
@@ -57,8 +58,11 @@ export function TopNav({ route }: { route: string }) {
                 <LobbyLink
                   href={item.path}
                   aria-current={active ? "page" : undefined}
-                  className={`top-nav-link ${active ? "text-brand" : "text-white hover:text-brand"}`}
+                  className={`top-nav-link gap-1.5 ${active ? "text-brand" : "text-white hover:text-brand"}`}
                 >
+                  {categoryIcon(item.id) ? (
+                    <CategoryIcon slug={item.id} className={`size-4 shrink-0 ${active ? "text-brand" : "text-muted"}`} />
+                  ) : null}
                   {t.topNav[item.labelKey]}
                 </LobbyLink>
               )}

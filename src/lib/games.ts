@@ -5,6 +5,9 @@ import { categoryGames, TEST_GAME_COVER, withGameInfo, type Game, type GameSymbo
 import type { SearchCategoryId } from "@/config/searchCategories";
 import { apiJson } from "@/lib/api";
 import { useStaticData as isStaticData } from "@/lib/apiMode";
+import { ALL_GAMES_PAGE_SIZE } from "@/lib/gameListPaging";
+import { getGameTags } from "@/lib/gameTags";
+import { loadLobbyGames, lobbyLocale } from "@/lib/lobbyApi";
 
 // Game lists per casino category (/{lang}/casino/{category} and the home rows).
 // This is the ONE place that talks to the games API; pages only call
@@ -56,8 +59,11 @@ export type CategoryGamesResult = {
   games: Game[];
   total?: number;
   nextPage?: number;
+  page?: number;
+  lastPage?: number;
   error?: boolean; // the API failed: show the error state instead of "nothing here"
 };
+
 
 // --- Mapping ----------------------------------------------------------------
 
@@ -148,7 +154,7 @@ async function fromApi(category: string, opts: CategoryGamesOptions): Promise<Ca
   "use cache";
   cacheTag(`games:${category}`);
 
-  const query = new URLSearchParams({ lang: opts.lang });
+  const query = new URLSearchParams({ lang: opts.lang, locale: lobbyLocale(opts.lang) });
   if (opts.provider) query.set("provider", opts.provider);
   if (opts.page && opts.page > 1) query.set("page", String(opts.page));
   if (opts.q) query.set("q", opts.q);
@@ -173,10 +179,94 @@ async function fromApi(category: string, opts: CategoryGamesOptions): Promise<Ca
 }
 
 // Never throws: failures come back as { games: [], error: true }.
+// The home row only shows the first 8. Round-robin so those 8 are not all one provider.
+export function mixProviders(games: Game[]): Game[] {
+  const groups = new Map<string, Game[]>();
+  for (const game of games) {
+    const key = game.publicCode || game.provider;
+    const bucket = groups.get(key);
+    if (bucket) bucket.push(game);
+    else groups.set(key, [game]);
+  }
+  const mixed: Game[] = [];
+  const buckets = [...groups.values()];
+  for (let index = 0; mixed.length < games.length; index += 1) {
+    let added = false;
+    for (const bucket of buckets) {
+      const game = bucket[index];
+      if (!game) continue;
+      mixed.push(game);
+      added = true;
+    }
+    if (!added) break;
+  }
+  return mixed;
+}
+
+function withCategory(games: Game[], category?: string): Game[] {
+  return category ? games.map((game) => ({ ...game, category })) : games;
+}
+
+function slicePage(games: Game[], page: number, limit: number): Game[] {
+  const start = (page - 1) * limit;
+  return games.slice(start, start + limit);
+}
+
+// POST /game_list. With `limit`, the API returns a flat page (data.games + total/page/last_page).
+// Without `limit` it returns the old nested list (used by the home Slots row). If we asked for a
+// page and the API omitted paging fields and sent everything, slice on the client.
+export async function getAllLobbyGames(
+  lang: string,
+  opts?: { mix?: boolean; category?: string; page?: number; limit?: number },
+): Promise<CategoryGamesResult> {
+  const page = opts?.page ?? 1;
+  const limit = opts?.limit;
+  const result = await loadLobbyGames(
+    lobbyLocale(lang),
+    undefined,
+    limit != null ? { page, limit } : undefined,
+  );
+  if (result.error) return { games: [], error: true };
+  const category = opts?.category;
+  const paged = result.lastPage != null || result.total != null;
+  if (limit != null && !paged && result.games.length > limit) {
+    const total = result.games.length;
+    let list = result.games;
+    if (opts?.mix) list = mixProviders(list);
+    const games = withCategory(slicePage(list, page, limit), category);
+    const lastPage = Math.max(1, Math.ceil(total / limit));
+    return {
+      games,
+      total,
+      page,
+      lastPage,
+      nextPage: page < lastPage ? page + 1 : undefined,
+    };
+  }
+  let list = result.games;
+  if (opts?.mix) list = mixProviders(list);
+  const total = result.total ?? list.length;
+  const lastPage = result.lastPage ?? (limit != null ? Math.max(1, Math.ceil(total / limit)) : undefined);
+  return {
+    games: withCategory(list, category),
+    total,
+    page: result.page ?? page,
+    ...(lastPage != null ? { lastPage } : {}),
+    nextPage: lastPage != null && (result.page ?? page) < lastPage ? (result.page ?? page) + 1 : undefined,
+  };
+}
+
 export async function getCategoryGames(
   category: string,
   opts: CategoryGamesOptions,
 ): Promise<CategoryGamesResult> {
+  // Tagged rows use POST /game_tags (lib/gameTags.ts), not the category path.
+  if (category === "hot-games") return getGameTags({ lang: opts.lang, label: "hot" }, "hot-games");
+  if (category === "new-release") return getGameTags({ lang: opts.lang, label: "new" }, "new-release");
+  // First page only; the All Games page loads further pages in AllGamesList.
+  if (category === "all-games") {
+    return getAllLobbyGames(opts.lang, { category: "all-games", page: opts.page ?? 1, limit: ALL_GAMES_PAGE_SIZE });
+  }
   return staticGamesEnabled() ? fromStatic(category, opts) : fromApi(category, opts);
 }
 
@@ -262,6 +352,7 @@ async function searchApi(opts: SearchGamesOptions): Promise<SearchGamesResult> {
     page: String(opts.page),
     pageSize: String(opts.pageSize),
     lang: opts.lang,
+    locale: lobbyLocale(opts.lang),
   });
   if (opts.q) query.set("q", opts.q);
   const payload = await apiJson<CategoryGamesDto | GameDto[]>(`${apiConfig.searchGamesPath || DEFAULT_SEARCH_PATH}?${query}`, {

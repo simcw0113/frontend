@@ -80,7 +80,9 @@
     "search": "Search",
     "searchPlaceholder": "Search {name}",
     "playing": "{count} playing",
-    "trendingGames": "Trending games",
+    "hotGames": "Hot Games",
+    "newRelease": "New Release",
+    "allGames": "All Games",
     "slots": "Slots",
     "liveDealer": "Live Dealer",
     "providers": "Providers",
@@ -149,15 +151,29 @@
     "columns": [
       {
         "title": "General",
-        "items": ["T&C", "Privacy Policy", "Affiliate Program", "Blog"]
+        "items": [
+          "T&C",
+          "Privacy Policy",
+          "Affiliate Program",
+          "Blog"
+        ]
       },
       {
         "title": "Games",
-        "items": ["Live Casino", "Sports", "Slots"]
+        "items": [
+          "Live Casino",
+          "Sports",
+          "Slots"
+        ]
       },
       {
         "title": "Info",
-        "items": ["Responsible Gaming", "Fairness Gaming", "Self-Exclusion", "KYC Policy"]
+        "items": [
+          "Responsible Gaming",
+          "Fairness Gaming",
+          "Self-Exclusion",
+          "KYC Policy"
+        ]
       }
     ]
   },
@@ -193,6 +209,9 @@
   },
   "topNav": {
     "label": "Main",
+    "hotGames": "Hot Games",
+    "newRelease": "New Release",
+    "allGames": "All Games",
     "slots": "Slots",
     "liveDealer": "Live Dealer",
     "sports": "Sports",

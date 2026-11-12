@@ -35,10 +35,13 @@ export const apiConfig = {
   infoPath: "/info",
   configPath: "/config",
   gameListPath: "/game_list",
+  // POST /game_tags. Optional body/query: label (default hot), limit (default 30, max 60), locale.
+  // Path lives only here so a backend rename is a one-line change.
+  gameTagsPath: "/game_tags",
   // POST /game_list body is `{ public_code }` or `{}` for every provider.
   // Sent as the `country-id` header on POST /game_list.
   lobbyCountryId: process.env.NEXT_PUBLIC_LOBBY_COUNTRY_ID ?? "1",
-  // TODO(API): placeholder. {category} is replaced by the slug ("slots", "trending-games");
+  // TODO(API): placeholder. {category} is replaced by the slug ("slots", "hot-games");
   // lang, provider, page and q are sent as query parameters.
   categoryGamesPath: "/games/category/{category}",
   // TODO(API): placeholder for the Explore search. Query: q, category, page, pageSize, lang.

@@ -80,7 +80,9 @@
     "search": "Buscar",
     "searchPlaceholder": "Buscar {name}",
     "playing": "{count} jugando",
-    "trendingGames": "Juegos en tendencia",
+    "hotGames": "Juegos populares",
+    "newRelease": "Novedades",
+    "allGames": "Todos los juegos",
     "slots": "Tragaperras",
     "liveDealer": "Crupier en vivo",
     "providers": "Proveedores",
@@ -149,15 +151,29 @@
     "columns": [
       {
         "title": "General",
-        "items": ["Términos", "Política de privacidad", "Programa de afiliados", "Blog"]
+        "items": [
+          "Términos",
+          "Política de privacidad",
+          "Programa de afiliados",
+          "Blog"
+        ]
       },
       {
         "title": "Juegos",
-        "items": ["Casino en vivo", "Deportes", "Tragamonedas"]
+        "items": [
+          "Casino en vivo",
+          "Deportes",
+          "Tragamonedas"
+        ]
       },
       {
         "title": "Información",
-        "items": ["Juego responsable", "Juego justo", "Autoexclusión", "Política KYC"]
+        "items": [
+          "Juego responsable",
+          "Juego justo",
+          "Autoexclusión",
+          "Política KYC"
+        ]
       }
     ]
   },
@@ -193,6 +209,9 @@
   },
   "topNav": {
     "label": "Principal",
+    "hotGames": "Juegos populares",
+    "newRelease": "Novedades",
+    "allGames": "Todos los juegos",
     "slots": "Tragaperras",
     "liveDealer": "Crupier en vivo",
     "sports": "Deportes",

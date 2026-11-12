@@ -13,34 +13,62 @@ import type { Dictionary } from "@/i18n";
 // To add a row, e.g. "Instant games" (slug `instant-games`):
 //   1. Add `{ slug: "instant-games", titleKey: "instantGames", title: "Instant games" }` below
 //      (add `showOnHome: false` to keep it off the home page, like live-dealer).
-//   2. Add `"instantGames": "..."` under `lobby` in all four i18n files (en, zh, de, es).
-//   3. Games: add a static list to config/lobby.ts and register it in `categoryGames`
-//      under the slug (with an API address set, getCategoryGames(slug) calls the API
-//      instead, see lib/games.ts; without data the row shows "Nothing here yet").
+//   2. Add `"instantGames": "..."` under `lobby` in the i18n files (en, zh, bm, vi, th, de, es).
+//   3. Games: tagged lists use `tagged` + POST /game_tags (lib/gameTags.ts). Otherwise add a
+//      static list in config/lobby.ts and register it in `categoryGames` under the slug
+//      (with an API address set, getCategoryGames(slug) calls the API instead; without data
+//      the home row is hidden and the category page shows "Nothing here yet").
 //   4. Nothing to change in pages, sitemap, proxy or components.
 //   5. Check: `npm run build` lists /[lang]/casino/instant-games, then `npm run check:lobby`.
 // `titleKey` is the heading in the message files (lobby.*), `title` the English name used
 // for page metadata. Static for now; swap for the categories API later.
+// `tagged` is a POST /game_tags label: the category page shows that list (no provider
+// browser). Old URLs under /casino/trending-games redirect to /casino/hot-games (proxy.ts).
+export type GameTagLabel = "hot" | "new" | "popular" | "recommended" | "featured";
+
 export type CasinoCategory = {
   slug: string;
   titleKey: keyof Dictionary["lobby"];
   title: string;
   showOnHome?: boolean; // default true; false = own page only, no home row
   luckyPick?: boolean; // show the "Lucky Pick" random-game reel on its page (components/lobby/LuckyPick.tsx)
+  tagged?: GameTagLabel; // POST /game_tags label; category page shows this list, no provider row
+  pinLast?: boolean; // always rendered last in home rows, top nav games group, and the sidebar
 };
 
+// Keeps pinLast items in source order, but after every item that is not pinned.
+// Used so "All Games" stays last even when new categories are inserted later.
+export function pinLastItems<T>(items: readonly T[], isPinned: (item: T) => boolean): T[] {
+  const leading: T[] = [];
+  const trailing: T[] = [];
+  for (const item of items) {
+    (isPinned(item) ? trailing : leading).push(item);
+  }
+  return [...leading, ...trailing];
+}
+
 export const casinoCategories: CasinoCategory[] = [
-  { slug: "trending-games", titleKey: "trendingGames", title: "Trending games" },
+  { slug: "hot-games", titleKey: "hotGames", title: "Hot Games", tagged: "hot" },
+  { slug: "new-release", titleKey: "newRelease", title: "New Release", tagged: "new" },
   { slug: "slots", titleKey: "slots", title: "Slots", luckyPick: true },
   // Not on the home page for now (top bar link + its own page only).
   { slug: "live-dealer", titleKey: "liveDealer", title: "Live dealer games", showOnHome: false },
+  // pinLast: always the last home row and the last item in the games nav group.
+  { slug: "all-games", titleKey: "allGames", title: "All Games", pinLast: true },
 ];
 
-// The rows of the home page.
-export const homeCategories = casinoCategories.filter((category) => category.showOnHome !== false);
+// The rows of the home page (All Games is pinned last).
+export const homeCategories = pinLastItems(
+  casinoCategories.filter((category) => category.showOnHome !== false),
+  (category) => category.pinLast === true,
+);
 
 export const defaultCasinoCategory = casinoCategories[0];
 
 export function findCasinoCategory(slug: string): CasinoCategory | undefined {
   return casinoCategories.find((category) => category.slug === slug);
+}
+
+export function tagLabelFor(slug: string): GameTagLabel | undefined {
+  return findCasinoCategory(slug)?.tagged;
 }

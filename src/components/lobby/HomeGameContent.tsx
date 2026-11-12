@@ -4,6 +4,7 @@ import { Suspense, use, type ReactNode } from "react";
 import { useI18n } from "@/components/I18nProvider";
 import { GameCover, gameHref } from "@/components/lobby/GameCover";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
+import { CategoryIcon } from "@/components/lobby/CategoryIcons";
 import { Partners, PartnersSkeleton } from "@/components/lobby/Partners";
 import { defaultCasinoCategory, homeCategories, type CasinoCategory } from "@/config/categories";
 import type { CategoryGamesResult } from "@/lib/games";
@@ -42,15 +43,34 @@ export function HomeGameContent({
           // `games` is required by the types; the optional chain only keeps a stale dev
           // module graph (page from an older version) from crashing the render.
           const promise = games?.[row.slug] as Promise<CategoryGamesResult> | undefined;
-          return (
-            <CardRow key={row.slug} title={t.lobby[row.titleKey]} href={home ? `/casino/${row.slug}` : undefined}>
-              {promise ? (
-                <Suspense fallback={<GridSkeleton count={home ? PREVIEW_COUNT : CATEGORY_SKELETON_COUNT} />}>
-                  <GameGrid promise={promise} category={row.slug} limit={home ? PREVIEW_COUNT : undefined} />
-                </Suspense>
-              ) : (
+          const href = home ? `/casino/${row.slug}` : undefined;
+          // Home rows: hide the whole row when the list is empty or the API fails,
+          // so a placeholder is never shown. Category pages keep the empty / error state.
+          const hideWhenEmpty = home;
+          if (!promise) {
+            if (hideWhenEmpty) return null;
+            return (
+              <CardRow key={row.slug} title={t.lobby[row.titleKey]} href={href} slug={row.slug} showTitle={home}>
                 <Notice>{t.lobby.empty}</Notice>
-              )}
+              </CardRow>
+            );
+          }
+          if (hideWhenEmpty) {
+            return (
+              <Suspense key={row.slug} fallback={
+                <CardRow title={t.lobby[row.titleKey]} href={href} slug={row.slug} showTitle={home}>
+                  <GridSkeleton count={PREVIEW_COUNT} />
+                </CardRow>
+              }>
+                <OptionalHomeRow title={t.lobby[row.titleKey]} href={href} promise={promise} category={row.slug} />
+              </Suspense>
+            );
+          }
+          return (
+            <CardRow key={row.slug} title={t.lobby[row.titleKey]} href={href} slug={row.slug} showTitle={home}>
+              <Suspense fallback={<GridSkeleton count={home ? PREVIEW_COUNT : CATEGORY_SKELETON_COUNT} />}>
+                <GameGrid promise={promise} category={row.slug} limit={home ? PREVIEW_COUNT : undefined} />
+              </Suspense>
             </CardRow>
           );
         })}
@@ -87,12 +107,48 @@ export function PlayerGameList({
   );
 }
 
-function CardRow({ title, href, children }: { title: string; href?: string; children: ReactNode }) {
+function OptionalHomeRow({
+  title,
+  href,
+  promise,
+  category,
+}: {
+  title: string;
+  href?: string;
+  promise: Promise<CategoryGamesResult>;
+  category: string;
+}) {
+  const result = use(promise);
+  if (result.error || result.games.length === 0) return null;
+  return (
+    <CardRow title={title} href={href} slug={category}>
+      <GameGrid promise={promise} category={category} limit={PREVIEW_COUNT} />
+    </CardRow>
+  );
+}
+
+function CardRow({
+  title,
+  href,
+  slug,
+  showTitle = true,
+  children,
+}: {
+  title: string;
+  href?: string;
+  slug?: string;
+  showTitle?: boolean;
+  children: ReactNode;
+}) {
   const { t } = useI18n();
   return (
     <section aria-label={title}>
+      {showTitle ? (
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold">{title}</h2>
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
+          {slug ? <CategoryIcon slug={slug} className="size-5 shrink-0 text-muted" /> : null}
+          {title}
+        </h2>
         {href ? (
           <LobbyLink
             href={href}
@@ -104,6 +160,7 @@ function CardRow({ title, href, children }: { title: string; href?: string; chil
           </LobbyLink>
         ) : null}
       </div>
+      ) : null}
       {children}
     </section>
   );

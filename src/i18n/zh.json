@@ -80,7 +80,9 @@
     "search": "搜索",
     "searchPlaceholder": "搜索 {name}",
     "playing": "{count} 人在玩",
-    "trendingGames": "热门游戏",
+    "hotGames": "热门游戏",
+    "newRelease": "最新上线",
+    "allGames": "全部游戏",
     "slots": "老虎机",
     "liveDealer": "真人荷官",
     "providers": "供应商",
@@ -149,15 +151,29 @@
     "columns": [
       {
         "title": "常规",
-        "items": ["条款", "隐私政策", "联盟计划", "博客"]
+        "items": [
+          "条款",
+          "隐私政策",
+          "联盟计划",
+          "博客"
+        ]
       },
       {
         "title": "游戏",
-        "items": ["真人娱乐场", "体育", "老虎机"]
+        "items": [
+          "真人娱乐场",
+          "体育",
+          "老虎机"
+        ]
       },
       {
         "title": "信息",
-        "items": ["责任博彩", "公平游戏", "自我排除", "KYC 政策"]
+        "items": [
+          "责任博彩",
+          "公平游戏",
+          "自我排除",
+          "KYC 政策"
+        ]
       }
     ]
   },
@@ -193,6 +209,9 @@
   },
   "topNav": {
     "label": "主导航",
+    "hotGames": "热门游戏",
+    "newRelease": "最新上线",
+    "allGames": "全部游戏",
     "slots": "老虎机",
     "liveDealer": "真人荷官",
     "sports": "体育",

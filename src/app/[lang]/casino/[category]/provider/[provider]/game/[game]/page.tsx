@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { LobbyScreen } from "@/components/lobby/LobbyScreen";
-import { findCasinoCategory } from "@/config/categories";
+import { findCasinoCategory, tagLabelFor } from "@/config/categories";
 import { getAuthTokenFromCookie } from "@/lib/authCookie";
 import { getGameLaunch } from "@/lib/gameLaunch";
+import { findTaggedGame } from "@/lib/gameTags";
 import { findLobbyGame, lobbyLocale } from "@/lib/lobbyApi";
 import type { GameDetails } from "@/lib/games";
 import { languageAlternates, localizedPath } from "@/i18n/routing";
@@ -24,7 +25,10 @@ async function lobbyDetails(
   lang: string,
 ): Promise<GameDetails | null> {
   if (!findCasinoCategory(category) || !provider || !gameCode) return null;
-  const found = await findLobbyGame(provider, gameCode, lobbyLocale(lang));
+  const tag = tagLabelFor(category);
+  const found =
+    (await findLobbyGame(provider, gameCode, lobbyLocale(lang))) ??
+    (tag ? await findTaggedGame(provider, gameCode, lang, tag) : null);
   if (!found) return null;
   return {
     game: { ...found.game, category },
