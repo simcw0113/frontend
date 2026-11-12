@@ -32,11 +32,13 @@ export function DepositForm({
   onClose,
   onSignIn,
   showClose = false,
+  wide = false,
 }: {
   onClose?: () => void;
   onSignIn: () => void;
   showClose?: boolean;
   // Full /deposit page: two columns from md. The wallet sheet stays a single column.
+  wide?: boolean;
 }) {
   const uid = useId();
   const titleId = showClose ? "dep-title" : `${uid}-title`;
@@ -44,7 +46,7 @@ export function DepositForm({
   return (
     <>
       <DepositHead titleId={titleId} onClose={showClose ? onClose : undefined} />
-      <DepositBody onClose={onClose} onSignIn={onSignIn} />
+      <DepositBody onClose={onClose} onSignIn={onSignIn} wide={wide} />
     </>
   );
 }
@@ -73,8 +75,10 @@ export function DepositPage({ onSignIn }: { onSignIn: () => void }) {
   const { user, ready } = useSession();
 
   return (
-    <div className="dep-page mx-auto mt-6 w-full max-w-md md:mt-4">
-      <div className="dep-card !rounded-2xl !border !border-white/10 !pb-0">
+    <div className="dep-page mx-auto mt-6 w-full max-w-md md:max-w-5xl md:mt-4 [&_.dep-card]:!max-h-none [&_.dep-card]:!overflow-visible [&_.dep-body]:!overflow-visible [&_.dep-body]:!overscroll-auto">
+      {/* Page card must not inherit the sheet's overflow/overscroll lock. Tailwind
+          !utilities apply immediately (next dev does not recompile globals.css). */}
+      <div className="dep-card !max-h-none !overflow-visible !rounded-2xl !border !border-white/10 !pb-0">
         {!ready ? (
           <>
             <DepositHead titleId="deposit-form-title" />
@@ -94,7 +98,7 @@ export function DepositPage({ onSignIn }: { onSignIn: () => void }) {
             </div>
           </>
         ) : (
-          <DepositForm onSignIn={onSignIn} />
+          <DepositForm onSignIn={onSignIn} wide />
         )}
       </div>
     </div>
@@ -143,7 +147,7 @@ function BankLogo({ method }: { method: TopupMethod }) {
   );
 }
 
-function DepositBody({ onClose, onSignIn }: { onClose?: () => void; onSignIn: () => void }) {
+function DepositBody({ onClose, onSignIn, wide = false }: { onClose?: () => void; onSignIn: () => void; wide?: boolean }) {
   const { t, lang, locale } = useI18n();
   const id = useId();
   const [view, setView] = useState<View>("loading");
@@ -401,17 +405,17 @@ function DepositBody({ onClose, onSignIn }: { onClose?: () => void; onSignIn: ()
 
   return (
     <form
-      className="dep-body"
+      className={`dep-body${wide ? " md:grid-cols-2 md:items-start md:gap-x-8" : ""}`}
       noValidate
       onSubmit={(event) => void onSubmit(event)}
     >
       {flash ? (
-        <p role="status" className="dep-flash">
+        <p role="status" className={`dep-flash${wide ? " md:col-span-2" : ""}`}>
           {flash}
         </p>
       ) : null}
 
-      <div className="contents">
+      <div className={wide ? "contents md:flex md:flex-col md:gap-[1.125rem]" : "contents"}>
       <fieldset className="dep-field">
         <legend className="dep-label">{t.deposit.method}</legend>
         <div className="dep-groups">
@@ -463,7 +467,7 @@ function DepositBody({ onClose, onSignIn }: { onClose?: () => void; onSignIn: ()
       ) : null}
       </div>
 
-      <div className="contents">
+      <div className={wide ? "contents md:flex md:flex-col md:gap-[1.125rem]" : "contents"}>
       <div className="dep-field">
         <div className="dep-label-row">
           <label htmlFor={`${id}-amount`} className="dep-label">

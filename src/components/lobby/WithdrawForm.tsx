@@ -43,10 +43,10 @@ export function WithdrawPage({ onSignIn }: { onSignIn: () => void }) {
   const { user, ready } = useSession();
 
   return (
-    <div className="dep-page mx-auto mt-6 w-full max-w-md md:mt-4">
+    <div className="dep-page mx-auto mt-6 w-full max-w-md md:max-w-5xl md:mt-4 [&_.dep-card]:!max-h-none [&_.dep-card]:!overflow-visible [&_.dep-body]:!overflow-visible [&_.dep-body]:!overscroll-auto">
       {/* Same page-card override as /deposit so sheet overflow rules cannot trap scroll
           (Tailwind !utilities apply immediately; next dev does not recompile globals.css). */}
-      <div className="dep-card !rounded-2xl !border !border-white/10 !pb-0">
+      <div className="dep-card !max-h-none !overflow-visible !rounded-2xl !border !border-white/10 !pb-0">
         {!ready ? (
           <>
             <WithdrawHead titleId="withdraw-form-title" />
@@ -330,11 +330,11 @@ export function WithdrawForm({ onSignIn }: { onSignIn: () => void }) {
     <>
       <WithdrawHead titleId={titleId} />
       <form
-        className="dep-body"
+        className="dep-body md:grid-cols-2 md:items-start md:gap-x-8"
         onSubmit={onSubmit}
         noValidate
       >
-        <div className="contents">
+        <div className="contents md:col-start-2 md:flex md:flex-col md:gap-[1.125rem]">
         <div className="dep-field">
           <div className="dep-label-row">
             <span className="dep-label">{t.withdraw.available}</span>
@@ -399,7 +399,7 @@ export function WithdrawForm({ onSignIn }: { onSignIn: () => void }) {
         </div>
         </div>
 
-        <div className="contents">
+        <div className="contents md:col-start-1 md:row-start-1 md:row-span-2 md:flex md:flex-col md:gap-[1.125rem]">
         {banks && banks.member_bank.length > 0 ? (
           <fieldset className="dep-field">
             <legend className="dep-label">{t.withdraw.savedBanks}</legend>
@@ -457,7 +457,7 @@ export function WithdrawForm({ onSignIn }: { onSignIn: () => void }) {
         </fieldset>
         </div>
 
-        <div className="contents">
+        <div className="contents md:col-start-2 md:flex md:flex-col md:gap-[1.125rem]">
         <div className="dep-field">
           <label className="dep-label" htmlFor="withdraw-account-name">
             {t.withdraw.accountName}
