@@ -325,5 +325,25 @@
     "loadError": "Dieses Spiel konnte nicht geladen werden. Bitte versuche es später erneut.",
     "signIn": "Melde dich an, um dieses Spiel zu spielen.",
     "loading": "Spiel wird geladen…"
+  },
+  "providerLaunch": {
+    "webHint": "Öffnet die Spiellobby des Anbieters in einem neuen Tab.",
+    "appHint": "Spiele in der App des Anbieters mit diesem Spielkonto.",
+    "deeplinkHint": "Installiere die App und starte dann das Spiel.",
+    "play": "Jetzt spielen",
+    "opening": "Wird geöffnet…",
+    "signIn": "Zum Spielen anmelden",
+    "getAccount": "Spielkonto abrufen",
+    "username": "Benutzername",
+    "password": "Passwort",
+    "balance": "Guthaben",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "downloadIos": "Für iOS herunterladen",
+    "downloadAndroid": "Für Android herunterladen",
+    "openGame": "Spiel öffnen",
+    "enterGame": "Spiel starten",
+    "noLink": "Der Anbieter hat noch keinen Startlink.",
+    "failed": "Das Spiel konnte nicht geöffnet werden. Bitte versuche es erneut."
   }
 }

@@ -18,6 +18,7 @@ import { GiftIcon, PromotionsGrid, PromotionsHeader, PromotionsSkeleton } from "
 import { LuckyPick } from "@/components/lobby/LuckyPick";
 import { GameView, GameViewSkeleton, type GamePageData } from "@/components/lobby/GameView";
 import { ProviderGames, ProviderGamesSkeleton } from "@/components/lobby/ProviderGames";
+import { ProviderLaunch } from "@/components/lobby/ProviderLaunch";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { SearchModal } from "@/components/lobby/SearchModal";
 import { ComingSoonHeader, TopNav } from "@/components/lobby/TopNav";
@@ -608,7 +609,17 @@ export function LobbyScreen({
               {focus === "home" || (focus === "casino" && !casino.tagged) ? (
                 <ProviderRow selected={activeProvider} onSelect={selectProvider} providers={visibleProviders} />
               ) : null}
-              {activeProduct ? (
+              {activeProduct && activeProduct.type != null && activeProduct.type !== 3 ? (
+                // Web / App / Deep Link products have no game list in our lobby.
+                <ProviderLaunch
+                  provider={activeProduct}
+                  signedIn={Boolean(user)}
+                  onSignIn={() => {
+                    setAuthView("login");
+                    setSignInOpen(true);
+                  }}
+                />
+              ) : activeProduct ? (
                 <ProviderGames
                   publicCode={activeProduct.id}
                   category={casino.slug}

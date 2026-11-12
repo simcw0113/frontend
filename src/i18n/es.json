@@ -325,5 +325,25 @@
     "loadError": "No se pudo cargar este juego. Inténtalo de nuevo más tarde.",
     "signIn": "Inicia sesión para jugar a este juego.",
     "loading": "Cargando juego…"
+  },
+  "providerLaunch": {
+    "webHint": "Abre el lobby del proveedor en una pestaña nueva.",
+    "appHint": "Juega en la app del proveedor con esta cuenta de juego.",
+    "deeplinkHint": "Instala la app y luego entra al juego.",
+    "play": "Jugar ahora",
+    "opening": "Abriendo…",
+    "signIn": "Inicia sesión para jugar",
+    "getAccount": "Obtener cuenta de juego",
+    "username": "Usuario",
+    "password": "Contraseña",
+    "balance": "Saldo",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "downloadIos": "Descargar para iOS",
+    "downloadAndroid": "Descargar para Android",
+    "openGame": "Abrir juego",
+    "enterGame": "Entrar al juego",
+    "noLink": "El proveedor aún no tiene enlace de inicio.",
+    "failed": "No se pudo abrir el juego. Inténtalo de nuevo."
   }
 }

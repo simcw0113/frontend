@@ -40,6 +40,7 @@ type RawProduct = {
   code?: unknown;
   public_code?: unknown;
   name?: unknown;
+  type?: unknown;
   image?: unknown;
   status?: unknown;
   sequence?: unknown;
@@ -87,9 +88,11 @@ function toProvider(raw: RawProduct, group?: string): Provider | null {
   if (!id || !code || !name) return null;
   if (raw.status != null && raw.status !== 1) return null;
   const image = typeof raw.image === "string" && raw.image ? raw.image : undefined;
+  const type = Number(raw.type);
   return {
     id,
     code,
+    ...(Number.isInteger(type) && type > 0 ? { type } : {}),
     name,
     mark: monogram(name),
     accent: ACCENTS[hash(id) % ACCENTS.length],

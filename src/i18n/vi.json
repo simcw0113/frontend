@@ -325,5 +325,25 @@
     "loadError": "Không tải được game này. Vui lòng thử lại sau.",
     "signIn": "Đăng nhập để chơi game này.",
     "loading": "Đang tải game…"
+  },
+  "providerLaunch": {
+    "webHint": "Mở sảnh game của nhà cung cấp trong tab mới.",
+    "appHint": "Chơi trong ứng dụng của nhà cung cấp bằng tài khoản game này.",
+    "deeplinkHint": "Cài ứng dụng, sau đó vào game.",
+    "play": "Chơi ngay",
+    "opening": "Đang mở…",
+    "signIn": "Đăng nhập để chơi",
+    "getAccount": "Nhận tài khoản game",
+    "username": "Tên đăng nhập",
+    "password": "Mật khẩu",
+    "balance": "Số dư",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép",
+    "downloadIos": "Tải cho iOS",
+    "downloadAndroid": "Tải cho Android",
+    "openGame": "Mở game",
+    "enterGame": "Vào game",
+    "noLink": "Nhà cung cấp chưa có liên kết khởi chạy.",
+    "failed": "Không mở được game. Vui lòng thử lại."
   }
 }

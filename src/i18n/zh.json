@@ -325,5 +325,25 @@
     "loadError": "游戏加载失败，请稍后重试。",
     "signIn": "登录后即可畅玩此游戏。",
     "loading": "游戏加载中…"
+  },
+  "providerLaunch": {
+    "webHint": "在新分页打开游戏商的大厅。",
+    "appHint": "用这个游戏账号在游戏商的 App 里玩。",
+    "deeplinkHint": "先安装 App，再进入游戏。",
+    "play": "开始游戏",
+    "opening": "正在打开…",
+    "signIn": "登录后开始游戏",
+    "getAccount": "获取游戏账号",
+    "username": "账号",
+    "password": "密码",
+    "balance": "余额",
+    "copy": "复制",
+    "copied": "已复制",
+    "downloadIos": "下载 iOS 版",
+    "downloadAndroid": "下载 Android 版",
+    "openGame": "打开游戏",
+    "enterGame": "进入游戏",
+    "noLink": "游戏商暂时没有提供打开链接。",
+    "failed": "游戏打开失败，请稍后再试。"
   }
 }

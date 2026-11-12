@@ -325,5 +325,25 @@
     "loadError": "Permainan ini tidak dapat dimuatkan. Sila cuba lagi kemudian.",
     "signIn": "Log masuk untuk bermain permainan ini.",
     "loading": "Memuatkan permainan…"
+  },
+  "providerLaunch": {
+    "webHint": "Membuka lobi permainan penyedia dalam tab baharu.",
+    "appHint": "Main dalam aplikasi penyedia dengan akaun permainan ini.",
+    "deeplinkHint": "Pasang aplikasi, kemudian masuk ke permainan.",
+    "play": "Main sekarang",
+    "opening": "Sedang dibuka…",
+    "signIn": "Log masuk untuk bermain",
+    "getAccount": "Dapatkan akaun permainan",
+    "username": "Nama pengguna",
+    "password": "Kata laluan",
+    "balance": "Baki",
+    "copy": "Salin",
+    "copied": "Disalin",
+    "downloadIos": "Muat turun untuk iOS",
+    "downloadAndroid": "Muat turun untuk Android",
+    "openGame": "Buka permainan",
+    "enterGame": "Masuk permainan",
+    "noLink": "Belum ada pautan permainan daripada penyedia.",
+    "failed": "Permainan tidak dapat dibuka. Sila cuba lagi."
   }
 }

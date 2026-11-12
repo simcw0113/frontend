@@ -8,4 +8,6 @@ export type Provider = {
   accent: string;
   image?: string;
   group?: string; // product category title, e.g. "Slots"
+  // Product type from GET /config: 1 Web, 2 App, 3 Lobby (game_list), 4 Deep Link.
+  type?: number;
 };

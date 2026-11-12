@@ -325,5 +325,25 @@
     "loadError": "This game could not be loaded. Please try again later.",
     "signIn": "Sign in to play this game.",
     "loading": "Loading game…"
+  },
+  "providerLaunch": {
+    "webHint": "Opens the provider's game lobby in a new tab.",
+    "appHint": "Play in the provider's app with this game account.",
+    "deeplinkHint": "Install the app, then enter the game.",
+    "play": "Play now",
+    "opening": "Opening…",
+    "signIn": "Sign in to play",
+    "getAccount": "Get game account",
+    "username": "Username",
+    "password": "Password",
+    "balance": "Balance",
+    "copy": "Copy",
+    "copied": "Copied",
+    "downloadIos": "Download for iOS",
+    "downloadAndroid": "Download for Android",
+    "openGame": "Open game",
+    "enterGame": "Enter game",
+    "noLink": "No launch link from the provider yet.",
+    "failed": "Could not open the game. Please try again."
   }
 }
