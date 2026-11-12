@@ -135,15 +135,18 @@ type RawGame = {
   code?: unknown;
   game_code?: unknown;
   public_code?: unknown;
+  provider_name?: unknown;
+  rtp?: unknown;
 };
 
-function toGame(raw: RawGame): Game | null {
+function toGame(raw: RawGame, fallbackProvider = ""): Game | null {
   if (raw.id == null || typeof raw.name !== "string" || !raw.name.trim()) return null;
   const id = String(raw.id);
   const [from, to] = PALETTE[hash(id) % PALETTE.length];
   const image = typeof raw.image === "string" && raw.image ? raw.image : undefined;
-  const provider = typeof raw.code === "string" ? raw.code : "";
+  const provider = text(raw.provider_name) || fallbackProvider;
   const gameCode = text(raw.game_code);
+  const rtp = typeof raw.rtp === "number" && Number.isFinite(raw.rtp) ? raw.rtp : undefined;
   return {
     id,
     title: raw.name.trim(),
@@ -155,16 +158,18 @@ function toGame(raw: RawGame): Game | null {
     to,
     symbol: SYMBOLS[hash(id) % SYMBOLS.length],
     image,
+    ...(rtp !== undefined ? { rtp, edge: Math.round((100 - rtp) * 100) / 100 } : {}),
   };
 }
 
 function pushGame(
   raw: unknown,
   publicCode: string | undefined,
+  providerName: string,
   games: Game[],
   seen: Set<string>,
 ) {
-  const game = toGame(raw as RawGame);
+  const game = toGame(raw as RawGame, providerName);
   if (!game || seen.has(game.id)) return;
   seen.add(game.id);
   // Nested lists put public_code on the provider wrapper; the paginated flat
@@ -175,26 +180,29 @@ function pushGame(
 
 // One provider is `{ public_code, name, games: [{ category, games: [game, ...] }] }`.
 // A category bucket is `{ category, games: [game, ...] }`. Flatten both.
+// Nested game rows often omit provider_name; the wrapper `name` is the display name.
 function collectGames(
   node: unknown,
   publicCode: string | undefined,
+  providerName: string,
   games: Game[],
   seen: Set<string>,
 ) {
   const rec = asRecord(node);
   if (!rec) return;
   const code = text(rec.public_code) || publicCode;
+  const name = text(rec.public_code) && text(rec.name) ? text(rec.name) : providerName;
   if (!Array.isArray(rec.games)) {
-    pushGame(rec, code, games, seen);
+    pushGame(rec, code, name, games, seen);
     return;
   }
   for (const item of rec.games) {
     const child = asRecord(item);
     if (child && Array.isArray(child.games)) {
-      collectGames(child, code, games, seen);
+      collectGames(child, code, name, games, seen);
       continue;
     }
-    pushGame(item, code, games, seen);
+    pushGame(item, code, name, games, seen);
   }
 }
 
@@ -207,13 +215,13 @@ export function parseGameList(payload: unknown): Game[] {
   if (envelope && Array.isArray(envelope.games) && !Array.isArray(data)) {
     const games: Game[] = [];
     const seen = new Set<string>();
-    for (const item of envelope.games) pushGame(item, undefined, games, seen);
+    for (const item of envelope.games) pushGame(item, undefined, "", games, seen);
     return games;
   }
   const groups = Array.isArray(data) ? data : [data];
   const games: Game[] = [];
   const seen = new Set<string>();
-  for (const group of groups) collectGames(group, undefined, games, seen);
+  for (const group of groups) collectGames(group, undefined, "", games, seen);
   return games;
 }
 

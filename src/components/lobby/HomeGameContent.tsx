@@ -59,7 +59,7 @@ export function HomeGameContent({
             return (
               <Suspense key={row.slug} fallback={
                 <CardRow title={t.lobby[row.titleKey]} href={href} slug={row.slug} showTitle={home}>
-                  <GridSkeleton count={PREVIEW_COUNT} />
+                  <GridSkeleton count={PREVIEW_COUNT} homeRow />
                 </CardRow>
               }>
                 <OptionalHomeRow title={t.lobby[row.titleKey]} href={href} promise={promise} category={row.slug} />
@@ -69,7 +69,7 @@ export function HomeGameContent({
           return (
             <CardRow key={row.slug} title={t.lobby[row.titleKey]} href={href} slug={row.slug} showTitle={home}>
               <Suspense fallback={<GridSkeleton count={home ? PREVIEW_COUNT : CATEGORY_SKELETON_COUNT} />}>
-                <GameGrid promise={promise} category={row.slug} limit={home ? PREVIEW_COUNT : undefined} />
+                <GameGrid promise={promise} category={row.slug} limit={home ? PREVIEW_COUNT : undefined} homeRow={home} />
               </Suspense>
             </CardRow>
           );
@@ -122,7 +122,7 @@ function OptionalHomeRow({
   if (result.error || result.games.length === 0) return null;
   return (
     <CardRow title={title} href={href} slug={category}>
-      <GameGrid promise={promise} category={category} limit={PREVIEW_COUNT} />
+      <GameGrid promise={promise} category={category} limit={PREVIEW_COUNT} homeRow />
     </CardRow>
   );
 }
@@ -166,7 +166,13 @@ function CardRow({
   );
 }
 
-const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8";
+// Category / player lists: 3 columns on phones (Kickwin-sized tiles), same 4/8 as before from sm.
+const GRID = "grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 xl:grid-cols-8";
+// Home rows on phones: horizontal scroller of 3 full cards + a peek of the next
+// (Kickwin: 16px inset, 8px gap, 8px peek). From sm, the existing 4/8 grid.
+const HOME_ROW =
+  "flex gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-sm:w-[calc(100%+1.5rem)] max-sm:-mx-3 max-sm:px-4 sm:mx-0 sm:grid sm:w-auto sm:grid-cols-4 sm:gap-3 sm:overflow-visible sm:px-0 xl:grid-cols-8";
+const HOME_TILE = "max-sm:w-[calc((100%-16px)/3)] max-sm:shrink-0 sm:w-auto";
 
 function Notice({ children }: { children: ReactNode }) {
   return (
@@ -183,30 +189,38 @@ function GameGrid({
   category,
   limit,
   emptyText,
+  homeRow = false,
 }: {
   promise: Promise<CategoryGamesResult>;
   category: string;
   limit?: number;
   emptyText?: string;
+  homeRow?: boolean;
 }) {
   const { t } = useI18n();
   const result = use(promise);
   if (result.error) return <Notice>{t.lobby.loadError}</Notice>;
   if (result.games.length === 0) return <Notice>{emptyText ?? t.lobby.empty}</Notice>;
   return (
-    <div className={GRID}>
+    <div className={homeRow ? HOME_ROW : GRID}>
       {(limit ? result.games.slice(0, limit) : result.games).map((game) => (
-        <GameCover key={game.id} game={game} href={gameHref(game, category)} fluid />
+        <GameCover
+          key={game.id}
+          game={game}
+          href={gameHref(game, category)}
+          fluid
+          className={homeRow ? HOME_TILE : undefined}
+        />
       ))}
     </div>
   );
 }
 
-function GridSkeleton({ count }: { count: number }) {
+function GridSkeleton({ count, homeRow = false }: { count: number; homeRow?: boolean }) {
   return (
-    <div className={GRID} aria-hidden="true" data-skeleton="">
+    <div className={homeRow ? HOME_ROW : GRID} aria-hidden="true" data-skeleton="">
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="aspect-[3/4] rounded-xl bg-white/5 motion-safe:animate-pulse" />
+        <div key={i} className={`aspect-[3/4] rounded-xl bg-white/5 motion-safe:animate-pulse ${homeRow ? HOME_TILE : ""}`} />
       ))}
     </div>
   );

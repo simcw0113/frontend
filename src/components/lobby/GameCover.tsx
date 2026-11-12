@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useI18n } from "@/components/I18nProvider";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import type { Game, GameSymbol } from "@/config/lobby";
-import { fill, htmlLang } from "@/i18n";
 
 export function SymbolMark({ symbol, className }: { symbol: GameSymbol; className?: string }) {
   const common = className ?? "h-24 w-24 drop-shadow-lg";
@@ -185,8 +183,7 @@ export function gameHref(
 }
 
 // With `href` the whole tile is a link to the game page (lobby transition, same hover lift).
-export function GameCover({ game, fluid = false, href }: { game: Game; fluid?: boolean; href?: string }) {
-  const { locale, t } = useI18n();
+export function GameCover({ game, fluid = false, href, className }: { game: Game; fluid?: boolean; href?: string; className?: string }) {
   // A cover image that fails (also before hydration) falls back to the drawn cover.
   const [failed, setFailed] = useState(false);
   const image = game.image && !failed ? game.image : null;
@@ -223,15 +220,14 @@ export function GameCover({ game, fluid = false, href }: { game: Game; fluid?: b
             </div>
           </>
         )}
-        <h3
-          className={
-            image
-              ? "sr-only"
-              : "absolute inset-x-2 bottom-3 text-[15px] leading-[0.95] font-black tracking-tight text-white uppercase drop-shadow-md"
-          }
-        >
-          {game.title}
-        </h3>
+        {image ? null : (
+          <p
+            aria-hidden="true"
+            className="absolute inset-x-2 bottom-3 text-[15px] leading-[0.95] font-black tracking-tight text-white uppercase drop-shadow-md"
+          >
+            {game.title}
+          </p>
+        )}
         <span
           aria-hidden="true"
           className="game-play absolute right-2 bottom-2 grid size-7 place-items-center rounded-full bg-brand text-lobby"
@@ -241,21 +237,23 @@ export function GameCover({ game, fluid = false, href }: { game: Game; fluid?: b
           </svg>
         </span>
       </div>
-      <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted">
-        <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />
-        {fill(t.lobby.playing, { count: game.playing.toLocaleString(htmlLang(locale)) })}
-      </p>
+      <div className="mt-1.5 min-w-0">
+        <h3 className="truncate text-[11px] font-medium leading-tight text-white">{game.title}</h3>
+        {game.provider ? (
+          <p className="mt-0.5 truncate text-[10px] leading-tight text-muted">{game.provider}</p>
+        ) : null}
+      </div>
     </>
   );
   if (href) {
     return (
       <LobbyLink
         href={href}
-        className={`game-card block rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand ${size}`}
+        className={`game-card block rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand ${size}${className ? ` ${className}` : ""}`}
       >
         {body}
       </LobbyLink>
     );
   }
-  return <article className={`game-card ${size}`}>{body}</article>;
+  return <article className={`game-card ${size}${className ? ` ${className}` : ""}`}>{body}</article>;
 }

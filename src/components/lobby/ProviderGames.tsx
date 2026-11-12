@@ -5,7 +5,7 @@ import { useI18n } from "@/components/I18nProvider";
 import { GameCover, gameHref } from "@/components/lobby/GameCover";
 import type { Game } from "@/config/lobby";
 
-const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8";
+const GRID = "grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 xl:grid-cols-8";
 // The API already returns the provider's full list. The page shows one batch,
 // then "Show More" reveals the next batch from that same list. Search filters
 // this list in memory and does not request again.
