@@ -271,6 +271,13 @@ function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignI
             </span>
           </div>
           <div className="gp-dock-buttons">
+            {/* Phones only: goes to /{lang}/deposit and leaves the game. To open the popup
+                over the game again, swap this LobbyLink for:
+                <button type="button" onClick={openDeposit} className="gp-deposit">
+                with `const openDeposit = useOpenDeposit();` (DepositContext). */}
+            <LobbyLink href="/deposit" className="gp-deposit no-underline">
+              {t.gamePage.deposit}
+            </LobbyLink>
             <DockButton label={t.gamePage.favourite} pressed={favourite} onClick={() => setFavourite((on) => !on)} className="gp-btn-fav">
               <svg viewBox="0 0 24 24" className={ICON} fill={favourite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
                 <path d="M12 3.5 14.6 9 20.5 9.6 16 13.6 17.3 19.5 12 16.5 6.7 19.5 8 13.6 3.5 9.6 9.4 9Z" />

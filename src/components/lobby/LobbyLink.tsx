@@ -26,6 +26,8 @@ export function LobbyLink({
   ariaLabel,
   children,
   "aria-current": ariaCurrent,
+  role,
+  "aria-selected": ariaSelected,
 }: {
   href: string;
   scroll?: boolean;
@@ -36,6 +38,8 @@ export function LobbyLink({
   ariaLabel?: string;
   children: ReactNode;
   "aria-current"?: "page";
+  role?: string;
+  "aria-selected"?: boolean;
 }) {
   const router = useRouter();
   const { href: localized } = useI18n();
@@ -75,6 +79,8 @@ export function LobbyLink({
       onFocus={warm}
       onTouchStart={warm}
       aria-current={ariaCurrent}
+      role={role}
+      aria-selected={ariaSelected}
       title={title}
       data-autofocus={autoFocusTarget || undefined}
       aria-label={ariaLabel}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Suspense, use, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { Suspense, use, useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import type { AuthView } from "@/components/auth/AuthFormPanel";
 import { SignInDialog } from "@/components/SignInDialog";
 import { useI18n } from "@/components/I18nProvider";
@@ -16,6 +16,9 @@ import { LobbyFooter } from "@/components/lobby/LobbyFooter";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { GiftIcon, PromotionsGrid, PromotionsHeader, PromotionsSkeleton } from "@/components/lobby/Promotions";
 import { LuckyPick } from "@/components/lobby/LuckyPick";
+import { DepositContext } from "@/components/lobby/DepositContext";
+import { DepositHeader, DepositPage } from "@/components/lobby/DepositForm";
+import { DepositSheet } from "@/components/lobby/DepositSheet";
 import { GameView, GameViewSkeleton, type GamePageData } from "@/components/lobby/GameView";
 import { ProviderGames, ProviderGamesSkeleton } from "@/components/lobby/ProviderGames";
 import { ProviderLaunch } from "@/components/lobby/ProviderLaunch";
@@ -50,7 +53,7 @@ const TOGGLE =
   "grid size-11 shrink-0 place-items-center rounded-lg text-brand hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 
-export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites" | "missions" | "game";
+export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites" | "missions" | "game" | "deposit";
 
 // `games` holds one promise per category slug, started on the server (lib/games.ts)
 // and read here with use() inside <Suspense>, so the page shell shows at once.
@@ -97,6 +100,18 @@ export function LobbyScreen({
   const { user, ready, signOut } = useSession();
   const [accountOpen, setAccountOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
+  // Wallet / deposit sheet (DepositContext): signed-in players get the sheet, guests the
+  // sign-in dialog. Before /api/auth/me answers the sheet opens and asks for sign-in itself
+  // if the cookie turns out to be missing (401).
+  const [depositOpen, setDepositOpen] = useState(false);
+  const openDeposit = useCallback(() => {
+    if (user || !ready) {
+      setDepositOpen(true);
+      return;
+    }
+    setAuthView("login");
+    setSignInOpen(true);
+  }, [user, ready]);
   const accountRef = useRef<HTMLDivElement>(null);
   const accountSheetRef = useRef<HTMLDivElement>(null);
   const notifyRef = useRef<HTMLDivElement>(null);
@@ -147,7 +162,7 @@ export function LobbyScreen({
   // Explore. While that pop-up is open it handles the shortcut itself. Not taken
   // while another dialog is open or while typing in a field other than the search bar.
   useEffect(() => {
-    if (searchOpen || signInOpen) return;
+    if (searchOpen || signInOpen || depositOpen) return;
     function onKey(event: KeyboardEvent) {
       if (!(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey || event.key.toLowerCase() !== "k") return;
       const target = event.target;
@@ -167,7 +182,7 @@ export function LobbyScreen({
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [searchOpen, signInOpen, focus]);
+  }, [searchOpen, signInOpen, depositOpen, focus]);
 
   function toggleSidebar() {
     if (sidebarOpen) setLanguageOpen(false);
@@ -182,7 +197,7 @@ export function LobbyScreen({
   // Drawer: Esc closes it and gives focus back to the header toggle (not while a pop-up is open,
   // the pop-up handles its own Esc).
   useEffect(() => {
-    if (!drawerOpen || rail || searchOpen || signInOpen) return;
+    if (!drawerOpen || rail || searchOpen || signInOpen || depositOpen) return;
     function onKey(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
       setDrawerOpen(false);
@@ -190,7 +205,7 @@ export function LobbyScreen({
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [drawerOpen, rail, searchOpen, signInOpen]);
+  }, [drawerOpen, rail, searchOpen, signInOpen, depositOpen]);
 
   useEffect(() => {
     if (!accountOpen && !notifyOpen) return;
@@ -294,8 +309,18 @@ export function LobbyScreen({
   };
 
   return (
+    <DepositContext value={openDeposit}>
     <div className={`lobby-root min-h-full bg-lobby text-ink${collapsed ? " is-collapsed" : ""}${drawerOpen ? " drawer-open" : ""}`}>
       <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} initialView={authView} />
+      <DepositSheet
+        open={depositOpen}
+        onClose={() => setDepositOpen(false)}
+        onSignIn={() => {
+          setDepositOpen(false);
+          setAuthView("login");
+          setSignInOpen(true);
+        }}
+      />
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
 
       {/* From lg: a full-height column on the left (expanded, or an icon rail when collapsed)
@@ -439,6 +464,13 @@ export function LobbyScreen({
         <div className="ml-auto flex h-16 shrink-0 items-center gap-2">
           {user?.username ? (
             <>
+            {/* Wallet / deposit (KickWin's green wallet button, in our cyan). Goes to
+                /{lang}/deposit. To open the popup again, swap this LobbyLink for:
+                <button type="button" onClick={openDeposit} className="dep-header-btn"> */}
+            <LobbyLink href="/deposit" className="dep-header-btn no-underline">
+              <WalletIcon />
+              <span className="dep-header-label">{t.deposit.deposit}</span>
+            </LobbyLink>
             <LobbyLink
               href="/vip"
               aria-label={t.topNav.vip}
@@ -555,6 +587,8 @@ export function LobbyScreen({
               <PlayerHeader focus={focus} />
             ) : focus === "vip" ? (
               <VipHeader />
+            ) : focus === "deposit" ? (
+              <DepositHeader />
             ) : focus === "sports" || focus === "z-ai" || focus === "missions" ? (
               <ComingSoonHeader title={focus === "z-ai" ? t.topNav.zAi : focus === "missions" ? t.menu.missions : t.topNav[focus]} />
             ) : focus === "game" ? null : (
@@ -709,6 +743,13 @@ export function LobbyScreen({
             </>
           ) : focus === "vip" ? (
             <VipClub />
+          ) : focus === "deposit" ? (
+            <DepositPage
+              onSignIn={() => {
+                setAuthView("login");
+                setSignInOpen(true);
+              }}
+            />
           ) : null}
           <LobbyFooter />
           </div>
@@ -749,7 +790,7 @@ export function LobbyScreen({
         drawerOpen={drawerOpen}
         searchOpen={searchOpen}
         profileOpen={accountOpen}
-        hidden={searchOpen || signInOpen}
+        hidden={searchOpen || signInOpen || depositOpen}
         onMenu={() => setDrawerOpen((open) => !open)}
         onSearch={() => {
           setDrawerOpen(false);
@@ -781,6 +822,7 @@ export function LobbyScreen({
         </div>
       ) : null}
     </div>
+    </DepositContext>
   );
 }
 
@@ -1051,6 +1093,16 @@ function BellIcon() {
     <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M6 9.5 C6 6.5 8.5 4 12 4 C15.5 4 18 6.5 18 9.5 V14 L20 16.5 H4 L6 14 Z" />
       <path d="M10 18.5 C10.4 19.5 11.2 20 12 20 C12.8 20 13.6 19.5 14 18.5" />
+    </svg>
+  );
+}
+
+function WalletIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 7.5 C4 6.1 5.1 5 6.5 5 H17 V8" />
+      <path d="M4 7.5 V17.5 C4 18.9 5.1 20 6.5 20 H19.5 V8 H6.5 C5.1 8 4 6.9 4 7.5" />
+      <path d="M15.5 14 H16.5" strokeWidth="2.4" />
     </svg>
   );
 }

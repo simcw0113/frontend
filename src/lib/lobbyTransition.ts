@@ -30,7 +30,7 @@ let installed = false;
 
 // The lobby ("/"), the casino category pages, the promotions, sports, VIP and Z-AI pages and
 // the player's Recent games and Favourites, and Missions.
-const LOBBY_PAGES = new Set(["/", "/promotions", "/sports", "/vip", "/z-ai", "/recent", "/favourites", "/missions"]);
+const LOBBY_PAGES = new Set(["/", "/promotions", "/sports", "/vip", "/z-ai", "/recent", "/favourites", "/missions", "/deposit"]);
 
 export function isLobbyRoute(path: string): path is LobbyRoute {
   if (LOBBY_PAGES.has(path)) return true;
