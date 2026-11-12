@@ -310,6 +310,7 @@
     "theatre": "Modo cine",
     "fullscreen": "Pantalla completa",
     "close": "Cerrar juego",
+    "deposit": "Depositar",
     "leaveTitle": "¿Salir del juego?",
     "stay": "Quedarse",
     "leave": "Salir",
@@ -324,8 +325,7 @@
     "description": "Juega a {name} con dinero real. Consulta las reglas dentro del juego para ver líneas de pago, funciones y límites.",
     "loadError": "No se pudo cargar este juego. Inténtalo de nuevo más tarde.",
     "signIn": "Inicia sesión para jugar a este juego.",
-    "loading": "Cargando juego…",
-    "deposit": "Depositar"
+    "loading": "Cargando juego…"
   },
   "providerLaunch": {
     "webHint": "Abre el lobby del proveedor en una pestaña nueva.",
@@ -346,18 +346,6 @@
     "enterGame": "Entrar al juego",
     "noLink": "El proveedor aún no tiene enlace de inicio.",
     "failed": "No se pudo abrir el juego. Inténtalo de nuevo."
-  },
-  "bottomNav": {
-    "label": "Menú principal",
-    "menu": "Menú",
-    "search": "Buscar",
-    "casino": "Casino",
-    "sports": "Deportes",
-    "profile": "Perfil"
-  },
-  "notifications": {
-    "title": "Notificaciones",
-    "empty": "No hay notificaciones"
   },
   "deposit": {
     "title": "Billetera",
@@ -404,6 +392,18 @@
     "failed": "Algo salió mal. Inténtalo de nuevo.",
     "meta": "Deposita por transferencia bancaria, billetera electrónica o pago en línea.",
     "signInPrompt": "Inicia sesión para depositar."
+  },
+  "bottomNav": {
+    "label": "Menú principal",
+    "menu": "Menú",
+    "search": "Buscar",
+    "casino": "Casino",
+    "sports": "Deportes",
+    "profile": "Perfil"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "No hay notificaciones"
   },
   "withdraw": {
     "meta": "Retira fondos a tu cuenta bancaria.",

@@ -310,6 +310,7 @@
     "theatre": "影院模式",
     "fullscreen": "全屏",
     "close": "关闭游戏",
+    "deposit": "充值",
     "leaveTitle": "离开游戏？",
     "stay": "留下",
     "leave": "离开",
@@ -324,8 +325,7 @@
     "description": "畅玩 {name}，赢取真钱奖励。赔付线、特色功能与限额请查看游戏内规则。",
     "loadError": "游戏加载失败，请稍后重试。",
     "signIn": "登录后即可畅玩此游戏。",
-    "loading": "游戏加载中…",
-    "deposit": "充值"
+    "loading": "游戏加载中…"
   },
   "providerLaunch": {
     "webHint": "在新分页打开游戏商的大厅。",
@@ -346,18 +346,6 @@
     "enterGame": "进入游戏",
     "noLink": "游戏商暂时没有提供打开链接。",
     "failed": "游戏打开失败，请稍后再试。"
-  },
-  "bottomNav": {
-    "label": "主导航",
-    "menu": "菜单",
-    "search": "搜索",
-    "casino": "娱乐场",
-    "sports": "体育",
-    "profile": "我的"
-  },
-  "notifications": {
-    "title": "通知",
-    "empty": "暂无通知"
   },
   "deposit": {
     "title": "钱包",
@@ -404,6 +392,18 @@
     "failed": "出错了，请稍后再试。",
     "meta": "通过银行转账、电子钱包或在线支付充值。",
     "signInPrompt": "请先登录后再充值。"
+  },
+  "bottomNav": {
+    "label": "主导航",
+    "menu": "菜单",
+    "search": "搜索",
+    "casino": "娱乐场",
+    "sports": "体育",
+    "profile": "我的"
+  },
+  "notifications": {
+    "title": "通知",
+    "empty": "暂无通知"
   },
   "withdraw": {
     "meta": "将资金提取到您的银行账户。",

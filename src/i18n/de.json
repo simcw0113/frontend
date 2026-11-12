@@ -310,6 +310,7 @@
     "theatre": "Kinomodus",
     "fullscreen": "Vollbild",
     "close": "Spiel schließen",
+    "deposit": "Einzahlen",
     "leaveTitle": "Spiel verlassen?",
     "stay": "Bleiben",
     "leave": "Verlassen",
@@ -324,8 +325,7 @@
     "description": "Spiele {name} um echtes Geld. Gewinnlinien, Features und Limits findest du in den Spielregeln im Spiel.",
     "loadError": "Dieses Spiel konnte nicht geladen werden. Bitte versuche es später erneut.",
     "signIn": "Melde dich an, um dieses Spiel zu spielen.",
-    "loading": "Spiel wird geladen…",
-    "deposit": "Einzahlen"
+    "loading": "Spiel wird geladen…"
   },
   "providerLaunch": {
     "webHint": "Öffnet die Spiellobby des Anbieters in einem neuen Tab.",
@@ -346,18 +346,6 @@
     "enterGame": "Spiel starten",
     "noLink": "Der Anbieter hat noch keinen Startlink.",
     "failed": "Das Spiel konnte nicht geöffnet werden. Bitte versuche es erneut."
-  },
-  "bottomNav": {
-    "label": "Hauptmenü",
-    "menu": "Menü",
-    "search": "Suche",
-    "casino": "Casino",
-    "sports": "Sport",
-    "profile": "Profil"
-  },
-  "notifications": {
-    "title": "Benachrichtigungen",
-    "empty": "Keine Benachrichtigungen"
   },
   "deposit": {
     "title": "Wallet",
@@ -404,6 +392,18 @@
     "failed": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
     "meta": "Zahle per Banküberweisung, E-Wallet oder Online-Zahlung ein.",
     "signInPrompt": "Melde dich an, um einzuzahlen."
+  },
+  "bottomNav": {
+    "label": "Hauptmenü",
+    "menu": "Menü",
+    "search": "Suche",
+    "casino": "Casino",
+    "sports": "Sport",
+    "profile": "Profil"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "empty": "Keine Benachrichtigungen"
   },
   "withdraw": {
     "meta": "Zahlen Sie Guthaben auf Ihr Bankkonto aus.",

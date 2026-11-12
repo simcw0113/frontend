@@ -310,6 +310,7 @@
     "theatre": "Mod teater",
     "fullscreen": "Skrin penuh",
     "close": "Tutup permainan",
+    "deposit": "Deposit",
     "leaveTitle": "Tinggalkan permainan?",
     "stay": "Kekal",
     "leave": "Tinggalkan",
@@ -324,8 +325,7 @@
     "description": "Putar {name} untuk menang wang sebenar. Semak peraturan permainan di dalam permainan untuk garis bayaran, ciri dan had.",
     "loadError": "Permainan ini tidak dapat dimuatkan. Sila cuba lagi kemudian.",
     "signIn": "Log masuk untuk bermain permainan ini.",
-    "loading": "Memuatkan permainan…",
-    "deposit": "Deposit"
+    "loading": "Memuatkan permainan…"
   },
   "providerLaunch": {
     "webHint": "Membuka lobi permainan penyedia dalam tab baharu.",
@@ -346,18 +346,6 @@
     "enterGame": "Masuk permainan",
     "noLink": "Belum ada pautan permainan daripada penyedia.",
     "failed": "Permainan tidak dapat dibuka. Sila cuba lagi."
-  },
-  "bottomNav": {
-    "label": "Menu utama",
-    "menu": "Menu",
-    "search": "Cari",
-    "casino": "Kasino",
-    "sports": "Sukan",
-    "profile": "Profil"
-  },
-  "notifications": {
-    "title": "Pemberitahuan",
-    "empty": "Tiada pemberitahuan"
   },
   "deposit": {
     "title": "Dompet",
@@ -404,6 +392,18 @@
     "failed": "Berlaku ralat. Sila cuba lagi.",
     "meta": "Deposit melalui pindahan bank, e-dompet atau pembayaran dalam talian.",
     "signInPrompt": "Log masuk untuk membuat deposit."
+  },
+  "bottomNav": {
+    "label": "Menu utama",
+    "menu": "Menu",
+    "search": "Cari",
+    "casino": "Kasino",
+    "sports": "Sukan",
+    "profile": "Profil"
+  },
+  "notifications": {
+    "title": "Pemberitahuan",
+    "empty": "Tiada pemberitahuan"
   },
   "withdraw": {
     "meta": "Keluarkan dana ke akaun bank anda.",
