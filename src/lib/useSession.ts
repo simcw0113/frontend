@@ -4,6 +4,32 @@ import { useEffect, useRef, useState } from "react";
 import type { SessionUser } from "@/lib/session";
 import { AUTH_TOKEN_EVENT, clearAuthToken } from "@/lib/token";
 
+type MeResult = { user: SessionUser | null };
+
+// Shared across every useSession() hook (and React Strict Mode's double mount in
+// dev) so /api/auth/me is in flight at most once. Sign-out / token events start
+// a new request; they still share that one.
+let inflight: Promise<MeResult> | null = null;
+
+function readUser(payload: unknown, ok: boolean): SessionUser | null {
+  const next = payload && typeof payload === "object" ? (payload as { user?: SessionUser | null }).user : null;
+  if (ok && next && typeof next.username === "string" && next.username.trim()) return next;
+  return null;
+}
+
+function loadSession(): Promise<MeResult> {
+  if (!inflight) {
+    inflight = (async () => {
+      const response = await fetch("/api/auth/me", { cache: "no-store" });
+      const payload = await response.json().catch(() => null);
+      return { user: readUser(payload, response.ok) };
+    })().finally(() => {
+      inflight = null;
+    });
+  }
+  return inflight;
+}
+
 export function useSession() {
   const [user, setUser] = useState<SessionUser | null>(null);
   // False until the first /api/auth/me result. Callers that must not flash
@@ -17,16 +43,10 @@ export function useSession() {
     async function refresh() {
       const requestId = ++requestIdRef.current;
       try {
-        const response = await fetch("/api/auth/me", { cache: "no-store" });
-        const payload = (await response.json().catch(() => null)) as { user?: SessionUser | null } | null;
-        const next = payload && typeof payload === "object" ? payload.user : null;
+        const { user: next } = await loadSession();
         if (cancelled || requestId !== requestIdRef.current) return;
         setReady(true);
-        if (response.ok && next && typeof next.username === "string" && next.username.trim()) {
-          setUser(next);
-        } else {
-          setUser(null);
-        }
+        setUser(next);
       } catch {
         if (!cancelled && requestId === requestIdRef.current) {
           setUser(null);
@@ -48,6 +68,7 @@ export function useSession() {
   async function signOut() {
     requestIdRef.current += 1;
     setUser(null);
+    inflight = null;
     await clearAuthToken();
   }
 
