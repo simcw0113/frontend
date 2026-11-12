@@ -45,3 +45,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# per-build id written by next build (next.config.ts)
+/.deployment-id
