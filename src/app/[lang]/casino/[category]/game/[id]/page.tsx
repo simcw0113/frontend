@@ -9,7 +9,8 @@ import { categoryGames } from "@/config/lobby";
 import { getGameDetails } from "@/lib/games";
 import { getAuthTokenFromCookie } from "@/lib/authCookie";
 import { getGameLaunch } from "@/lib/gameLaunch";
-import { isSlug, languageAlternates, localizedPath } from "@/i18n/routing";
+import { languageAlternates, localizedPath } from "@/i18n/routing";
+import { getSiteLanguages } from "@/lib/siteLanguages";
 
 type Props = PageProps<"/[lang]/casino/[category]/game/[id]">;
 
@@ -33,8 +34,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: details.game.title, // the game name, not the id
     description: details.game.description ?? `${details.game.title} · ${details.game.provider}`,
     alternates: {
-      canonical: isSlug(lang) ? localizedPath(lang, path) : undefined,
-      languages: languageAlternates(path),
+      canonical: localizedPath(lang, path),
+      languages: languageAlternates(path, await getSiteLanguages()),
     },
   };
 }

@@ -5,6 +5,7 @@ import { topWinEntries } from "@/config/topWins";
 import { mapGame, type GameDto } from "@/lib/games";
 import { apiJson } from "@/lib/api";
 import { useStaticData as isStaticData } from "@/lib/apiMode";
+import { lobbyLocale } from "@/lib/lobbyApi";
 
 // "Top wins of the month" for the lobby home page. Server only. Same pattern as
 // lib/games.ts: static sample data while there is no API address
@@ -71,7 +72,7 @@ async function fromApi(lang: string): Promise<TopWinsResult> {
   try {
     // TODO(API): endpoint path lives in apiConfig.topWinsPath (config/site.ts).
     const payload = await apiJson<{ data?: TopWinDto[] } | TopWinDto[]>(
-      `${apiConfig.topWinsPath || DEFAULT_TOP_WINS_PATH}?${new URLSearchParams({ lang })}`,
+      `${apiConfig.topWinsPath || DEFAULT_TOP_WINS_PATH}?${new URLSearchParams({ lang, locale: lobbyLocale(lang) })}`,
       { auth: false, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) },
     );
     const wins = mapTopWins(payload).sort((a, b) => a.rank - b.rank);

@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { casinoCategories } from "@/config/categories";
 import { siteConfig } from "@/config/site";
-import { languageAlternates, localeSlugs, localizedPath } from "@/i18n/routing";
+import { languageAlternates, localizedPath } from "@/i18n/routing";
+import { getSiteLanguages } from "@/lib/siteLanguages";
 
 const pages = [
   { path: "/", priority: 1 },
@@ -14,13 +15,14 @@ const pages = [
 ];
 
 // One entry per language and page, each listing its translations.
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const siteLanguages = await getSiteLanguages();
   return pages.flatMap(({ path, priority }) => {
     const languages = Object.fromEntries(
-      Object.entries(languageAlternates(path)).map(([lang, href]) => [lang, `${siteConfig.url}${href}`]),
+      Object.entries(languageAlternates(path, siteLanguages)).map(([lang, href]) => [lang, `${siteConfig.url}${href}`]),
     );
-    return localeSlugs.map((slug) => ({
-      url: `${siteConfig.url}${localizedPath(slug, path)}`,
+    return siteLanguages.map(({ code }) => ({
+      url: `${siteConfig.url}${localizedPath(code, path)}`,
       changeFrequency: "weekly" as const,
       priority,
       alternates: { languages },

@@ -1,4 +1,3 @@
-import type { Locale } from "@/i18n";
 
 // Promotions page (/{lang}/promotions). STATIC sample data with neutral, invented wording;
 // the API replaces it later (see src/lib/promotions.ts). It mirrors what the API is
@@ -33,7 +32,8 @@ export type StaticPromotion = {
   startDate: string;
   endDate: string;
   image?: string;
-  text: { en: PromotionText } & Partial<Record<Exclude<Locale, "en">, PromotionText>>;
+  // Keyed by UI locale (en, zh, bm, vi, th, ...); English is the fallback. Extra keys (de, es) are unused.
+  text: { en: PromotionText } & Partial<Record<string, PromotionText>>;
 };
 
 // TEST image used by every sample promo (requested for testing). Replace per promo by setting

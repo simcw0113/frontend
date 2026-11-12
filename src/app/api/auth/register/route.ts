@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { apiConfig } from "@/config/site";
 import { ApiError, apiJson, extractAuthToken, isApiStatusFailure, readApiMessage } from "@/lib/api";
 import { writeAuthCookie } from "@/lib/authCookie";
+import { requestLocale, withLocale } from "@/lib/requestLocale";
 
 type RegisterBody = {
   username?: unknown;
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
   if (referral) payloadBody.referral = referral;
 
   try {
-    const payload = await apiJson(apiConfig.registerPath, {
+    const payload = await apiJson(withLocale(apiConfig.registerPath, requestLocale(request)), {
       method: "POST",
       auth: false,
       headers: { "Content-Type": "application/json" },

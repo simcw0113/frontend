@@ -1,0 +1,324 @@
+{
+  "siteName": "Sảnh Game",
+  "brand": "Lobby",
+  "loading": "Đang tải",
+  "skip": "Chuyển đến nội dung",
+  "menu": {
+    "home": "Trang chủ",
+    "recent": "Game gần đây",
+    "favourites": "Yêu thích",
+    "missions": "Nhiệm vụ",
+    "promotions": "Khuyến mãi",
+    "hide": "Ẩn menu",
+    "show": "Hiện menu",
+    "collapse": "Thu gọn menu",
+    "expand": "Mở rộng menu"
+  },
+  "auth": {
+    "signIn": "Đăng nhập",
+    "register": "Đăng ký",
+    "back": "Quay lại sảnh",
+    "close": "Đóng",
+    "password": "Mật khẩu",
+    "pending": "Đang đăng nhập…",
+    "login": "Đăng nhập",
+    "identifier": "Tên đăng nhập / Số điện thoại",
+    "showPassword": "Hiện mật khẩu",
+    "hidePassword": "Ẩn mật khẩu",
+    "remember": "Ghi nhớ tôi",
+    "forgot": "Quên mật khẩu",
+    "noAccount": "Chưa có tài khoản?",
+    "registerNow": "Đăng ký ngay",
+    "orLoginWith": "Hoặc đăng nhập bằng",
+    "loginWithGoogle": "Đăng nhập bằng Google",
+    "loginWithTelegram": "Đăng nhập bằng Telegram",
+    "errorIdentifier": "Nhập tên đăng nhập hoặc số điện thoại của bạn.",
+    "errorPassword": "Nhập mật khẩu của bạn.",
+    "headlineAccent": "NƠI NGƯỜI THẮNG",
+    "headlineWhite": "KHỞI ĐẦU",
+    "benefit": {
+      "vip": "Ưu đãi độc quyền VIP",
+      "rakeback": "Hoàn trả không giới hạn",
+      "cashback": "Hoàn tiền hàng tuần & hàng tháng"
+    },
+    "features": {
+      "fast": "Nhanh",
+      "secure": "An toàn",
+      "support": "Hỗ trợ 24/7"
+    },
+    "emailAddress": "Địa chỉ email",
+    "phoneNumber": "Số điện thoại",
+    "username": "Tên đăng nhập",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "realName": "Họ và tên thật",
+    "registerWith": "Đăng ký bằng",
+    "countryCode": "Mã quốc gia",
+    "referralToggle": "Nhập mã giới thiệu",
+    "referralLabel": "Mã giới thiệu",
+    "agree": "Tôi đồng ý với Điều khoản người dùng và xác nhận tôi đã đủ 18 tuổi",
+    "haveAccount": "Đã có tài khoản?",
+    "loginNow": "Đăng nhập ngay",
+    "errorEmail": "Nhập địa chỉ email hợp lệ.",
+    "errorPhone": "Nhập số điện thoại hợp lệ.",
+    "errorUsername": "Dùng 6–20 ký tự, gồm cả chữ và số. Được phép dùng _ và -.",
+    "errorConfirm": "Mật khẩu không khớp.",
+    "errorRealName": "Nhập họ tên thật, chỉ dùng chữ cái.",
+    "errorPasswordShort": "Dùng ít nhất 8 ký tự.",
+    "errorAgree": "Vui lòng xác nhận để tiếp tục.",
+    "registering": "Đang tạo tài khoản…",
+    "joinUs": "THAM GIA",
+    "signOut": "Đăng xuất"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "en": "English",
+    "es": "Spanish",
+    "de": "German",
+    "zh": "Chinese"
+  },
+  "lobby": {
+    "search": "Tìm kiếm",
+    "searchPlaceholder": "Tìm {name}",
+    "playing": "{count} đang chơi",
+    "trendingGames": "Game thịnh hành",
+    "slots": "Slots",
+    "liveDealer": "Live Casino",
+    "providers": "Nhà cung cấp",
+    "topWins": "Chiến thắng lớn nhất tháng",
+    "rank": "Hạng {n}",
+    "all": "Tất cả",
+    "viewAll": "Xem tất cả",
+    "back": "Quay lại",
+    "empty": "Chưa có nội dung.",
+    "loadError": "Không tải được danh sách game. Vui lòng thử lại sau.",
+    "promotions": "Khuyến mãi",
+    "showBanner": "Hiện banner {n}",
+    "previous": "Slide trước",
+    "next": "Slide sau",
+    "bannerAlt": "Banner khuyến mãi {n}"
+  },
+  "cookies": {
+    "title": "Chúng tôi sử dụng cookie",
+    "body": "Cookie giúp trang web hoạt động. Thông báo này không lưu tài khoản.",
+    "accept": "Đồng ý"
+  },
+  "partners": {
+    "title": "Đối tác của chúng tôi"
+  },
+  "promotions": {
+    "title": "Khuyến mãi",
+    "learnMore": "Tìm hiểu thêm",
+    "joinNow": "Tham gia ngay",
+    "close": "Đóng",
+    "terms": "Điều khoản chính",
+    "period": "{start} – {end}",
+    "empty": "Hiện chưa có khuyến mãi.",
+    "meta": "Khuyến mãi và thưởng hiện có."
+  },
+  "howTo": {
+    "title": "Cách đăng ký",
+    "steps": {
+      "create": {
+        "title": "Tạo tài khoản",
+        "text": "Nhấn Tham gia và đăng ký"
+      },
+      "deposit": {
+        "title": "Nạp tiền",
+        "text": "Nạp bằng tiền mặt hoặc tiền mã hóa"
+      },
+      "win": {
+        "title": "Bắt đầu thắng",
+        "text": "Chơi các game bạn yêu thích"
+      },
+      "reward": {
+        "title": "Nhận thưởng",
+        "text": "Nhận các phần thưởng của bạn"
+      }
+    }
+  },
+  "footer": {
+    "payment": "Phương thức thanh toán",
+    "follow": "Theo dõi chúng tôi",
+    "licenses": "Giấy phép",
+    "fair": "công bằng",
+    "check": "KIỂM TRA",
+    "secure": "An toàn",
+    "legal1": "{name} là bản xem trước. Tên nhà điều hành, thông tin đăng ký và địa chỉ sẽ được công bố ở dòng này.",
+    "legal2": "Chi tiết giấy phép và cơ quan quản lý sẽ được bổ sung khi có.",
+    "legal3": "Thông tin liên hệ hỗ trợ sẽ xuất hiện tại đây.",
+    "columns": [
+      {
+        "title": "Chung",
+        "items": [
+          "Điều khoản",
+          "Chính sách bảo mật",
+          "Chương trình đại lý",
+          "Blog"
+        ]
+      },
+      {
+        "title": "Game",
+        "items": [
+          "Live Casino",
+          "Thể thao",
+          "Slots"
+        ]
+      },
+      {
+        "title": "Thông tin",
+        "items": [
+          "Chơi game có trách nhiệm",
+          "Chơi game công bằng",
+          "Tự loại trừ",
+          "Chính sách KYC"
+        ]
+      }
+    ]
+  },
+  "errors": {
+    "unreachable": "Không kết nối được API.",
+    "api_unconfigured": "Địa chỉ API chưa được cấu hình.",
+    "api_unexpected": "API trả về phản hồi không mong đợi.",
+    "api_failed": "Không thể hoàn tất yêu cầu.",
+    "token_missing": "Phản hồi đăng nhập không có token."
+  },
+  "search": {
+    "title": "Khám phá",
+    "placeholder": "Tìm game",
+    "clear": "Xóa tìm kiếm",
+    "close": "Đóng",
+    "open": "Mở tìm kiếm game",
+    "categoriesLabel": "Danh mục game",
+    "showMore": "Xem thêm",
+    "loading": "Đang tải",
+    "retry": "Thử lại",
+    "empty": "Không tìm thấy game",
+    "shown": "Đang hiển thị {count} trên {total} game",
+    "categories": {
+      "all": "Tất cả game",
+      "slots": "Slots",
+      "liveCasino": "Live Casino",
+      "baccarat": "Baccarat",
+      "blackjack": "Blackjack",
+      "roulette": "Roulette",
+      "gameShows": "Game shows",
+      "sicBo": "Sic Bo"
+    }
+  },
+  "topNav": {
+    "label": "Chính",
+    "slots": "Slots",
+    "liveDealer": "Live Casino",
+    "sports": "Thể thao",
+    "promotions": "Khuyến mãi",
+    "vip": "VIP",
+    "zAi": "Z-AI"
+  },
+  "vip": {
+    "meta": "Cấp VIP, hoàn trả và hoàn tiền.",
+    "sample": "Tiến trình mẫu. Cấp VIP thực tế của bạn sẽ hiện ở đây khi API VIP sẵn sàng.",
+    "current": "Cấp hiện tại",
+    "progress": "Tiến trình VIP của bạn",
+    "wagered": "Đã cược",
+    "more": "Còn {amount} nữa để lên {level}",
+    "nextReward": "Thưởng khi lên cấp tiếp theo",
+    "rakeback": "Hoàn trả",
+    "claimed": "Tổng thưởng đã nhận",
+    "claimedState": "Đã nhận",
+    "details": "Chi tiết",
+    "redeem": "Mã đổi thưởng",
+    "redeemSubmit": "Đổi",
+    "redeemUnavailable": "Mã đổi thưởng chưa khả dụng.",
+    "bonus": "Thưởng VIP",
+    "claim": "Nhận",
+    "locked": "Đã khóa",
+    "otherLevels": "Các cấp khác",
+    "levelName": "{name} {tier}",
+    "levelCount": "{count} cấp",
+    "tiers": "{filled} / {total}",
+    "reward": "Phần thưởng",
+    "play": "Đến sảnh casino",
+    "faqTitle": "Câu hỏi thường gặp",
+    "levels": {
+      "silver": "Bạc",
+      "gold": "Vàng",
+      "emerald": "Ngọc lục bảo",
+      "sapphire": "Sapphire",
+      "ruby": "Ruby",
+      "diamond": "Kim cương"
+    },
+    "rewards": {
+      "reload": "Reload",
+      "instant": "Hoàn trả tức thì",
+      "daily": "Hoàn trả hàng ngày",
+      "weekly": "Hoàn tiền hàng tuần",
+      "monthly": "Hoàn tiền hàng tháng"
+    },
+    "faq": [
+      {
+        "q": "Hoàn trả tức thì là gì?",
+        "a": "Một phần biên nhà cái từ số tiền bạn cược. Tỷ lệ theo cấp VIP của bạn và được tính dù cược thắng hay thua."
+      },
+      {
+        "q": "Hoàn trả hàng ngày là gì?",
+        "a": "Cùng một phần biên nhà cái, cộng dồn trong ngày và được trả sau khi ngày đó kết thúc."
+      },
+      {
+        "q": "Reload là gì?",
+        "a": "Phần thưởng dựa trên số tiền bạn cược và cấp VIP hiện tại."
+      },
+      {
+        "q": "Hoàn tiền hàng tuần là gì?",
+        "a": "Phần thưởng được quyết toán mỗi tuần, dựa trên lối chơi và cấp VIP của bạn."
+      },
+      {
+        "q": "Hoàn tiền hàng tháng là gì?",
+        "a": "Phần thưởng được quyết toán mỗi tháng, dựa trên lối chơi và cấp VIP của bạn."
+      }
+    ]
+  },
+  "comingSoon": {
+    "text": "Sắp ra mắt",
+    "sportsMeta": "Cá cược thể thao sắp ra mắt.",
+    "vipMeta": "Cấp VIP, hoàn trả và hoàn tiền.",
+    "zAiMeta": "Z-AI sắp ra mắt.",
+    "missionsMeta": "Nhiệm vụ sắp ra mắt."
+  },
+  "playerGames": {
+    "recentEmpty": "Chưa có game gần đây",
+    "favouritesEmpty": "Chưa có game yêu thích",
+    "recentMeta": "Các game bạn chơi gần đây.",
+    "favouritesMeta": "Các game bạn yêu thích."
+  },
+  "luckyPick": {
+    "title": "Lucky Pick Slots",
+    "subtitle": "Vận may bắt đầu từ một lựa chọn!",
+    "spin": "Quay",
+    "play": "Chơi",
+    "tryAgain": "Thử lại",
+    "by": "bởi {provider}",
+    "picked": "Lựa chọn may mắn của bạn: {name}",
+    "close": "Đóng"
+  },
+  "gamePage": {
+    "favourite": "Yêu thích",
+    "theatre": "Chế độ rạp",
+    "fullscreen": "Toàn màn hình",
+    "close": "Đóng game",
+    "leaveTitle": "Rời khỏi game?",
+    "stay": "Ở lại",
+    "leave": "Rời đi",
+    "recommended": "Đề xuất",
+    "previous": "Game trước",
+    "next": "Game tiếp",
+    "nowPlaying": "Đang chơi",
+    "statRtp": "RTP",
+    "statEdge": "Biên nhà cái",
+    "statCategory": "Danh mục",
+    "percent": "{value}%",
+    "description": "Quay {name} để thắng tiền thật. Xem luật chơi trong game để biết dòng thanh toán, tính năng và giới hạn.",
+    "loadError": "Không tải được game này. Vui lòng thử lại sau.",
+    "signIn": "Đăng nhập để chơi game này.",
+    "loading": "Đang tải game…"
+  }
+}

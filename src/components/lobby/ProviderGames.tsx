@@ -20,7 +20,7 @@ export function ProviderGames({
   category: string;
   query?: string; // category page: filter the loaded list in place, no search dialog
 }) {
-  const { locale, t } = useI18n();
+  const { lang, t } = useI18n();
   const [state, setState] = useState<"loading" | "error" | "ready">("loading");
   const [games, setGames] = useState<Game[]>([]);
   const [shown, setShown] = useState(PAGE_SIZE);
@@ -33,7 +33,7 @@ export function ProviderGames({
     fetch("/api/lobby/games", {
       method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify({ publicCode, locale }),
+      body: JSON.stringify({ publicCode, locale: lang }),
       signal: controller.signal,
     })
       .then(async (response) => {
@@ -51,7 +51,7 @@ export function ProviderGames({
       });
 
     return () => controller.abort();
-  }, [publicCode, locale]);
+  }, [publicCode, lang]);
 
   // A new provider or a new search starts again at the first batch.
   useEffect(() => {

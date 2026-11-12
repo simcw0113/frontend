@@ -1,4 +1,5 @@
 import { apiConfig } from "@/config/site";
+import { isLanguageCode } from "@/i18n/languages";
 import { apiJson } from "@/lib/api";
 import type { Game, GameSymbol } from "@/config/lobby";
 import type { Provider } from "@/config/providers";
@@ -19,9 +20,14 @@ const PALETTE: [string, string][] = [
 const SYMBOLS: GameSymbol[] = ["reel", "seven", "star", "coin", "crown", "lantern"];
 const ACCENTS = ["#ffb020", "#7dff6a", "#e6edf0", "#4cc3ff", "#ff7ad9", "#c9a3ff", "#5ef0c4", "#ff6b6b"];
 
+// URL language slug -> the `locale` the API expects (APIController reads $request->locale).
+// Slugs are backend codes already (en, cn, bm); old UI ids zh / ms are mapped. Any other
+// configured code is passed through as it is; something that is not a code is English.
 export function lobbyLocale(lang: string): string {
-  if (lang === "zh" || lang === "cn") return "cn";
-  return "en";
+  const value = lang.trim().toLowerCase();
+  if (value === "zh" || value === "cn") return "cn";
+  if (value === "ms" || value === "bm") return "bm";
+  return isLanguageCode(value) ? value : "en";
 }
 
 function hash(text: string) {

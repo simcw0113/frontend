@@ -1,28 +1,21 @@
-// Locale-prefixed URLs (/en, /cn, /de, /es). Kept free of the message JSON so the
-// proxy can import it. The URL segment for Chinese is "cn"; internally it maps to
-// the existing "zh" locale and zh.json.
-import type { Locale } from "@/i18n";
+// Locale-prefixed URLs (/en, /cn, /bm). The prefix is the backend language code from
+// GET /config `data.languages` (see ./languages.ts); which codes are live is decided at
+// request time, so the helpers here only check the shape of a segment. Kept free of the
+// message JSON so the proxy can import it.
+import { DEFAULT_CODE, isLanguageCode } from "@/i18n/languages";
+import type { SiteLanguage } from "@/i18n/languages";
 
-export const localeSlugs = ["en", "cn", "de", "es"] as const;
-export type LocaleSlug = (typeof localeSlugs)[number];
+// A backend language code used as the URL prefix ("en", "cn", "bm", ...).
+export type LocaleSlug = string;
 
-export const defaultSlug: LocaleSlug = "en";
+export const defaultSlug: LocaleSlug = DEFAULT_CODE;
 export const localeCookie = "NEXT_LOCALE";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
-const slugByLocale: Record<Locale, LocaleSlug> = { en: "en", zh: "cn", de: "de", es: "es" };
-const localeBySlug: Record<LocaleSlug, Locale> = { en: "en", cn: "zh", de: "de", es: "es" };
-
+// Shape check only (two letters, optional region). Whether the language is configured
+// is checked by the proxy and the [lang] layout against /config.
 export function isSlug(value: string | null | undefined): value is LocaleSlug {
-  return localeSlugs.some((slug) => slug === value);
-}
-
-export function toSlug(locale: Locale): LocaleSlug {
-  return slugByLocale[locale];
-}
-
-export function fromSlug(slug: LocaleSlug): Locale {
-  return localeBySlug[slug];
+  return isLanguageCode(value);
 }
 
 // "/cn/games" -> "/games", "/en" -> "/", "/games" (no prefix) -> "/games".
@@ -37,8 +30,9 @@ export function localizedPath(slug: LocaleSlug, path: string): string {
   return path === "/" || path === "" ? `/${slug}` : `/${slug}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-// Picks the best supported language from an Accept-Language header.
-export function negotiate(header: string | null): LocaleSlug | null {
+// Picks the best configured language from an Accept-Language header.
+// Browser tags are mapped to backend codes: zh-* -> cn, ms-* -> bm.
+export function negotiate(header: string | null, codes: readonly string[]): LocaleSlug | null {
   if (!header) return null;
   const ranked = header
     .split(",")
@@ -51,8 +45,9 @@ export function negotiate(header: string | null): LocaleSlug | null {
     .sort((a, b) => b.q - a.q);
   for (const { tag } of ranked) {
     const primary = tag.split("-")[0];
-    if (primary === "zh") return "cn";
-    if (isSlug(primary)) return primary;
+    const code = primary === "zh" ? "cn" : primary === "ms" ? "bm" : primary;
+    if (codes.includes(tag)) return tag;
+    if (codes.includes(code)) return code;
   }
   return null;
 }
@@ -61,13 +56,21 @@ export function setLocaleCookie(slug: LocaleSlug) {
   document.cookie = `${localeCookie}=${slug}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax`;
 }
 
-// <link rel="alternate" hreflang> map for a page, given its path without prefix.
-export function languageAlternates(path: string): Record<string, string> {
-  return {
-    "en-US": localizedPath("en", path),
-    "zh-CN": localizedPath("cn", path),
-    "de-DE": localizedPath("de", path),
-    "es-ES": localizedPath("es", path),
-    "x-default": localizedPath(defaultSlug, path),
-  };
+// hreflang tag for a backend language code.
+export function hreflang(code: string): string {
+  if (code === "cn") return "zh-Hans";
+  if (code === "bm") return "ms";
+  if (code === "en") return "en-US";
+  return code;
+}
+
+// <link rel="alternate" hreflang> map for a page, given its path without prefix and the
+// configured languages (getSiteLanguages()).
+export function languageAlternates(path: string, languages: SiteLanguage[]): Record<string, string> {
+  const codes = languages.map((language) => language.code);
+  const alternates: Record<string, string> = Object.fromEntries(
+    codes.map((code) => [hreflang(code), localizedPath(code, path)]),
+  );
+  alternates["x-default"] = localizedPath(codes.includes(defaultSlug) ? defaultSlug : (codes[0] ?? defaultSlug), path);
+  return alternates;
 }

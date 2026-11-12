@@ -5,8 +5,9 @@ import { BootLoader } from "@/components/BootLoader";
 import { I18nProvider } from "@/components/I18nProvider";
 import { SkipLink } from "@/components/SkipLink";
 import { siteConfig } from "@/config/site";
-import { htmlLang } from "@/i18n";
-import { fromSlug, isSlug, localeSlugs } from "@/i18n/routing";
+import { htmlLang, uiLocale } from "@/i18n";
+import { isSlug } from "@/i18n/routing";
+import { getSiteLanguages } from "@/lib/siteLanguages";
 import "../globals.css";
 
 const outfit = Outfit({
@@ -14,13 +15,15 @@ const outfit = Outfit({
   variable: "--font-outfit",
 });
 
-export function generateStaticParams() {
-  return localeSlugs.map((lang) => ({ lang }));
+// The languages configured in the backoffice (GET /config data.languages); English only
+// when /config is unreachable at build time. Other configured codes render on demand.
+export async function generateStaticParams() {
+  return (await getSiteLanguages()).map(({ code }) => ({ lang: code }));
 }
 
 export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Promise<Metadata> {
   const { lang } = await params;
-  const locale = isSlug(lang) ? fromSlug(lang) : "en";
+  const locale = uiLocale(lang);
   return {
     metadataBase: new URL(siteConfig.url),
     title: {
@@ -54,7 +57,9 @@ const websiteJsonLd = {
 export default async function RootLayout({ children, params }: LayoutProps<"/[lang]">) {
   const { lang } = await params;
   if (!isSlug(lang)) notFound();
-  const locale = fromSlug(lang);
+  // The proxy already sends languages /config does not list to a configured one.
+  const languages = await getSiteLanguages();
+  const locale = uiLocale(lang); // UI strings: en / zh / bm / vi / th, English for any other code
 
   return (
     <html lang={htmlLang(locale)} className={`${outfit.variable} h-full antialiased`}>
@@ -63,7 +68,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
-        <I18nProvider locale={locale}>
+        <I18nProvider lang={lang} languages={languages}>
           <BootLoader />
           <div id="app-shell">
             <SkipLink />

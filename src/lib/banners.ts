@@ -26,7 +26,7 @@ function imageUrl(value: unknown, locale: string): string {
   if (direct) return direct;
   const record = asRecord(value);
   if (!record) return "";
-  const preferred = [locale, locale === "cn" ? "zh" : "", "en"];
+  const preferred = [locale, locale === "cn" ? "zh" : locale === "bm" ? "ms" : "", "en"];
   for (const key of preferred) {
     if (!key) continue;
     const hit = text(record[key]);

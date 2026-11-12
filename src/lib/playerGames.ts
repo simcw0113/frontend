@@ -3,6 +3,7 @@ import { categoryGames, staticGameId, type Game } from "@/config/lobby";
 import { apiJson } from "@/lib/api";
 import { useStaticData as isStaticData } from "@/lib/apiMode";
 import { mapResponse, type CategoryGamesDto, type CategoryGamesResult, type GameDto } from "@/lib/games";
+import { lobbyLocale } from "@/lib/lobbyApi";
 
 // The signed-in player's own game lists: /{lang}/recent and /{lang}/favourites.
 // Same static/API switch as the other lobby data (apiConfig.useStaticPlayerGames, static
@@ -39,7 +40,7 @@ function staticEnabled(): boolean {
 async function fromApi(path: string | undefined, fallback: string, opts: PlayerGamesOptions): Promise<CategoryGamesResult> {
   if (!opts.token) return { games: [] };
   try {
-    const query = new URLSearchParams({ lang: opts.lang });
+    const query = new URLSearchParams({ lang: opts.lang, locale: lobbyLocale(opts.lang) });
     const payload = await apiJson<CategoryGamesDto | GameDto[]>(`${path || fallback}?${query}`, {
       auth: false, // the token is passed in explicitly (the browser token helper is client-only)
       headers: { Authorization: `Bearer ${opts.token}` },

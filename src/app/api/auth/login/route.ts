@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { apiConfig } from "@/config/site";
 import { ApiError, apiJson, extractAuthToken, isApiStatusFailure, readApiMessage } from "@/lib/api";
 import { writeAuthCookie } from "@/lib/authCookie";
+import { requestLocale, withLocale } from "@/lib/requestLocale";
 
 type LoginBody = {
   username?: unknown;
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const payload = await apiJson(apiConfig.loginPath, {
+    const payload = await apiJson(withLocale(apiConfig.loginPath, requestLocale(request)), {
       method: "POST",
       auth: false,
       headers: { "Content-Type": "application/json" },

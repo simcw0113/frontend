@@ -3,6 +3,7 @@ import { apiConfig } from "@/config/site";
 import { staticPartners, type Partner } from "@/config/partners";
 import { apiJson } from "@/lib/api";
 import { useStaticData as isStaticData } from "@/lib/apiMode";
+import { lobbyLocale } from "@/lib/lobbyApi";
 
 // "Our Partners" for the lobby home page. Server only. Same pattern as lib/topWins.ts:
 // static placeholder data while there is no API address (apiConfig.useStaticPartners, see
@@ -41,7 +42,7 @@ async function fromApi(lang: string): Promise<PartnersResult> {
   try {
     // TODO(API): endpoint path lives in apiConfig.partnersPath (config/site.ts).
     const payload = await apiJson<{ data?: PartnerDto[] } | PartnerDto[]>(
-      `${apiConfig.partnersPath || DEFAULT_PARTNERS_PATH}?${new URLSearchParams({ lang })}`,
+      `${apiConfig.partnersPath || DEFAULT_PARTNERS_PATH}?${new URLSearchParams({ lang, locale: lobbyLocale(lang) })}`,
       { auth: false, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) },
     );
     const partners = mapPartners(payload);

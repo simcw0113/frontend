@@ -3,6 +3,7 @@ import { apiConfig } from "@/config/site";
 import { ApiError, apiJson, isApiStatusFailure, readApiMessage } from "@/lib/api";
 import { getAuthTokenFromCookie } from "@/lib/authCookie";
 import { readSessionUser } from "@/lib/session";
+import { requestLocale, withLocale } from "@/lib/requestLocale";
 
 function errorJson(message: string, status: number, code?: ApiError["code"]) {
   return NextResponse.json({ user: null, message, code }, { status });
@@ -12,14 +13,14 @@ function errorJson(message: string, status: number, code?: ApiError["code"]) {
 // Reads the HttpOnly auth cookie and asks the backend POST /api/info for the
 // signed-in member. The token is sent as Authorization: Bearer and never
 // exposed to the client.
-export async function GET() {
+export async function GET(request: Request) {
   const token = await getAuthTokenFromCookie();
   if (!token) {
     return NextResponse.json({ user: null }, { status: 401 });
   }
 
   try {
-    const payload = await apiJson(apiConfig.infoPath, {
+    const payload = await apiJson(withLocale(apiConfig.infoPath, requestLocale(request)), {
       method: "POST",
       auth: false,
       headers: {

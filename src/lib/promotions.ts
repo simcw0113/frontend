@@ -4,7 +4,7 @@ import { apiConfig } from "@/config/site";
 import { apiJson, isApiStatusFailure } from "@/lib/api";
 import { useStaticData as isStaticData } from "@/lib/apiMode";
 import { lobbyLocale } from "@/lib/lobbyApi";
-import { fromSlug, isSlug } from "@/i18n/routing";
+import { uiLocale } from "@/i18n";
 
 // Promotions for /{lang}/promotions. Server only. Static sample data
 // (config/promotions.ts) while there is no API address (apiConfig.useStaticPromotions,
@@ -146,7 +146,7 @@ const REQUEST_TIMEOUT_MS = 8000;
 const DEFAULT_PROMOTIONS_PATH = "/promotion";
 
 function fromStatic(lang: string): PromotionsResult {
-  const locale = isSlug(lang) ? fromSlug(lang) : "en";
+  const locale = uiLocale(lang);
   const promotions = staticPromotions.map(({ text, ...promo }) => ({ ...promo, ...(text[locale] ?? text.en) }));
   return { promotions: promotions.sort((a, b) => a.sort - b.sort) };
 }

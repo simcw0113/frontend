@@ -4,7 +4,8 @@ import { Suspense } from "react";
 import { LobbyScreen } from "@/components/lobby/LobbyScreen";
 import { casinoCategories, findCasinoCategory } from "@/config/categories";
 import { getCategoryGames } from "@/lib/games";
-import { isSlug, languageAlternates, localizedPath } from "@/i18n/routing";
+import { languageAlternates, localizedPath } from "@/i18n/routing";
+import { getSiteLanguages } from "@/lib/siteLanguages";
 
 // TODO(API): the allow-list of slugs is config/categories.ts for now; take it from
 // the API (categories endpoint) later and keep notFound() for unknown slugs.
@@ -21,8 +22,8 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/casino/[ca
     title: category.title,
     description: `All ${category.title.toLowerCase()}.`,
     alternates: {
-      canonical: isSlug(lang) ? localizedPath(lang, path) : undefined,
-      languages: languageAlternates(path),
+      canonical: localizedPath(lang, path),
+      languages: languageAlternates(path, await getSiteLanguages()),
     },
   };
 }

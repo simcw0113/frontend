@@ -8,7 +8,8 @@ import { getCategoryGames, type CategoryGamesResult } from "@/lib/games";
 import { loadLobbyGames, lobbyLocale } from "@/lib/lobbyApi";
 import { getPartners } from "@/lib/partners";
 import { getTopWins } from "@/lib/topWins";
-import { isSlug, languageAlternates, localizedPath } from "@/i18n/routing";
+import { languageAlternates, localizedPath } from "@/i18n/routing";
+import { getSiteLanguages } from "@/lib/siteLanguages";
 
 // The home row only shows the first 8. Round-robin so those 8 are not all one provider.
 function mixProviders(games: Game[]): Game[] {
@@ -48,8 +49,8 @@ export async function generateMetadata({ params }: PageProps<"/[lang]">): Promis
   return {
     description: siteConfig.description,
     alternates: {
-      canonical: isSlug(lang) ? localizedPath(lang, "/") : undefined,
-      languages: languageAlternates("/"),
+      canonical: localizedPath(lang, "/"),
+      languages: languageAlternates("/", await getSiteLanguages()),
     },
   };
 }

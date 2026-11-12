@@ -8,7 +8,8 @@ import { getAuthTokenFromCookie } from "@/lib/authCookie";
 import { getGameLaunch } from "@/lib/gameLaunch";
 import { findLobbyGame, lobbyLocale } from "@/lib/lobbyApi";
 import type { GameDetails } from "@/lib/games";
-import { isSlug, languageAlternates, localizedPath } from "@/i18n/routing";
+import { languageAlternates, localizedPath } from "@/i18n/routing";
+import { getSiteLanguages } from "@/lib/siteLanguages";
 
 // /casino/{category}/provider/{public_code}/game/{game_code}
 // Example: /en/casino/slots/provider/XYV9QF/game/ES073
@@ -40,8 +41,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: details.game.title,
     description: details.game.description ?? `${details.game.title} · ${details.game.provider}`,
     alternates: {
-      canonical: isSlug(lang) ? localizedPath(lang, path) : undefined,
-      languages: languageAlternates(path),
+      canonical: localizedPath(lang, path),
+      languages: languageAlternates(path, await getSiteLanguages()),
     },
   };
 }

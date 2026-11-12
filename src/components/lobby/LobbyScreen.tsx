@@ -23,8 +23,8 @@ import { VipClub, VipHeader } from "@/components/lobby/VipClub";
 import { sidebarMissionsItem, sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
 import { PlayerGameList } from "@/components/lobby/HomeGameContent";
 import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
-import { fill, localeChoices } from "@/i18n";
-import { toSlug } from "@/i18n/routing";
+import { fill } from "@/i18n";
+import { hreflang } from "@/i18n/routing";
 import type { Provider } from "@/config/providers";
 import type { CategoryGamesResult } from "@/lib/games";
 import { providersForCategory } from "@/lib/lobbyApi";
@@ -81,7 +81,8 @@ export function LobbyScreen({
   // Category pages filter the open provider list in place. Home still opens Explore.
   const [gameQuery, setGameQuery] = useState("");
   const [languageOpen, setLanguageOpen] = useState(false);
-  const { locale, setLocale, t } = useI18n();
+  const { lang, languages, setLang, t } = useI18n();
+  const languageName = languages.find((language) => language.code === lang)?.name ?? lang.toUpperCase();
   const sidebarOpen = useSidebarOpen(); // lg+: expanded (icon + label) or the icon rail
   const drawerOpen = useDrawerOpen(); // below lg: the drawer over the page
   const rail = useSidebarRail();
@@ -104,7 +105,7 @@ export function LobbyScreen({
   useEffect(() => {
     const controller = new AbortController();
     setProvidersStatus("loading");
-    fetch(`/api/lobby/products?locale=${locale}`, { signal: controller.signal })
+    fetch(`/api/lobby/products?locale=${encodeURIComponent(lang)}`, { signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error("failed");
         return (await response.json()) as { providers?: Provider[] };
@@ -118,7 +119,7 @@ export function LobbyScreen({
         setProvidersStatus("error");
       });
     return () => controller.abort();
-  }, [locale]);
+  }, [lang]);
 
   // The router may keep the lobby mounted while a "View all" page is open and
   // show it again on the way back. Put the scroll position where it was before
@@ -335,8 +336,8 @@ export function LobbyScreen({
             <button
               type="button"
               aria-expanded={languageOpen}
-              aria-label={`${t.language.label}: ${t.language[locale]}`}
-              title={collapsed ? `${t.language.label}: ${t.language[locale]}` : undefined}
+              aria-label={`${t.language.label}: ${languageName}`}
+              title={collapsed ? `${t.language.label}: ${languageName}` : undefined}
               onClick={() => {
                 if (collapsed) {
                   setSidebarOpen(true);
@@ -349,7 +350,7 @@ export function LobbyScreen({
             >
               <span className="flex items-center gap-3">
                 <GlobeIcon />
-                <span className="lobby-label">{t.language[locale]}</span>
+                <span className="lobby-label">{languageName}</span>
               </span>
               <span aria-hidden="true" className={`lobby-label inline-block transition-transform duration-300 motion-reduce:transition-none ${languageOpen ? "rotate-180" : ""}`}>
                 ▾
@@ -357,20 +358,22 @@ export function LobbyScreen({
             </button>
             <Collapse open={languageOpen}>
               <div className="mt-1 rounded-lg border border-white/10 bg-white/5 p-1">
-                {localeChoices.map((choice) => (
+                {/* GET /config data.languages: code is the URL prefix, name the label. */}
+                {languages.map((choice) => (
                   <button
-                    key={choice.id}
+                    key={choice.code}
                     type="button"
-                    aria-pressed={locale === choice.id}
+                    lang={hreflang(choice.code)}
+                    aria-pressed={lang === choice.code}
                     onClick={() => {
-                      setLocale(choice.id);
+                      setLang(choice.code);
                       setLanguageOpen(false);
                     }}
                     className={`block w-full rounded-md px-3 py-2 text-left text-sm whitespace-nowrap ${
-                      locale === choice.id ? "bg-brand text-lobby" : "hover:bg-white/10"
+                      lang === choice.code ? "bg-brand text-lobby" : "hover:bg-white/10"
                     }`}
                   >
-                    {t.language[choice.label]}
+                    {choice.name}
                   </button>
                 ))}
               </div>
@@ -477,7 +480,7 @@ export function LobbyScreen({
         </div>
       </header>
 
-        <main id="content" data-route={route} data-lang={toSlug(locale)} className="min-w-0 px-3 py-4 sm:px-5">
+        <main id="content" data-route={route} data-lang={lang} className="min-w-0 px-3 py-4 sm:px-5">
           <div className="lobby-vt-top">
             {focus === "home" ? (
               <Suspense fallback={<BannerSkeleton />}>

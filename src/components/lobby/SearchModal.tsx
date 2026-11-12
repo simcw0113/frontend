@@ -9,7 +9,6 @@ import { defaultCasinoCategory } from "@/config/categories";
 import { defaultSearchCategory, searchCategories, type SearchCategoryId } from "@/config/searchCategories";
 import type { Game } from "@/config/lobby";
 import { fill, htmlLang } from "@/i18n";
-import { toSlug } from "@/i18n/routing";
 import type { SearchGamesResult } from "@/lib/games";
 import { animate, reduceMotion } from "@/lib/motion";
 
@@ -163,8 +162,7 @@ async function fetchPage(
 }
 
 function ExploreContent({ onClose }: { onClose: () => void }) {
-  const { locale, t } = useI18n();
-  const lang = toSlug(locale);
+  const { lang, locale, t } = useI18n();
   const [input, setInput] = useState("");
   const [q, setQ] = useState(""); // the debounced text the requests use
   const [category, setCategory] = useState<SearchCategoryId>(defaultSearchCategory);

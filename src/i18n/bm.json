@@ -1,0 +1,324 @@
+{
+  "siteName": "Game Lobby",
+  "brand": "Lobi",
+  "loading": "Memuatkan",
+  "skip": "Langkau ke kandungan",
+  "menu": {
+    "home": "Utama",
+    "recent": "Permainan Terkini",
+    "favourites": "Kegemaran",
+    "missions": "Misi",
+    "promotions": "Promosi",
+    "hide": "Sembunyikan menu",
+    "show": "Tunjukkan menu",
+    "collapse": "Kecilkan menu",
+    "expand": "Kembangkan menu"
+  },
+  "auth": {
+    "signIn": "Log masuk",
+    "register": "Daftar",
+    "back": "Kembali ke lobi",
+    "close": "Tutup",
+    "password": "Kata laluan",
+    "pending": "Sedang log masuk…",
+    "login": "Log Masuk",
+    "identifier": "Nama pengguna / No. telefon bimbit",
+    "showPassword": "Tunjukkan kata laluan",
+    "hidePassword": "Sembunyikan kata laluan",
+    "remember": "Ingat Saya",
+    "forgot": "Lupa Kata Laluan",
+    "noAccount": "Belum mempunyai akaun?",
+    "registerNow": "Daftar Sekarang",
+    "orLoginWith": "Atau log masuk dengan",
+    "loginWithGoogle": "Log masuk dengan Google",
+    "loginWithTelegram": "Log masuk dengan Telegram",
+    "errorIdentifier": "Masukkan nama pengguna atau nombor telefon bimbit anda.",
+    "errorPassword": "Masukkan kata laluan anda.",
+    "headlineAccent": "DI SINI PEMENANG",
+    "headlineWhite": "BERMULA",
+    "benefit": {
+      "vip": "Ganjaran Eksklusif VIP",
+      "rakeback": "Rebat Tanpa Had",
+      "cashback": "Pulangan Tunai Mingguan & Bulanan"
+    },
+    "features": {
+      "fast": "Pantas",
+      "secure": "Selamat",
+      "support": "Sokongan 24/7"
+    },
+    "emailAddress": "Alamat E-mel",
+    "phoneNumber": "No. telefon bimbit",
+    "username": "Nama pengguna",
+    "confirmPassword": "Sahkan kata laluan",
+    "realName": "Nama sebenar",
+    "registerWith": "Daftar dengan",
+    "countryCode": "Kod negara",
+    "referralToggle": "Masukkan kod rujukan",
+    "referralLabel": "Kod rujukan",
+    "agree": "Saya bersetuju dengan Perjanjian Pengguna & mengesahkan saya berumur sekurang-kurangnya 18 tahun",
+    "haveAccount": "Sudah mempunyai akaun?",
+    "loginNow": "Log Masuk Sekarang",
+    "errorEmail": "Masukkan alamat e-mel yang sah.",
+    "errorPhone": "Masukkan nombor telefon bimbit yang sah.",
+    "errorUsername": "Gunakan 6–20 aksara yang mengandungi huruf dan nombor. _ dan - dibenarkan.",
+    "errorConfirm": "Kata laluan tidak sepadan.",
+    "errorRealName": "Masukkan nama sebenar anda menggunakan huruf sahaja.",
+    "errorPasswordShort": "Gunakan sekurang-kurangnya 8 aksara.",
+    "errorAgree": "Sila sahkan untuk meneruskan.",
+    "registering": "Sedang membuat akaun…",
+    "joinUs": "SERTAI KAMI",
+    "signOut": "Log keluar"
+  },
+  "language": {
+    "label": "Bahasa",
+    "en": "English",
+    "es": "Spanish",
+    "de": "German",
+    "zh": "Chinese"
+  },
+  "lobby": {
+    "search": "Cari",
+    "searchPlaceholder": "Cari {name}",
+    "playing": "{count} sedang bermain",
+    "trendingGames": "Permainan trending",
+    "slots": "Slot",
+    "liveDealer": "Kasino Langsung",
+    "providers": "Penyedia",
+    "topWins": "Kemenangan terbesar bulan ini",
+    "rank": "Kedudukan {n}",
+    "all": "Semua",
+    "viewAll": "Lihat semua",
+    "back": "Kembali",
+    "empty": "Belum ada apa-apa di sini.",
+    "loadError": "Permainan tidak dapat dimuatkan. Sila cuba lagi kemudian.",
+    "promotions": "Promosi",
+    "showBanner": "Tunjukkan sepanduk {n}",
+    "previous": "Slaid sebelumnya",
+    "next": "Slaid seterusnya",
+    "bannerAlt": "Sepanduk promosi {n}"
+  },
+  "cookies": {
+    "title": "Kami menggunakan kuki",
+    "body": "Kuki memastikan laman ini berfungsi. Notis ini tidak menyimpan sebarang akaun.",
+    "accept": "Terima"
+  },
+  "partners": {
+    "title": "Rakan Kongsi Kami"
+  },
+  "promotions": {
+    "title": "Promosi",
+    "learnMore": "Ketahui Lanjut",
+    "joinNow": "Sertai sekarang",
+    "close": "Tutup",
+    "terms": "Terma utama",
+    "period": "{start} – {end}",
+    "empty": "Tiada promosi buat masa ini.",
+    "meta": "Promosi dan bonus semasa."
+  },
+  "howTo": {
+    "title": "Cara Mendaftar",
+    "steps": {
+      "create": {
+        "title": "Buka akaun",
+        "text": "Klik Sertai Kami dan daftar"
+      },
+      "deposit": {
+        "title": "Buat deposit",
+        "text": "Deposit dengan wang tunai atau kripto"
+      },
+      "win": {
+        "title": "Mula menang",
+        "text": "Main permainan kegemaran anda"
+      },
+      "reward": {
+        "title": "Dapatkan ganjaran",
+        "text": "Tuntut bonus anda"
+      }
+    }
+  },
+  "footer": {
+    "payment": "Kaedah Pembayaran",
+    "follow": "Ikuti kami",
+    "licenses": "Lesen",
+    "fair": "adil",
+    "check": "SEMAK",
+    "secure": "Selamat",
+    "legal1": "{name} ialah versi pratonton. Nama pengendali, pendaftaran dan alamat akan disiarkan pada baris ini.",
+    "legal2": "Butiran lesen dan pengawal selia akan ditambah apabila tersedia.",
+    "legal3": "Maklumat hubungan sokongan akan dipaparkan di sini.",
+    "columns": [
+      {
+        "title": "Umum",
+        "items": [
+          "T&S",
+          "Dasar Privasi",
+          "Program Afiliasi",
+          "Blog"
+        ]
+      },
+      {
+        "title": "Permainan",
+        "items": [
+          "Kasino Langsung",
+          "Sukan",
+          "Slot"
+        ]
+      },
+      {
+        "title": "Maklumat",
+        "items": [
+          "Perjudian Bertanggungjawab",
+          "Permainan Adil",
+          "Pengecualian Diri",
+          "Dasar KYC"
+        ]
+      }
+    ]
+  },
+  "errors": {
+    "unreachable": "Tidak dapat menghubungi API.",
+    "api_unconfigured": "Alamat API belum ditetapkan.",
+    "api_unexpected": "API memberikan respons yang tidak dijangka.",
+    "api_failed": "Permintaan tidak dapat diselesaikan.",
+    "token_missing": "Respons log masuk tidak mengandungi token."
+  },
+  "search": {
+    "title": "Teroka",
+    "placeholder": "Cari permainan",
+    "clear": "Kosongkan carian",
+    "close": "Tutup",
+    "open": "Buka carian permainan",
+    "categoriesLabel": "Kategori permainan",
+    "showMore": "Tunjuk Lagi",
+    "loading": "Memuatkan",
+    "retry": "Cuba lagi",
+    "empty": "Tiada permainan ditemui",
+    "shown": "Memaparkan {count} daripada {total} permainan",
+    "categories": {
+      "all": "Semua Permainan",
+      "slots": "Slot",
+      "liveCasino": "Kasino Langsung",
+      "baccarat": "Bakarat",
+      "blackjack": "Blackjack",
+      "roulette": "Rolet",
+      "gameShows": "Rancangan Permainan",
+      "sicBo": "Sic Bo"
+    }
+  },
+  "topNav": {
+    "label": "Navigasi utama",
+    "slots": "Slot",
+    "liveDealer": "Kasino Langsung",
+    "sports": "Sukan",
+    "promotions": "Promosi",
+    "vip": "VIP",
+    "zAi": "Z-AI"
+  },
+  "vip": {
+    "meta": "Tahap VIP, rebat dan pulangan tunai.",
+    "sample": "Contoh kemajuan. Tahap VIP sebenar anda akan dipaparkan di sini setelah API VIP sedia.",
+    "current": "Tahap semasa",
+    "progress": "Kemajuan VIP anda",
+    "wagered": "Jumlah pertaruhan",
+    "more": "{amount} lagi untuk ke {level}",
+    "nextReward": "Ganjaran naik tahap seterusnya",
+    "rakeback": "Rebat",
+    "claimed": "Jumlah bonus dituntut",
+    "claimedState": "Telah dituntut",
+    "details": "Butiran",
+    "redeem": "Kod tebus",
+    "redeemSubmit": "Tebus",
+    "redeemUnavailable": "Kod tebus belum tersedia.",
+    "bonus": "Bonus VIP",
+    "claim": "Tuntut",
+    "locked": "Dikunci",
+    "otherLevels": "Tahap lain",
+    "levelName": "{name} {tier}",
+    "levelCount": "{count} tahap",
+    "tiers": "{filled} daripada {total}",
+    "reward": "Ganjaran",
+    "play": "Ke kasino",
+    "faqTitle": "Soalan lazim",
+    "levels": {
+      "silver": "Perak",
+      "gold": "Emas",
+      "emerald": "Zamrud",
+      "sapphire": "Nilam",
+      "ruby": "Delima",
+      "diamond": "Berlian"
+    },
+    "rewards": {
+      "reload": "Bonus Tambah Nilai",
+      "instant": "Rebat segera",
+      "daily": "Rebat harian",
+      "weekly": "Pulangan tunai mingguan",
+      "monthly": "Pulangan tunai bulanan"
+    },
+    "faq": [
+      {
+        "q": "Apakah rebat segera?",
+        "a": "Sebahagian daripada kelebihan rumah daripada pertaruhan anda. Kadarnya mengikut tahap VIP anda, dan ia diperoleh sama ada pertaruhan menang atau kalah."
+      },
+      {
+        "q": "Apakah rebat harian?",
+        "a": "Bahagian kelebihan rumah yang sama, dikumpul sepanjang hari dan dibayar selepas hari tersebut ditutup."
+      },
+      {
+        "q": "Apakah bonus tambah nilai?",
+        "a": "Bonus berdasarkan jumlah pertaruhan anda dan tahap VIP anda."
+      },
+      {
+        "q": "Apakah pulangan tunai mingguan?",
+        "a": "Ganjaran yang diselesaikan sekali seminggu berdasarkan permainan dan tahap VIP anda."
+      },
+      {
+        "q": "Apakah pulangan tunai bulanan?",
+        "a": "Ganjaran yang diselesaikan sekali sebulan berdasarkan permainan dan tahap VIP anda."
+      }
+    ]
+  },
+  "comingSoon": {
+    "text": "Akan datang",
+    "sportsMeta": "Pertaruhan sukan akan datang tidak lama lagi.",
+    "vipMeta": "Tahap VIP, rebat dan pulangan tunai.",
+    "zAiMeta": "Z-AI akan datang tidak lama lagi.",
+    "missionsMeta": "Misi akan datang tidak lama lagi."
+  },
+  "playerGames": {
+    "recentEmpty": "Belum ada permainan terkini",
+    "favouritesEmpty": "Belum ada kegemaran",
+    "recentMeta": "Permainan yang anda main baru-baru ini.",
+    "favouritesMeta": "Permainan kegemaran anda."
+  },
+  "luckyPick": {
+    "title": "Slot Pilihan Bertuah",
+    "subtitle": "Tuah anda bermula dengan satu pilihan bertuah!",
+    "spin": "Putar",
+    "play": "Main",
+    "tryAgain": "Cuba Lagi",
+    "by": "oleh {provider}",
+    "picked": "Pilihan bertuah anda: {name}",
+    "close": "Tutup"
+  },
+  "gamePage": {
+    "favourite": "Kegemaran",
+    "theatre": "Mod teater",
+    "fullscreen": "Skrin penuh",
+    "close": "Tutup permainan",
+    "leaveTitle": "Tinggalkan permainan?",
+    "stay": "Kekal",
+    "leave": "Tinggalkan",
+    "recommended": "Disyorkan",
+    "previous": "Permainan sebelumnya",
+    "next": "Permainan seterusnya",
+    "nowPlaying": "Sedang dimainkan",
+    "statRtp": "RTP",
+    "statEdge": "Kelebihan rumah",
+    "statCategory": "Kategori",
+    "percent": "{value}%",
+    "description": "Putar {name} untuk menang wang sebenar. Semak peraturan permainan di dalam permainan untuk garis bayaran, ciri dan had.",
+    "loadError": "Permainan ini tidak dapat dimuatkan. Sila cuba lagi kemudian.",
+    "signIn": "Log masuk untuk bermain permainan ini.",
+    "loading": "Memuatkan permainan…"
+  }
+}
