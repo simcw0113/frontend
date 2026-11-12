@@ -9,7 +9,7 @@ import { bannerSlides, type BannerSlide } from "@/config/banners";
 import { siteConfig } from "@/config/site";
 import { defaultCasinoCategory, findCasinoCategory } from "@/config/categories";
 import { AllGamesFromPromise } from "@/components/lobby/AllGamesList";
-import { AllGamesIcon, CategoryIcon, HotGamesIcon, NewReleaseIcon } from "@/components/lobby/CategoryIcons";
+import { CategoryIcon, HotGamesIcon, NewReleaseIcon } from "@/components/lobby/CategoryIcons";
 import { HOME_SCROLL_KEY, HomeGameContent } from "@/components/lobby/HomeGameContent";
 import { HowToRegister } from "@/components/lobby/HowToRegister";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
@@ -1067,7 +1067,6 @@ const SIDEBAR_ICONS: Record<
   vip: CrownIcon,
   "hot-games": HotGamesIcon,
   "new-release": NewReleaseIcon,
-  "all-games": AllGamesIcon,
   slots: SlotsIcon,
   "live-dealer": LiveDealerIcon,
   sports: SportsIcon,
