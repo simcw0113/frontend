@@ -18,6 +18,7 @@ import { GiftIcon, PromotionsGrid, PromotionsHeader, PromotionsSkeleton } from "
 import { LuckyPick } from "@/components/lobby/LuckyPick";
 import { DepositContext } from "@/components/lobby/DepositContext";
 import { DepositHeader, DepositPage } from "@/components/lobby/DepositForm";
+import { WithdrawHeader, WithdrawPage } from "@/components/lobby/WithdrawForm";
 import { DepositSheet } from "@/components/lobby/DepositSheet";
 import { GameView, GameViewSkeleton, type GamePageData } from "@/components/lobby/GameView";
 import { ProviderGames, ProviderGamesSkeleton } from "@/components/lobby/ProviderGames";
@@ -53,7 +54,7 @@ const TOGGLE =
   "grid size-11 shrink-0 place-items-center rounded-lg text-brand hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 
-export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites" | "missions" | "game" | "deposit";
+export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites" | "missions" | "game" | "deposit" | "withdraw";
 
 // `games` holds one promise per category slug, started on the server (lib/games.ts)
 // and read here with use() inside <Suspense>, so the page shell shows at once.
@@ -589,6 +590,8 @@ export function LobbyScreen({
               <VipHeader />
             ) : focus === "deposit" ? (
               <DepositHeader />
+            ) : focus === "withdraw" ? (
+              <WithdrawHeader />
             ) : focus === "sports" || focus === "z-ai" || focus === "missions" ? (
               <ComingSoonHeader title={focus === "z-ai" ? t.topNav.zAi : focus === "missions" ? t.menu.missions : t.topNav[focus]} />
             ) : focus === "game" ? null : (
@@ -745,6 +748,13 @@ export function LobbyScreen({
             <VipClub />
           ) : focus === "deposit" ? (
             <DepositPage
+              onSignIn={() => {
+                setAuthView("login");
+                setSignInOpen(true);
+              }}
+            />
+          ) : focus === "withdraw" ? (
+            <WithdrawPage
               onSignIn={() => {
                 setAuthView("login");
                 setSignInOpen(true);
