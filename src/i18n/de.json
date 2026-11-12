@@ -345,5 +345,17 @@
     "enterGame": "Spiel starten",
     "noLink": "Der Anbieter hat noch keinen Startlink.",
     "failed": "Das Spiel konnte nicht geöffnet werden. Bitte versuche es erneut."
+  },
+  "bottomNav": {
+    "label": "Hauptmenü",
+    "menu": "Menü",
+    "search": "Suche",
+    "casino": "Casino",
+    "sports": "Sport",
+    "profile": "Profil"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "empty": "Keine Benachrichtigungen"
   }
 }

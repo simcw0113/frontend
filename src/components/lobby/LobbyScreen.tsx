@@ -21,6 +21,7 @@ import { ProviderGames, ProviderGamesSkeleton } from "@/components/lobby/Provide
 import { ProviderLaunch } from "@/components/lobby/ProviderLaunch";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { SearchModal } from "@/components/lobby/SearchModal";
+import { MobileTabBar } from "@/components/lobby/MobileTabBar";
 import { ComingSoonHeader, TopNav } from "@/components/lobby/TopNav";
 import { VipClub, VipHeader } from "@/components/lobby/VipClub";
 import { sidebarMissionsItem, sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
@@ -95,7 +96,10 @@ export function LobbyScreen({
   const [authView, setAuthView] = useState<AuthView>("login");
   const { user, ready, signOut } = useSession();
   const [accountOpen, setAccountOpen] = useState(false);
+  const [notifyOpen, setNotifyOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement>(null);
+  const accountSheetRef = useRef<HTMLDivElement>(null);
+  const notifyRef = useRef<HTMLDivElement>(null);
   const [cookiesOn, setCookiesOn] = useState(false);
   const [provider, setProvider] = useState<string | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -189,13 +193,19 @@ export function LobbyScreen({
   }, [drawerOpen, rail, searchOpen, signInOpen]);
 
   useEffect(() => {
-    if (!accountOpen) return;
+    if (!accountOpen && !notifyOpen) return;
     function onPointerDown(event: PointerEvent) {
-      if (accountRef.current?.contains(event.target as Node)) return;
-      setAccountOpen(false);
+      const target = event.target as Node | null;
+      if (accountOpen && !accountRef.current?.contains(target) && !accountSheetRef.current?.contains(target) && !(event.target instanceof Element && event.target.closest("[data-account-tab]"))) {
+        setAccountOpen(false);
+      }
+      if (notifyOpen && !notifyRef.current?.contains(target)) setNotifyOpen(false);
     }
     function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setAccountOpen(false);
+      if (event.key === "Escape") {
+        setAccountOpen(false);
+        setNotifyOpen(false);
+      }
     }
     window.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("keydown", onKey);
@@ -203,7 +213,7 @@ export function LobbyScreen({
       window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("keydown", onKey);
     };
-  }, [accountOpen]);
+  }, [accountOpen, notifyOpen]);
 
   useEffect(() => {
     if (window.localStorage.getItem(COOKIE_NOTICE_KEY) !== "1") setCookiesOn(true);
@@ -404,11 +414,11 @@ export function LobbyScreen({
           aria-expanded={drawerOpen}
           aria-controls="lobby-sidebar"
           onClick={() => setDrawerOpen((open) => !open)}
-          className={`${TOGGLE} lg:hidden`}
+          className={`${TOGGLE} hidden md:grid lg:hidden`}
         >
           <MenuIcon />
         </button>
-        <h1 className="ml-1.5 min-w-0 md:ml-[13px] lg:ml-3">
+        <h1 className="min-w-0 md:ml-[13px] lg:ml-3">
           <LobbyLink
             href="/"
             className="logo-press flex items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
@@ -428,7 +438,37 @@ export function LobbyScreen({
         <TopNav route={navRoute} />
         <div className="ml-auto flex h-16 shrink-0 items-center gap-2">
           {user?.username ? (
-            <div className="relative" ref={accountRef}>
+            <>
+            <LobbyLink
+              href="/vip"
+              aria-label={t.topNav.vip}
+              className="md:hidden grid size-10 place-items-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            >
+              <CrownIcon />
+            </LobbyLink>
+            <div className="relative md:hidden" ref={notifyRef}>
+              <button
+                type="button"
+                aria-expanded={notifyOpen}
+                aria-haspopup="dialog"
+                aria-label={t.notifications.title}
+                onClick={() => setNotifyOpen((open) => !open)}
+                className="grid size-10 place-items-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                <BellIcon />
+              </button>
+              {notifyOpen ? (
+                <div
+                  role="dialog"
+                  aria-label={t.notifications.title}
+                  className="absolute right-0 z-50 mt-1 w-64 rounded-xl border border-white/10 bg-lobby p-4 shadow-lg"
+                >
+                  <p className="text-sm font-semibold">{t.notifications.title}</p>
+                  <p className="mt-1 text-sm text-muted">{t.notifications.empty}</p>
+                </div>
+              ) : null}
+            </div>
+            <div className="relative max-md:hidden" ref={accountRef}>
               <button
                 type="button"
                 aria-expanded={accountOpen}
@@ -457,6 +497,7 @@ export function LobbyScreen({
                 </div>
               ) : null}
             </div>
+            </>
           ) : (
             <>
               <button
@@ -465,7 +506,7 @@ export function LobbyScreen({
                   setAuthView("login");
                   setSignInOpen(true);
                 }}
-                className="rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap hover:bg-white/10"
+                className="hidden rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap hover:bg-white/10 md:inline-flex"
               >
                 {t.auth.signIn}
               </button>
@@ -475,16 +516,36 @@ export function LobbyScreen({
                   setAuthView("register");
                   setSignInOpen(true);
                 }}
-                className="join-glow rounded-lg bg-brand px-3.5 py-2 text-sm font-extrabold tracking-wide whitespace-nowrap text-lobby uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="join-glow hidden rounded-lg bg-brand px-3.5 py-2 text-sm font-extrabold tracking-wide whitespace-nowrap text-lobby uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:inline-flex"
               >
                 {t.auth.joinUs}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthView("login");
+                  setSignInOpen(true);
+                }}
+                className="inline-flex h-9 items-center rounded-full bg-white/10 px-4 text-sm font-semibold text-white md:hidden"
+              >
+                {t.auth.login}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthView("register");
+                  setSignInOpen(true);
+                }}
+                className="inline-flex h-9 items-center rounded-full bg-brand px-4 text-sm font-extrabold text-lobby md:hidden"
+              >
+                {t.auth.register}
               </button>
             </>
           )}
         </div>
       </header>
 
-        <main id="content" data-route={route} data-lang={lang} className="min-w-0 px-3 py-4 sm:px-5">
+        <main id="content" data-route={route} data-lang={lang} className="min-w-0 px-3 py-4 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] sm:px-5 md:pb-4">
           <div className="lobby-vt-top">
             {focus === "home" ? (
               <Suspense fallback={<BannerSkeleton />}>
@@ -654,9 +715,59 @@ export function LobbyScreen({
         </main>
       </div>
 
+      {user?.username && accountOpen ? (
+        <div
+          ref={accountSheetRef}
+          role="menu"
+          className="fixed inset-x-3 z-50 rounded-xl border border-white/10 bg-lobby p-1 shadow-2xl md:hidden"
+          style={{ bottom: "calc(var(--mobile-tab-h, 3.75rem) + 8px)" }}
+        >
+          <p className="px-3 py-2 text-sm font-semibold">{user.username}</p>
+          <LobbyLink
+            href="/vip"
+            onGo={() => setAccountOpen(false)}
+            className="block rounded-md px-3 py-2 text-sm font-semibold hover:bg-white/10"
+          >
+            {t.topNav.vip}
+          </LobbyLink>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setAccountOpen(false);
+              void signOut();
+            }}
+            className="block w-full rounded-md px-3 py-2 text-left text-sm font-semibold hover:bg-white/10"
+          >
+            {t.auth.signOut}
+          </button>
+        </div>
+      ) : null}
+
+      <MobileTabBar
+        focus={focus}
+        drawerOpen={drawerOpen}
+        searchOpen={searchOpen}
+        profileOpen={accountOpen}
+        hidden={searchOpen || signInOpen}
+        onMenu={() => setDrawerOpen((open) => !open)}
+        onSearch={() => {
+          setDrawerOpen(false);
+          setSearchOpen(true);
+        }}
+        onProfile={() => {
+          setDrawerOpen(false);
+          if (user) setAccountOpen((open) => !open);
+          else {
+            setAuthView("login");
+            setSignInOpen(true);
+          }
+        }}
+      />
+
       {cookiesOn ? (
         <div
-          className="fixed bottom-4 left-4 z-50 w-[min(100%-2rem,20rem)] rounded-xl border border-white/10 bg-lobby p-4 shadow-2xl"
+          className="lobby-cookie fixed bottom-4 left-4 z-50 w-[min(100%-2rem,20rem)] rounded-xl border border-white/10 bg-lobby p-4 shadow-2xl"
         >
           <p className="font-semibold">{t.cookies.title}</p>
           <p className="mt-1 text-sm leading-5 text-muted">{t.cookies.body}</p>
@@ -931,6 +1042,15 @@ function GlobeIcon() {
     <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
       <circle cx="12" cy="12" r="8.5" />
       <path d="M3.5 12 H20.5 M12 3.5 C9 7 9 17 12 20.5 M12 3.5 C15 7 15 17 12 20.5" />
+    </svg>
+  );
+}
+
+function BellIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M6 9.5 C6 6.5 8.5 4 12 4 C15.5 4 18 6.5 18 9.5 V14 L20 16.5 H4 L6 14 Z" />
+      <path d="M10 18.5 C10.4 19.5 11.2 20 12 20 C12.8 20 13.6 19.5 14 18.5" />
     </svg>
   );
 }

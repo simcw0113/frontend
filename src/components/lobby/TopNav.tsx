@@ -37,7 +37,7 @@ export function TopNav({ route }: { route: string }) {
   }, []);
 
   return (
-    <nav aria-label={t.topNav.label} className="top-nav">
+    <nav aria-label={t.topNav.label} className="top-nav max-md:hidden">
       <ul ref={listRef} className="top-nav-list">
         {topNavItems.map((item) => {
           const active = item.path === route;

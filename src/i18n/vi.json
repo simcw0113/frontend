@@ -345,5 +345,17 @@
     "enterGame": "Vào game",
     "noLink": "Nhà cung cấp chưa có liên kết khởi chạy.",
     "failed": "Không mở được game. Vui lòng thử lại."
+  },
+  "bottomNav": {
+    "label": "Menu chính",
+    "menu": "Menu",
+    "search": "Tìm kiếm",
+    "casino": "Casino",
+    "sports": "Thể thao",
+    "profile": "Hồ sơ"
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "empty": "Không có thông báo"
   }
 }

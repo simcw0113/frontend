@@ -345,5 +345,17 @@
     "enterGame": "Enter game",
     "noLink": "No launch link from the provider yet.",
     "failed": "Could not open the game. Please try again."
+  },
+  "bottomNav": {
+    "label": "Main menu",
+    "menu": "Menu",
+    "search": "Search",
+    "casino": "Casino",
+    "sports": "Sports",
+    "profile": "Profile"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications"
   }
 }

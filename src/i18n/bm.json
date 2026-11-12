@@ -345,5 +345,17 @@
     "enterGame": "Masuk permainan",
     "noLink": "Belum ada pautan permainan daripada penyedia.",
     "failed": "Permainan tidak dapat dibuka. Sila cuba lagi."
+  },
+  "bottomNav": {
+    "label": "Menu utama",
+    "menu": "Menu",
+    "search": "Cari",
+    "casino": "Kasino",
+    "sports": "Sukan",
+    "profile": "Profil"
+  },
+  "notifications": {
+    "title": "Pemberitahuan",
+    "empty": "Tiada pemberitahuan"
   }
 }

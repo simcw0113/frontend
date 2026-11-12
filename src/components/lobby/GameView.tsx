@@ -19,6 +19,7 @@ import { useI18n } from "@/components/I18nProvider";
 import { gameHref, SymbolMark } from "@/components/lobby/GameCover";
 import { hasInAppHistory, LobbyLink } from "@/components/lobby/LobbyLink";
 import { findCasinoCategory } from "@/config/categories";
+import { siteConfig } from "@/config/site";
 import type { Game } from "@/config/lobby";
 import { fill, htmlLang } from "@/i18n";
 import type { GameLaunch } from "@/lib/gameLaunch";
@@ -35,6 +36,9 @@ import { animate, reduceMotion } from "@/lib/motion";
 //     tiles (RTP, house edge, category) and "Recommended" (a vertical list on the side, a
 //     horizontal snap carousel below 1280px).
 // Theatre mode hides the side panel and gives the stage the full width.
+// Phones (portrait < 768px wide, or landscape <= 500px tall) get the KickWin layout instead:
+// the stage covers the whole screen, the dock becomes a compact top bar, and the game fills
+// the rest. Site header, nav, footer and cookie bar stay underneath (CSS only, see .gp-* in globals.css).
 // Stops the game. An about:blank page has a light canvas, which would flash white inside the
 // dark page, so the frame is hidden first.
 function blankFrame(frame: HTMLIFrameElement | null) {
@@ -253,6 +257,11 @@ function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignI
         </div>
 
         <div className="gp-dock">
+          {/* Phones only (KickWin-style top bar): logo home link instead of the game title. */}
+          <LobbyLink href="/" className="gp-dock-logo" ariaLabel={t.siteName}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={siteConfig.logo.src} width={siteConfig.logo.width} height={siteConfig.logo.height} alt="" draggable={false} />
+          </LobbyLink>
           <div className="gp-dock-title">
             <span className="gp-live" aria-hidden="true" />
             <span className="sr-only">{t.gamePage.nowPlaying}: </span>
@@ -262,19 +271,19 @@ function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignI
             </span>
           </div>
           <div className="gp-dock-buttons">
-            <DockButton label={t.gamePage.favourite} pressed={favourite} onClick={() => setFavourite((on) => !on)}>
+            <DockButton label={t.gamePage.favourite} pressed={favourite} onClick={() => setFavourite((on) => !on)} className="gp-btn-fav">
               <svg viewBox="0 0 24 24" className={ICON} fill={favourite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
                 <path d="M12 3.5 14.6 9 20.5 9.6 16 13.6 17.3 19.5 12 16.5 6.7 19.5 8 13.6 3.5 9.6 9.4 9Z" />
               </svg>
             </DockButton>
-            <DockButton label={t.gamePage.theatre} pressed={theatre} onClick={() => setTheatre((on) => !on)}>
+            <DockButton label={t.gamePage.theatre} pressed={theatre} onClick={() => setTheatre((on) => !on)} className="gp-btn-theatre">
               <svg viewBox="0 0 24 24" className={ICON} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="3" y="6" width="18" height="12" rx="2.5" />
                 {theatre ? <path d="M10 10 8 12 10 14 M14 10 16 12 14 14" /> : <path d="M8 10 6 12 8 14 M16 10 18 12 16 14" />}
               </svg>
             </DockButton>
             {canFullscreen ? (
-              <DockButton label={t.gamePage.fullscreen} pressed={isFullscreen} onClick={toggleFullscreen}>
+              <DockButton label={t.gamePage.fullscreen} pressed={isFullscreen} onClick={toggleFullscreen} className="gp-btn-full">
                 <svg viewBox="0 0 24 24" className={ICON} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M4 9 V4 H9 M15 4 H20 V9 M20 15 V20 H15 M9 20 H4 V15" />
                 </svg>

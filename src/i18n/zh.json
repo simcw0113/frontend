@@ -345,5 +345,17 @@
     "enterGame": "进入游戏",
     "noLink": "游戏商暂时没有提供打开链接。",
     "failed": "游戏打开失败，请稍后再试。"
+  },
+  "bottomNav": {
+    "label": "主导航",
+    "menu": "菜单",
+    "search": "搜索",
+    "casino": "娱乐场",
+    "sports": "体育",
+    "profile": "我的"
+  },
+  "notifications": {
+    "title": "通知",
+    "empty": "暂无通知"
   }
 }

@@ -345,5 +345,17 @@
     "enterGame": "Entrar al juego",
     "noLink": "El proveedor aún no tiene enlace de inicio.",
     "failed": "No se pudo abrir el juego. Inténtalo de nuevo."
+  },
+  "bottomNav": {
+    "label": "Menú principal",
+    "menu": "Menú",
+    "search": "Buscar",
+    "casino": "Casino",
+    "sports": "Deportes",
+    "profile": "Perfil"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "No hay notificaciones"
   }
 }
