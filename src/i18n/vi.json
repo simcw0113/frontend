@@ -8,6 +8,7 @@
     "recent": "Game gần đây",
     "favourites": "Yêu thích",
     "missions": "Nhiệm vụ",
+    "affiliate": "Tiếp thị liên kết",
     "promotions": "Khuyến mãi",
     "hide": "Ẩn menu",
     "show": "Hiện menu",
@@ -327,6 +328,22 @@
     "signIn": "Đăng nhập để chơi game này.",
     "loading": "Đang tải game…"
   },
+  "sportsPage": {
+    "meta": "Cá cược thể thao trực tiếp.",
+    "signIn": "Đăng nhập để chơi thể thao.",
+    "loadError": "Không tải được trang thể thao. Vui lòng thử lại sau.",
+    "loading": "Đang tải thể thao…",
+    "retry": "Thử lại",
+    "frameTitle": "Thể thao",
+    "unavailableTitle": "Thể thao hiện không khả dụng",
+    "unavailableBody": "Vui lòng quay lại sau hoặc khám phá các trò chơi khác của chúng tôi.",
+    "browseCasino": "Xem sòng bạc",
+    "maintenanceTitle": "Thể thao đang bảo trì",
+    "maintenanceBody": "Chúng tôi đang thực hiện một số cải tiến. Vui lòng quay lại sau ít lâu.",
+    "comingSoonTitle": "Thể thao sắp ra mắt",
+    "comingSoonBody": "Hãy sẵn sàng, cá cược thể thao sắp được ra mắt!",
+    "backHome": "Về trang chủ"
+  },
   "providerLaunch": {
     "webHint": "Mở sảnh game của nhà cung cấp trong tab mới.",
     "appHint": "Chơi trong ứng dụng của nhà cung cấp bằng tài khoản game này.",
@@ -440,5 +457,63 @@
     "errDailyAmount": "Số tiền này vượt hạn mức còn lại trong ngày là {remaining}.",
     "errDailyCount": "Bạn đã hết lượt rút trong ngày hôm nay.",
     "blockedMin": "Số dư khả dụng thấp hơn mức rút tối thiểu {min}."
+  },
+  "affiliate": {
+    "meta": "Mời người chơi và nhận hoa hồng từ lượt chơi của họ.",
+    "title": "Tiếp thị liên kết",
+    "heroTitle": "Mời người chơi, nhận một phần từ lượt chơi của họ.",
+    "heroBody": "Chia sẻ liên kết giới thiệu với bạn bè. Khi họ đăng ký và chơi, bạn nhận hoa hồng. Tỷ lệ trên trang này chỉ là mẫu cho đến khi chương trình được kết nối với hệ thống thật.",
+    "join": "Tạo tài khoản",
+    "howTitle": "Cách hoạt động",
+    "rateLabel": "Tỷ lệ mẫu {rate}%",
+    "stepLabel": "Bước {n}",
+    "steps": [
+      {
+        "title": "Tạo tài khoản",
+        "body": "Đăng ký với tư cách người chơi. Liên kết giới thiệu cá nhân sẽ hiện ở đây khi mã giới thiệu được gắn vào tài khoản."
+      },
+      {
+        "title": "Chia sẻ liên kết",
+        "body": "Gửi qua tin nhắn, email hoặc mạng xã hội. Ai tham gia qua liên kết của bạn sẽ được gắn với bạn."
+      },
+      {
+        "title": "Nhận hoa hồng",
+        "body": "Bạn nhận một phần từ lượt chơi hợp lệ của người được giới thiệu, thanh toán theo lịch của chương trình."
+      }
+    ],
+    "tiersTitle": "Hạng hoa hồng",
+    "tiersNote": "Các tỷ lệ này chỉ là chỗ dành để xem trước. Tỷ lệ chính thức sẽ do chương trình tiếp thị liên kết cung cấp.",
+    "tierNames": {
+      "start": "Khởi đầu",
+      "plus": "Plus",
+      "pro": "Pro"
+    },
+    "tierRate": "{rate}%",
+    "tierActive": "{count}+ lượt giới thiệu hoạt động",
+    "tierDefault": "Tỷ lệ bắt đầu",
+    "faqTitle": "Câu hỏi thường gặp",
+    "faq": [
+      {
+        "q": "Ai có thể tham gia?",
+        "a": "Bất kỳ ai có tài khoản người chơi đều có thể tham gia, theo quy tắc chương trình."
+      },
+      {
+        "q": "Hoa hồng được trả khi nào?",
+        "a": "Thời điểm thanh toán do chương trình quy định. Trang này chưa kết nối ví trực tiếp."
+      },
+      {
+        "q": "Tôi có thể dùng liên kết của chính mình?",
+        "a": "Không. Hoa hồng chỉ tính trên người chơi bạn giới thiệu, không phải lượt chơi của bạn."
+      },
+      {
+        "q": "Làm sao để có liên kết giới thiệu?",
+        "a": "Đăng nhập. Liên kết cá nhân sẽ hiện ở đây khi mã giới thiệu được gắn vào tài khoản."
+      }
+    ],
+    "ctaTitle": "Sẵn sàng bắt đầu?",
+    "ctaBody": "Tạo tài khoản hoặc đăng nhập. Liên kết giới thiệu sẽ hiện ở đây khi được gắn vào tài khoản.",
+    "referralTitle": "Liên kết giới thiệu của bạn",
+    "referralCopy": "Sao chép",
+    "referralCopied": "Đã sao chép"
   }
 }

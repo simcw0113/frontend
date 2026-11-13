@@ -62,6 +62,16 @@ export const apiConfig = {
   gameLaunchPath: "/opengame",
 };
 
+// IBC sportsbook. `launchCode` is the BO product code (shown as IBC_T[ORI]), used
+// to look up the product's public_code from GET /config (lobbyApi.fetchLobbyProducts).
+// /opengame is called as { provider: public_code, isMobile } — not { code }.
+// `publicCode` is an optional override (SPORTS_PUBLIC_CODE or NEXT_PUBLIC_SPORTS_PUBLIC_CODE)
+// so a specific public_code can be forced without waiting on the product list.
+export const sportsConfig = {
+  launchCode: "IBC_T[ORI]",
+  publicCode: (process.env.SPORTS_PUBLIC_CODE ?? process.env.NEXT_PUBLIC_SPORTS_PUBLIC_CODE ?? "").trim(),
+};
+
 // TEMPORARY test URL for the game page iframe while there is no launch API (static mode), the
 // same for every game: a YouTube video (https://www.youtube.com/watch?v=P4sGaqucJcs) in its
 // embed form, since watch pages refuse framing. Used as it is (no query added); only the local demo

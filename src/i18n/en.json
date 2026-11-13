@@ -8,6 +8,7 @@
     "recent": "Recent Games",
     "favourites": "Favourites",
     "missions": "Missions",
+    "affiliate": "Affiliate",
     "promotions": "Promotions",
     "hide": "Hide menu",
     "show": "Show menu",
@@ -327,6 +328,22 @@
     "signIn": "Sign in to play this game.",
     "loading": "Loading game…"
   },
+  "sportsPage": {
+    "meta": "Live sports betting.",
+    "signIn": "Sign in to play sports.",
+    "loadError": "Sports could not be loaded. Please try again later.",
+    "loading": "Loading sports…",
+    "retry": "Try again",
+    "frameTitle": "Sports",
+    "unavailableTitle": "Sports is currently unavailable",
+    "unavailableBody": "Please check back later or explore our other games.",
+    "browseCasino": "Browse Casino",
+    "maintenanceTitle": "Sports is under maintenance",
+    "maintenanceBody": "We're making some improvements. Please check back shortly.",
+    "comingSoonTitle": "Sports is coming soon",
+    "comingSoonBody": "Get ready, sports betting is launching soon!",
+    "backHome": "Back to Home"
+  },
   "providerLaunch": {
     "webHint": "Opens the provider's game lobby in a new tab.",
     "appHint": "Play in the provider's app with this game account.",
@@ -440,5 +457,63 @@
     "errDailyAmount": "This amount exceeds your remaining daily limit of {remaining}.",
     "errDailyCount": "You have no withdrawals remaining today.",
     "blockedMin": "Your available balance is below the minimum withdrawal of {min}."
+  },
+  "affiliate": {
+    "meta": "Invite players and earn a commission on their play.",
+    "title": "Affiliate",
+    "heroTitle": "Invite players, earn a share of their play.",
+    "heroBody": "Share your referral link with friends. When they join and play, you earn a commission. The rates on this page are samples until the programme is connected to the live system.",
+    "join": "Create an account",
+    "howTitle": "How it works",
+    "rateLabel": "Sample rate {rate}%",
+    "stepLabel": "Step {n}",
+    "steps": [
+      {
+        "title": "Create your account",
+        "body": "Sign up as a player. Your personal referral link appears here once a referral code is attached to your account."
+      },
+      {
+        "title": "Share your link",
+        "body": "Send it by message, email or social media. Anyone who joins through your link is tied to you."
+      },
+      {
+        "title": "Earn commission",
+        "body": "You receive a share of referred players' eligible play, paid on the schedule set by the programme."
+      }
+    ],
+    "tiersTitle": "Commission tiers",
+    "tiersNote": "These percentages are placeholders for layout and review. Final rates will come from the affiliate programme.",
+    "tierNames": {
+      "start": "Starter",
+      "plus": "Plus",
+      "pro": "Pro"
+    },
+    "tierRate": "{rate}%",
+    "tierActive": "{count}+ active referrals",
+    "tierDefault": "Starting rate",
+    "faqTitle": "FAQ",
+    "faq": [
+      {
+        "q": "Who can join?",
+        "a": "Anyone with a player account can take part, subject to the programme rules."
+      },
+      {
+        "q": "When is commission paid?",
+        "a": "Payout timing will be set by the programme. This page does not yet connect to a live wallet."
+      },
+      {
+        "q": "Can I use my own link?",
+        "a": "No. Commission is only earned on players you refer, not on your own play."
+      },
+      {
+        "q": "How do I get a referral link?",
+        "a": "Sign in. Your personal link appears here once a referral code is attached to your account."
+      }
+    ],
+    "ctaTitle": "Ready to start?",
+    "ctaBody": "Create an account or sign in. Your referral link will show here when one is attached to your account.",
+    "referralTitle": "Your referral link",
+    "referralCopy": "Copy",
+    "referralCopied": "Copied"
   }
 }

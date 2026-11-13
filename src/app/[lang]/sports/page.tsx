@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/sports">):
   const t = dictionaryFor(lang);
   return {
     title: t.topNav.sports,
-    description: t.comingSoon.sportsMeta,
+    description: t.sportsPage.meta,
     alternates: {
       canonical: localizedPath(lang, PATH),
       languages: languageAlternates(PATH, await getSiteLanguages()),
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/sports">):
   };
 }
 
-// Placeholder inside the lobby shell (header, sidebar, footer): title + "Coming soon".
+// Full-page IBC sportsbook iframe inside the lobby shell (header, sidebar, phone tab bar).
 export default function SportsPage() {
   return <LobbyScreen focus="sports" games={{}} />;
 }

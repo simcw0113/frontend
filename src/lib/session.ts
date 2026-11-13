@@ -4,6 +4,8 @@ export type SessionUser = {
   email: string | null;
   phone: string | null;
   profile_image: string | null;
+  // Present only when the profile payload already includes a referral / invite code.
+  referral_code: string | null;
 };
 
 function asOptionalString(value: unknown): string | null {
@@ -21,6 +23,14 @@ function fromRecord(record: Record<string, unknown>): SessionUser | null {
     email: asOptionalString(record.email),
     phone: asOptionalString(record.phone),
     profile_image: asOptionalString(record.profile_image),
+    referral_code:
+      asOptionalString(record.referral_code) ??
+      asOptionalString(record.referralCode) ??
+      asOptionalString(record.invite_code) ??
+      asOptionalString(record.inviteCode) ??
+      asOptionalString(record.affiliate_code) ??
+      asOptionalString(record.affiliateCode) ??
+      asOptionalString(record.refer_code),
   };
 }
 

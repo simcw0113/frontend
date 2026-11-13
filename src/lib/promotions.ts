@@ -62,6 +62,25 @@ function text(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+// `summary` comes from the CMS as HTML (`<p>…</p>`). Cards show it as plain text, so
+// drop the tags, turn block/line breaks into spaces and decode the common entities.
+const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", "#39": "'" };
+
+export function htmlToText(value: string): string {
+  if (!value.includes("<") && !value.includes("&")) return value;
+  return value
+    .replace(/<br\s*\/?>|<\/(?:p|div|li|h[1-6])>/gi, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&(#\d+|#x[0-9a-f]+|[a-z]+);/gi, (m, code: string) => {
+      const c = code.toLowerCase();
+      if (c.startsWith("#x")) return String.fromCodePoint(parseInt(c.slice(2), 16));
+      if (c.startsWith("#") && c !== "#39") return String.fromCodePoint(parseInt(c.slice(1), 10));
+      return ENTITIES[c] ?? m;
+    })
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 // Banner and content images are often site-root paths (`/storage/...`).
 function mediaUrl(value: string): string {
   if (!value || /^https?:\/\//i.test(value)) return value;
@@ -112,7 +131,7 @@ export function mapPromotions(payload: unknown): Promotion[] {
       : text(item.headline)
         ? text(item.headline).split("\n")
         : headlineFrom(title);
-    const summary = text(item.summary);
+    const summary = htmlToText(text(item.summary));
     const content = text(item.content);
     const image = mediaUrl(text(item.image));
     return [
@@ -121,7 +140,7 @@ export function mapPromotions(payload: unknown): Promotion[] {
         slug: text(item.promotion_code) || text(item.slug) || String(item.id),
         title,
         headline: headline.slice(0, 2),
-        tagline: text(item.tagline) || summary,
+        tagline: htmlToText(text(item.tagline)) || summary,
         summary,
         terms: Array.isArray(item.terms) ? item.terms.filter((term) => text(term)) : [],
         content: content ? mediaUrlHtml(content) : undefined,

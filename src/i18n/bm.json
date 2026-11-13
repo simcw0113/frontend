@@ -8,6 +8,7 @@
     "recent": "Permainan Terkini",
     "favourites": "Kegemaran",
     "missions": "Misi",
+    "affiliate": "Afiliasi",
     "promotions": "Promosi",
     "hide": "Sembunyikan menu",
     "show": "Tunjukkan menu",
@@ -327,6 +328,22 @@
     "signIn": "Log masuk untuk bermain permainan ini.",
     "loading": "Memuatkan permainan…"
   },
+  "sportsPage": {
+    "meta": "Pertaruhan sukan secara langsung.",
+    "signIn": "Log masuk untuk bermain sukan.",
+    "loadError": "Sukan tidak dapat dimuatkan. Sila cuba lagi kemudian.",
+    "loading": "Memuatkan sukan…",
+    "retry": "Cuba lagi",
+    "frameTitle": "Sukan",
+    "unavailableTitle": "Sukan tidak tersedia buat masa ini",
+    "unavailableBody": "Sila semak semula kemudian atau terokai permainan lain kami.",
+    "browseCasino": "Layari Kasino",
+    "maintenanceTitle": "Sukan sedang diselenggara",
+    "maintenanceBody": "Kami sedang membuat beberapa penambahbaikan. Sila semak semula sebentar lagi.",
+    "comingSoonTitle": "Sukan akan datang tidak lama lagi",
+    "comingSoonBody": "Bersedia, pertaruhan sukan akan dilancarkan tidak lama lagi!",
+    "backHome": "Kembali ke Laman Utama"
+  },
   "providerLaunch": {
     "webHint": "Membuka lobi permainan penyedia dalam tab baharu.",
     "appHint": "Main dalam aplikasi penyedia dengan akaun permainan ini.",
@@ -440,5 +457,63 @@
     "errDailyAmount": "Jumlah ini melebihi baki had harian anda sebanyak {remaining}.",
     "errDailyCount": "Anda tiada pengeluaran berbaki hari ini.",
     "blockedMin": "Baki tersedia anda di bawah pengeluaran minimum {min}."
+  },
+  "affiliate": {
+    "meta": "Jemput pemain dan peroleh komisen daripada permainan mereka.",
+    "title": "Afiliasi",
+    "heroTitle": "Jemput pemain, peroleh bahagian daripada permainan mereka.",
+    "heroBody": "Kongsi pautan rujukan anda dengan rakan. Apabila mereka mendaftar dan bermain, anda memperoleh komisen. Kadar di halaman ini adalah contoh sehingga program disambungkan ke sistem sebenar.",
+    "join": "Cipta akaun",
+    "howTitle": "Cara ia berfungsi",
+    "rateLabel": "Kadar contoh {rate}%",
+    "stepLabel": "Langkah {n}",
+    "steps": [
+      {
+        "title": "Cipta akaun anda",
+        "body": "Daftar sebagai pemain. Pautan rujukan peribadi anda muncul di sini setelah kod rujukan dilampirkan pada akaun."
+      },
+      {
+        "title": "Kongsi pautan anda",
+        "body": "Hantar melalui mesej, e-mel atau media sosial. Sesiapa yang menyertai melalui pautan anda akan dikaitkan dengan anda."
+      },
+      {
+        "title": "Peroleh komisen",
+        "body": "Anda menerima bahagian daripada permainan layak pemain yang dirujuk, dibayar mengikut jadual program."
+      }
+    ],
+    "tiersTitle": "Peringkat komisen",
+    "tiersNote": "Peratusan ini adalah ruang letak untuk pratonton. Kadar muktamad akan datang daripada program afiliasi.",
+    "tierNames": {
+      "start": "Permulaan",
+      "plus": "Plus",
+      "pro": "Pro"
+    },
+    "tierRate": "{rate}%",
+    "tierActive": "{count}+ rujukan aktif",
+    "tierDefault": "Kadar permulaan",
+    "faqTitle": "Soalan lazim",
+    "faq": [
+      {
+        "q": "Siapa boleh menyertai?",
+        "a": "Sesiapa yang mempunyai akaun pemain boleh menyertai, tertakluk kepada peraturan program."
+      },
+      {
+        "q": "Bila komisen dibayar?",
+        "a": "Masa bayaran akan ditetapkan oleh program. Halaman ini belum disambungkan ke dompet langsung."
+      },
+      {
+        "q": "Boleh guna pautan sendiri?",
+        "a": "Tidak. Komisen hanya dikira daripada pemain yang anda rujuk, bukan permainan anda sendiri."
+      },
+      {
+        "q": "Bagaimana saya dapat pautan rujukan?",
+        "a": "Log masuk. Pautan peribadi anda muncul di sini setelah kod rujukan dilampirkan pada akaun."
+      }
+    ],
+    "ctaTitle": "Sedia untuk bermula?",
+    "ctaBody": "Cipta akaun atau log masuk. Pautan rujukan akan dipaparkan di sini apabila kod dilampirkan pada akaun anda.",
+    "referralTitle": "Pautan rujukan anda",
+    "referralCopy": "Salin",
+    "referralCopied": "Disalin"
   }
 }

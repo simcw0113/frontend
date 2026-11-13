@@ -8,6 +8,7 @@
     "recent": "Zuletzt gespielt",
     "favourites": "Favoriten",
     "missions": "Missionen",
+    "affiliate": "Partnerprogramm",
     "promotions": "Aktionen",
     "hide": "Menü ausblenden",
     "show": "Menü anzeigen",
@@ -327,6 +328,22 @@
     "signIn": "Melde dich an, um dieses Spiel zu spielen.",
     "loading": "Spiel wird geladen…"
   },
+  "sportsPage": {
+    "meta": "Live-Sportwetten.",
+    "signIn": "Melde dich an, um Sport zu spielen.",
+    "loadError": "Sport konnte nicht geladen werden. Bitte versuche es später erneut.",
+    "loading": "Sport wird geladen…",
+    "retry": "Erneut versuchen",
+    "frameTitle": "Sport",
+    "unavailableTitle": "Sport ist derzeit nicht verfügbar",
+    "unavailableBody": "Bitte schau später noch einmal vorbei oder entdecke unsere anderen Spiele.",
+    "browseCasino": "Casino entdecken",
+    "maintenanceTitle": "Sport wird gewartet",
+    "maintenanceBody": "Wir nehmen einige Verbesserungen vor. Bitte schau in Kürze wieder vorbei.",
+    "comingSoonTitle": "Sport kommt bald",
+    "comingSoonBody": "Mach dich bereit – Sportwetten starten bald!",
+    "backHome": "Zurück zur Startseite"
+  },
   "providerLaunch": {
     "webHint": "Öffnet die Spiellobby des Anbieters in einem neuen Tab.",
     "appHint": "Spiele in der App des Anbieters mit diesem Spielkonto.",
@@ -440,5 +457,63 @@
     "errDailyAmount": "Dieser Betrag überschreitet Ihr verbleibendes Tageslimit von {remaining}.",
     "errDailyCount": "Sie haben heute keine Auszahlungen mehr übrig.",
     "blockedMin": "Ihr verfügbares Guthaben liegt unter dem Mindestauszahlungsbetrag von {min}."
+  },
+  "affiliate": {
+    "meta": "Lade Spieler ein und verdiene eine Provision an ihrem Spiel.",
+    "title": "Partnerprogramm",
+    "heroTitle": "Spieler einladen und an ihrem Spiel mitverdienen.",
+    "heroBody": "Teile deinen Empfehlungslink mit Freunden. Wenn sie sich anmelden und spielen, verdienst du eine Provision. Die Sätze auf dieser Seite sind Muster, bis das Programm an das Live-System angebunden ist.",
+    "join": "Konto erstellen",
+    "howTitle": "So funktioniert es",
+    "rateLabel": "Muster-Satz {rate}%",
+    "stepLabel": "Schritt {n}",
+    "steps": [
+      {
+        "title": "Konto erstellen",
+        "body": "Melde dich als Spieler an. Dein persönlicher Empfehlungslink erscheint hier, sobald ein Empfehlungscode mit deinem Konto verknüpft ist."
+      },
+      {
+        "title": "Link teilen",
+        "body": "Sende ihn per Nachricht, E-Mail oder über soziale Medien. Wer über deinen Link beitritt, wird dir zugeordnet."
+      },
+      {
+        "title": "Provision verdienen",
+        "body": "Du erhältst einen Anteil am berechtigten Spiel deiner Geworbenen, ausgezahlt nach dem Zeitplan des Programms."
+      }
+    ],
+    "tiersTitle": "Provisionsstufen",
+    "tiersNote": "Diese Prozentsätze sind Platzhalter zur Ansicht. Die endgültigen Sätze kommen vom Partnerprogramm.",
+    "tierNames": {
+      "start": "Start",
+      "plus": "Plus",
+      "pro": "Pro"
+    },
+    "tierRate": "{rate}%",
+    "tierActive": "{count}+ aktive Empfehlungen",
+    "tierDefault": "Startsatz",
+    "faqTitle": "FAQ",
+    "faq": [
+      {
+        "q": "Wer kann teilnehmen?",
+        "a": "Jeder mit einem Spielerkonto kann teilnehmen, vorbehaltlich der Programmregeln."
+      },
+      {
+        "q": "Wann wird die Provision ausgezahlt?",
+        "a": "Den Auszahlungszeitpunkt legt das Programm fest. Diese Seite ist noch nicht mit einem Live-Wallet verbunden."
+      },
+      {
+        "q": "Darf ich meinen eigenen Link nutzen?",
+        "a": "Nein. Provision gibt es nur für von dir geworbene Spieler, nicht für dein eigenes Spiel."
+      },
+      {
+        "q": "Wie erhalte ich einen Empfehlungslink?",
+        "a": "Melde dich an. Dein persönlicher Link erscheint hier, sobald ein Empfehlungscode mit deinem Konto verknüpft ist."
+      }
+    ],
+    "ctaTitle": "Bereit loszulegen?",
+    "ctaBody": "Erstelle ein Konto oder melde dich an. Dein Empfehlungslink erscheint hier, sobald er mit deinem Konto verknüpft ist.",
+    "referralTitle": "Dein Empfehlungslink",
+    "referralCopy": "Kopieren",
+    "referralCopied": "Kopiert"
   }
 }

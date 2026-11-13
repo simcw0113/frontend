@@ -274,6 +274,105 @@ export async function fetchLobbyProducts(locale: string): Promise<Provider[]> {
   }
 }
 
+// A product record that keeps `status` from GET /config. Unlike parseProducts /
+// toProvider (lobby lists, status 1 only), this includes maintenance and coming-soon
+// items so the sports page can show a status card. Hidden(7)/inactive(8) are normally
+// filtered out by the backend already.
+export type LobbyProductRecord = Provider & { status: number };
+
+export type LobbyProductLookup =
+  | { ok: true; product: LobbyProductRecord | null }
+  | { ok: false };
+
+function toProductRecord(raw: RawProduct, group?: string): LobbyProductRecord | null {
+  const id = text(raw.public_code);
+  const code = text(raw.code);
+  const name = text(raw.name);
+  if (!id || !code || !name) return null;
+  const statusNum = Number(raw.status);
+  const status = Number.isFinite(statusNum) ? statusNum : 1;
+  const image = typeof raw.image === "string" && raw.image ? raw.image : undefined;
+  const type = Number(raw.type);
+  return {
+    id,
+    code,
+    ...(Number.isInteger(type) && type > 0 ? { type } : {}),
+    name,
+    mark: monogram(name),
+    accent: ACCENTS[hash(id) % ACCENTS.length],
+    image,
+    group,
+    status,
+  };
+}
+
+export function parseProductsWithStatus(payload: unknown): LobbyProductRecord[] {
+  const groups = readGroups(payload);
+  const seen = new Set<string>();
+  const products: LobbyProductRecord[] = [];
+
+  for (const group of groups) {
+    const rec = asRecord(group) as RawGroup | null;
+    if (!rec) continue;
+    const title = typeof rec.title === "string" ? rec.title : undefined;
+    const nested = Array.isArray(rec.products) ? (rec.products as RawProduct[]) : [];
+    if (nested.length === 0 && "code" in rec) {
+      const product = toProductRecord(rec as RawProduct, title);
+      if (product && !seen.has(product.id)) {
+        seen.add(product.id);
+        products.push(product);
+      }
+      continue;
+    }
+    for (const item of nested) {
+      const product = toProductRecord(item, title);
+      if (!product || seen.has(product.id)) continue;
+      seen.add(product.id);
+      products.push(product);
+    }
+  }
+
+  return products;
+}
+
+function matchProductByCode<T extends { code: string; name: string }>(products: T[], code: string): T | null {
+  const needle = code.trim().toLowerCase();
+  if (!needle) return null;
+  return (
+    products.find((item) => item.code.toLowerCase() === needle) ??
+    products.find((item) => item.name.toLowerCase() === needle) ??
+    products.find((item) => item.name.toLowerCase().includes(needle)) ??
+    null
+  );
+}
+
+// Fetch GET /config and locate a product by internal `code` (or name), including
+// non-active statuses. `{ ok: false }` means the request itself failed (network /
+// missing API base) — callers must not treat that as "product missing".
+export async function lookupLobbyProductByCode(code: string, locale: string): Promise<LobbyProductLookup> {
+  if (!apiConfig.baseUrl) return { ok: false };
+  const query = `?locale=${encodeURIComponent(locale)}`;
+  try {
+    const payload = await apiJson(`${apiConfig.configPath}${query}`, {
+      method: "GET",
+      auth: false,
+      cache: "no-store",
+    });
+    return { ok: true, product: matchProductByCode(parseProductsWithStatus(payload), code) };
+  } catch {
+    return { ok: false };
+  }
+}
+
+// Locate a lobby-listable (status 1) product by its internal `code` (e.g. IBC_T[ORI])
+// or display name. Returns the Provider whose `id` is the public_code used by /opengame.
+// For status-aware lookups (maintenance / coming soon), use lookupLobbyProductByCode.
+export async function findLobbyProductByCode(code: string, locale: string): Promise<Provider | null> {
+  const products = await fetchLobbyProducts(locale);
+  const match = matchProductByCode(products, code);
+  return match ?? null;
+}
+
 // One game from a provider's list, plus the other games in that list (the game page's
 // recommended row). `publicCode` is the product's public_code. `gameCode` is the inner
 // game code used in the page path (/casino/{category}/provider/{publicCode}/game/{gameCode}).

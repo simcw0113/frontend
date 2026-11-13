@@ -8,6 +8,7 @@
     "recent": "Juegos recientes",
     "favourites": "Favoritos",
     "missions": "Misiones",
+    "affiliate": "Afiliados",
     "promotions": "Promociones",
     "hide": "Ocultar menú",
     "show": "Mostrar menú",
@@ -327,6 +328,22 @@
     "signIn": "Inicia sesión para jugar a este juego.",
     "loading": "Cargando juego…"
   },
+  "sportsPage": {
+    "meta": "Apuestas deportivas en vivo.",
+    "signIn": "Inicia sesión para jugar a deportes.",
+    "loadError": "No se pudieron cargar los deportes. Inténtalo de nuevo más tarde.",
+    "loading": "Cargando deportes…",
+    "retry": "Reintentar",
+    "frameTitle": "Deportes",
+    "unavailableTitle": "Los deportes no están disponibles por el momento",
+    "unavailableBody": "Vuelve más tarde o explora nuestros otros juegos.",
+    "browseCasino": "Explorar el casino",
+    "maintenanceTitle": "Los deportes están en mantenimiento",
+    "maintenanceBody": "Estamos haciendo algunas mejoras. Vuelve en breve.",
+    "comingSoonTitle": "Los deportes estarán disponibles pronto",
+    "comingSoonBody": "¡Prepárate, las apuestas deportivas se lanzarán pronto!",
+    "backHome": "Volver al inicio"
+  },
   "providerLaunch": {
     "webHint": "Abre el lobby del proveedor en una pestaña nueva.",
     "appHint": "Juega en la app del proveedor con esta cuenta de juego.",
@@ -440,5 +457,63 @@
     "errDailyAmount": "Este importe supera tu límite diario restante de {remaining}.",
     "errDailyCount": "No te quedan retiros hoy.",
     "blockedMin": "Tu saldo disponible es inferior al retiro mínimo de {min}."
+  },
+  "affiliate": {
+    "meta": "Invita a jugadores y gana una comisión por su actividad.",
+    "title": "Afiliados",
+    "heroTitle": "Invita a jugadores y gana una parte de su juego.",
+    "heroBody": "Comparte tu enlace de referido con amigos. Cuando se registren y jueguen, ganas una comisión. Las tasas de esta página son de ejemplo hasta que el programa se conecte al sistema en vivo.",
+    "join": "Crear una cuenta",
+    "howTitle": "Cómo funciona",
+    "rateLabel": "Tasa de ejemplo {rate}%",
+    "stepLabel": "Paso {n}",
+    "steps": [
+      {
+        "title": "Crea tu cuenta",
+        "body": "Regístrate como jugador. Tu enlace de referido aparece aquí cuando un código de referido se asocie a tu cuenta."
+      },
+      {
+        "title": "Comparte tu enlace",
+        "body": "Envíalo por mensaje, correo o redes sociales. Quien se una a través de tu enlace queda vinculado a ti."
+      },
+      {
+        "title": "Gana comisión",
+        "body": "Recibes una parte del juego elegible de los jugadores referidos, pagada según el calendario del programa."
+      }
+    ],
+    "tiersTitle": "Niveles de comisión",
+    "tiersNote": "Estos porcentajes son provisionales para la vista previa. Las tasas finales las definirá el programa de afiliados.",
+    "tierNames": {
+      "start": "Inicial",
+      "plus": "Plus",
+      "pro": "Pro"
+    },
+    "tierRate": "{rate}%",
+    "tierActive": "{count}+ referidos activos",
+    "tierDefault": "Tasa inicial",
+    "faqTitle": "Preguntas frecuentes",
+    "faq": [
+      {
+        "q": "¿Quién puede unirse?",
+        "a": "Cualquier persona con una cuenta de jugador puede participar, sujeto a las reglas del programa."
+      },
+      {
+        "q": "¿Cuándo se paga la comisión?",
+        "a": "El calendario de pagos lo define el programa. Esta página aún no se conecta a una billetera en vivo."
+      },
+      {
+        "q": "¿Puedo usar mi propio enlace?",
+        "a": "No. La comisión solo se calcula sobre los jugadores que refieres, no sobre tu propio juego."
+      },
+      {
+        "q": "¿Cómo obtengo un enlace de referido?",
+        "a": "Inicia sesión. Tu enlace personal aparece aquí cuando un código de referido se asocie a tu cuenta."
+      }
+    ],
+    "ctaTitle": "¿Listo para empezar?",
+    "ctaBody": "Crea una cuenta o inicia sesión. Tu enlace de referido se mostrará aquí cuando esté asociado a tu cuenta.",
+    "referralTitle": "Tu enlace de referido",
+    "referralCopy": "Copiar",
+    "referralCopied": "Copiado"
   }
 }

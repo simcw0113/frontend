@@ -8,6 +8,7 @@
     "recent": "最近游戏",
     "favourites": "收藏",
     "missions": "任务",
+    "affiliate": "联盟",
     "promotions": "优惠活动",
     "hide": "隐藏菜单",
     "show": "显示菜单",
@@ -327,6 +328,22 @@
     "signIn": "登录后即可畅玩此游戏。",
     "loading": "游戏加载中…"
   },
+  "sportsPage": {
+    "meta": "体育即时投注。",
+    "signIn": "登录后即可进入体育投注。",
+    "loadError": "体育页面加载失败，请稍后重试。",
+    "loading": "体育加载中…",
+    "retry": "重试",
+    "frameTitle": "体育",
+    "unavailableTitle": "体育投注暂时无法使用",
+    "unavailableBody": "请稍后再试，或先浏览其他游戏。",
+    "browseCasino": "浏览娱乐场",
+    "maintenanceTitle": "体育投注维护中",
+    "maintenanceBody": "我们正在进行一些改进，请稍后再来。",
+    "comingSoonTitle": "体育投注即将上线",
+    "comingSoonBody": "敬请期待，体育投注即将推出！",
+    "backHome": "返回首页"
+  },
   "providerLaunch": {
     "webHint": "在新分页打开游戏商的大厅。",
     "appHint": "用这个游戏账号在游戏商的 App 里玩。",
@@ -440,5 +457,63 @@
     "errDailyAmount": "该金额超过今日剩余额度 {remaining}。",
     "errDailyCount": "今日提款次数已用完。",
     "blockedMin": "可用余额低于最低提款额 {min}。"
+  },
+  "affiliate": {
+    "meta": "邀请玩家，并从他们的游戏中获得佣金。",
+    "title": "联盟",
+    "heroTitle": "邀请玩家，分享他们的游戏收益。",
+    "heroBody": "把你的推荐链接分享给朋友。他们注册并开始游戏后，你即可获得佣金。本页费率为示例，待联盟系统接入后再以实际比例为准。",
+    "join": "创建账户",
+    "howTitle": "如何开始",
+    "rateLabel": "示例比例 {rate}%",
+    "stepLabel": "第 {n} 步",
+    "steps": [
+      {
+        "title": "创建账户",
+        "body": "先注册成为玩家。账户绑定推荐码后，你的专属推荐链接就会显示在此。"
+      },
+      {
+        "title": "分享链接",
+        "body": "通过短信、邮件或社交媒体发送。凡经你的链接注册的玩家都会计入你的名下。"
+      },
+      {
+        "title": "获得佣金",
+        "body": "你将按计划获得被推荐玩家有效游戏的分成，具体结算时间以联盟计划为准。"
+      }
+    ],
+    "tiersTitle": "佣金等级",
+    "tiersNote": "以下比例仅用于页面预览，正式费率将由联盟计划提供。",
+    "tierNames": {
+      "start": "入门",
+      "plus": "进阶",
+      "pro": "专业"
+    },
+    "tierRate": "{rate}%",
+    "tierActive": "{count}+ 位活跃推荐",
+    "tierDefault": "起始比例",
+    "faqTitle": "常见问题",
+    "faq": [
+      {
+        "q": "谁可以参加？",
+        "a": "拥有玩家账户的用户都可以参加，具体以联盟规则为准。"
+      },
+      {
+        "q": "佣金何时发放？",
+        "a": "发放时间由联盟计划决定。本页目前尚未连接实时钱包。"
+      },
+      {
+        "q": "可以用自己的链接吗？",
+        "a": "不可以。佣金只计算你推荐的玩家，不包括你自己的游戏。"
+      },
+      {
+        "q": "如何获得推荐链接？",
+        "a": "请先登录。账户绑定推荐码后，专属链接就会显示在此。"
+      }
+    ],
+    "ctaTitle": "准备好了吗？",
+    "ctaBody": "创建账户或登录。账户绑定推荐码后，推荐链接会显示在此。",
+    "referralTitle": "你的推荐链接",
+    "referralCopy": "复制",
+    "referralCopied": "已复制"
   }
 }

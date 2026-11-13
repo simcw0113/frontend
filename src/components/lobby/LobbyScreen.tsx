@@ -26,9 +26,11 @@ import { ProviderLaunch } from "@/components/lobby/ProviderLaunch";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { SearchModal } from "@/components/lobby/SearchModal";
 import { MobileTabBar } from "@/components/lobby/MobileTabBar";
+import { SportsView } from "@/components/lobby/SportsView";
+import { AffiliateHeader, AffiliatePage } from "@/components/lobby/AffiliatePage";
 import { ComingSoonHeader, TopNav } from "@/components/lobby/TopNav";
 import { VipClub, VipHeader } from "@/components/lobby/VipClub";
-import { sidebarMissionsItem, sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
+import { sidebarAffiliateItem, sidebarMissionsItem, sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
 import { PlayerGameList } from "@/components/lobby/HomeGameContent";
 import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
 import { fill } from "@/i18n";
@@ -54,7 +56,7 @@ const TOGGLE =
   "grid size-11 shrink-0 place-items-center rounded-lg text-brand hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 
-export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites" | "missions" | "game" | "deposit" | "withdraw";
+export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites" | "missions" | "affiliate" | "game" | "deposit" | "withdraw";
 
 // `games` holds one promise per category slug, started on the server (lib/games.ts)
 // and read here with use() inside <Suspense>, so the page shell shows at once.
@@ -295,13 +297,17 @@ export function LobbyScreen({
       { path: "/", label: t.menu.home, Icon: HomeIcon },
       ...sidebarPlayerItems.map((item) => ({ path: item.path, label: t.menu[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
     ],
-    sidebarPromoItems.flatMap((item) => {
-      const entry = { path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] };
-      // Missions sits right below Promotions (sidebar only, not in the top bar).
-      if (item.id !== "promotions") return [entry];
-      const missions = sidebarMissionsItem;
-      return [entry, { path: missions.path, label: t.menu[missions.labelKey], Icon: SIDEBAR_ICONS[missions.id] }];
-    }),
+    [
+      ...sidebarPromoItems.flatMap((item) => {
+        const entry = { path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] };
+        // Missions sits right below Promotions (sidebar only, not in the top bar).
+        if (item.id !== "promotions") return [entry];
+        const missions = sidebarMissionsItem;
+        return [entry, { path: missions.path, label: t.menu[missions.labelKey], Icon: SIDEBAR_ICONS[missions.id] }];
+      }),
+      // Affiliate is sidebar-only, after VIP (not in the top bar).
+      { path: sidebarAffiliateItem.path, label: t.menu[sidebarAffiliateItem.labelKey], Icon: SIDEBAR_ICONS[sidebarAffiliateItem.id] },
+    ],
     sidebarNavItems.map((item) => ({ path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
   ];
   const openRegister = () => {
@@ -578,7 +584,7 @@ export function LobbyScreen({
         </div>
       </header>
 
-        <main id="content" data-route={route} data-lang={lang} className="min-w-0 px-3 py-4 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] sm:px-5 md:pb-4">
+        <main id="content" data-route={route} data-lang={lang} className={focus === "sports" ? "flex h-[calc(100dvh-var(--lobby-header-h)-var(--mobile-tab-h,0px))] min-w-0 flex-col overflow-hidden p-0" : "min-w-0 px-3 py-4 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] sm:px-5 md:pb-4"}>
           <div className="lobby-vt-top">
             {focus === "home" ? (
               <Suspense fallback={<BannerSkeleton />}>
@@ -588,13 +594,15 @@ export function LobbyScreen({
               <PlayerHeader focus={focus} />
             ) : focus === "vip" ? (
               <VipHeader />
+            ) : focus === "affiliate" ? (
+              <AffiliateHeader />
             ) : focus === "deposit" ? (
               <DepositHeader />
             ) : focus === "withdraw" ? (
               <WithdrawHeader />
-            ) : focus === "sports" || focus === "z-ai" || focus === "missions" ? (
-              <ComingSoonHeader title={focus === "z-ai" ? t.topNav.zAi : focus === "missions" ? t.menu.missions : t.topNav[focus]} />
-            ) : focus === "game" ? null : (
+            ) : focus === "z-ai" || focus === "missions" ? (
+              <ComingSoonHeader title={focus === "z-ai" ? t.topNav.zAi : t.menu.missions} />
+            ) : focus === "game" || focus === "sports" ? null : (
               <div>
                 <LobbyLink
                   href="/"
@@ -675,7 +683,7 @@ export function LobbyScreen({
           </label>
           ) : null}
 
-          <div className="lobby-vt-content">
+          <div className={`lobby-vt-content${focus === "sports" ? " min-h-0 flex-1" : ""}`}>
           {focus === "promotions" ? (
             promotions ? (
               <Suspense fallback={<PromotionsSkeleton />}>
@@ -760,8 +768,30 @@ export function LobbyScreen({
                 setSignInOpen(true);
               }}
             />
+          ) : focus === "sports" ? (
+            <SportsView
+              signedIn={Boolean(user)}
+              ready={ready}
+              onSignIn={() => {
+                setAuthView("login");
+                setSignInOpen(true);
+              }}
+            />
+          ) : focus === "affiliate" ? (
+            <AffiliatePage
+              signedIn={Boolean(user)}
+              referralCode={user?.referral_code}
+              onJoin={() => {
+                setAuthView("register");
+                setSignInOpen(true);
+              }}
+              onSignIn={() => {
+                setAuthView("login");
+                setSignInOpen(true);
+              }}
+            />
           ) : null}
-          <LobbyFooter />
+          {focus === "sports" ? null : <LobbyFooter />}
           </div>
         </main>
       </div>
@@ -1053,11 +1083,23 @@ function CrownIcon() {
   );
 }
 
+function AffiliateIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="7.5" cy="8" r="2.5" />
+      <circle cx="16.5" cy="8" r="2.5" />
+      <path d="M3.5 18.5 C3.8 15.2 5.4 13.2 7.5 13.2 C9.6 13.2 11.2 15.2 11.5 18.5" />
+      <path d="M12.5 18.5 C12.8 15.2 14.4 13.2 16.5 13.2 C18.6 13.2 20.2 15.2 20.5 18.5" />
+    </svg>
+  );
+}
+
 const SIDEBAR_ICONS: Record<
   | (typeof sidebarNavItems)[number]["id"]
   | (typeof sidebarPlayerItems)[number]["id"]
   | (typeof sidebarPromoItems)[number]["id"]
-  | typeof sidebarMissionsItem.id,
+  | typeof sidebarMissionsItem.id
+  | typeof sidebarAffiliateItem.id,
   () => ReactNode
 > = {
   recent: RecentIcon,
@@ -1065,6 +1107,7 @@ const SIDEBAR_ICONS: Record<
   promotions: GiftIcon,
   missions: MissionsIcon,
   vip: CrownIcon,
+  affiliate: AffiliateIcon,
   "hot-games": HotGamesIcon,
   "new-release": NewReleaseIcon,
   slots: SlotsIcon,
