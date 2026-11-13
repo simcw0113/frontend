@@ -3,26 +3,30 @@
 import { useI18n } from "@/components/I18nProvider";
 import type { Provider } from "@/config/providers";
 
-// Heading + "All" reset on one line, then one horizontally scrollable row of
+// Heading + "All Providers" reset on one line, then one horizontally scrollable row of
 // pills. Scrollbar hidden; pills are real buttons, so the row scrolls with the
 // keyboard (Tab moves focus and brings the pill into view) and snaps.
 export function ProviderRow({
   selected,
   onSelect,
   providers,
+  className,
+  headingId = "provider-heading",
 }: {
   selected: string | null;
   onSelect: (id: string | null) => void;
   providers: Provider[];
+  className?: string;
+  headingId?: string;
 }) {
   const { t } = useI18n();
 
   if (providers.length === 0) return null;
 
   return (
-    <section aria-labelledby="provider-heading" className="mt-5">
+    <section aria-labelledby={headingId} className={className ?? "mt-5"}>
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 id="provider-heading" className="text-lg font-semibold">
+        <h2 id={headingId} className="text-lg font-semibold">
           {t.lobby.providers}
         </h2>
         <button
@@ -33,7 +37,7 @@ export function ProviderRow({
             selected === null ? "text-brand" : "text-muted hover:text-white"
           }`}
         >
-          {t.lobby.all}
+          {t.lobby.allProviders}
           <span aria-hidden="true">›</span>
         </button>
       </div>

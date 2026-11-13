@@ -1,18 +1,21 @@
 "use client";
 
 import type { JSAnimation } from "animejs";
-import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useI18n } from "@/components/I18nProvider";
-import { gameHref, SymbolMark } from "@/components/lobby/GameCover";
-import { LobbyLink } from "@/components/lobby/LobbyLink";
+import { GameCover, gameHref } from "@/components/lobby/GameCover";
+import { CategoryChips, toCategoryChips } from "@/components/lobby/CategoryChips";
+import { ProviderRow } from "@/components/lobby/ProviderRow";
 import { defaultCasinoCategory } from "@/config/categories";
-import { defaultSearchCategory, searchCategories, type SearchCategoryId } from "@/config/searchCategories";
 import type { Game } from "@/config/lobby";
+import type { Provider } from "@/config/providers";
 import { fill, htmlLang } from "@/i18n";
 import type { SearchGamesResult } from "@/lib/games";
+import { LOBBY_ALL_CATEGORY, providersInCodes, type LobbyProductCategory } from "@/lib/lobbyApi";
 import { animate, reduceMotion } from "@/lib/motion";
 
 const PAGE_SIZE = 24;
+const emptyCodes: string[] = [];
 const DEBOUNCE_MS = 250;
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -142,39 +145,61 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
 
 type Results = SearchGamesResult & { key: string; error?: boolean };
 
-// Talks to the route handler (app/api/games/search/route.ts), never to the API.
+type GamesPayload = {
+  games?: Game[];
+  total?: number;
+  page?: number;
+  last_page?: number | null;
+};
+
+// Same list source as All Games (POST /api/lobby/games), with optional text `q`.
 async function fetchPage(
-  params: { q: string; category: SearchCategoryId; page: number; lang: string },
+  params: { q: string; publicCodes: string[]; page: number; lang: string },
   signal: AbortSignal,
 ): Promise<SearchGamesResult> {
-  const query = new URLSearchParams({
-    category: params.category,
-    page: String(params.page),
-    pageSize: String(PAGE_SIZE),
-    lang: params.lang,
+  const response = await fetch("/api/lobby/games", {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify({
+      locale: params.lang,
+      page: params.page,
+      limit: PAGE_SIZE,
+      ...(params.q ? { q: params.q } : {}),
+      ...(params.publicCodes.length > 0 ? { publicCodes: params.publicCodes } : {}),
+    }),
+    signal,
   });
-  if (params.q) query.set("q", params.q);
-  const response = await fetch(`/api/games/search?${query}`, { signal });
   if (!response.ok) throw new Error(`Search failed (${response.status})`);
-  const body = (await response.json()) as SearchGamesResult;
-  if (!Array.isArray(body.games)) throw new Error("Unexpected search response");
-  return body;
+  const body = (await response.json()) as GamesPayload;
+  const games = Array.isArray(body.games) ? body.games : [];
+  const page = typeof body.page === "number" ? body.page : params.page;
+  const lastPage = typeof body.last_page === "number" ? body.last_page : games.length < PAGE_SIZE ? page : null;
+  const total = typeof body.total === "number" ? body.total : games.length;
+  return { games, total, nextPage: lastPage != null && page < lastPage ? page + 1 : undefined };
 }
 
 function ExploreContent({ onClose }: { onClose: () => void }) {
   const { lang, locale, t } = useI18n();
   const [input, setInput] = useState("");
   const [q, setQ] = useState(""); // the debounced text the requests use
-  const [category, setCategory] = useState<SearchCategoryId>(defaultSearchCategory);
+  const [productCategories, setProductCategories] = useState<LobbyProductCategory[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [categoryId, setCategoryId] = useState(LOBBY_ALL_CATEGORY);
+  const [providerId, setProviderId] = useState<string | null>(null);
   const [results, setResults] = useState<Results | null>(null);
   const [more, setMore] = useState<{ key: string; status: "loading" | "error" } | null>(null);
   const [attempt, setAttempt] = useState(0); // bumped by "Try again"
   const controller = useRef<AbortController | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLUListElement>(null);
-  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const key = `${category}\n${q}`;
+  const categoryCodes = productCategories.find((item) => item.id === categoryId)?.publicCodes ?? emptyCodes;
+  const publicCodes = useMemo(
+    () => (providerId ? [providerId] : categoryCodes),
+    [providerId, categoryCodes],
+  );
+  const visibleProviders = providersInCodes(providers, categoryId === LOBBY_ALL_CATEGORY ? undefined : categoryCodes);
+  const key = `${categoryId}\n${providerId ?? ""}\n${q}`;
   const loading = results?.key !== key;
   const moreStatus = more?.key === key ? more.status : null;
 
@@ -184,14 +209,33 @@ function ExploreContent({ onClose }: { onClose: () => void }) {
     return () => window.clearTimeout(id);
   }, [input]);
 
+  useEffect(() => {
+    const ac = new AbortController();
+    fetch(`/api/lobby/products?locale=${encodeURIComponent(lang)}`, { signal: ac.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("failed");
+        return (await response.json()) as { providers?: Provider[]; categories?: LobbyProductCategory[] };
+      })
+      .then((payload) => {
+        setProviders(Array.isArray(payload.providers) ? payload.providers : []);
+        setProductCategories(Array.isArray(payload.categories) ? payload.categories : []);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      });
+    return () => ac.abort();
+  }, [lang]);
+
+  // First page for the current (category, provider, text). Starting a new one
+  // aborts the previous request, and the key check keeps an old response from landing.
   // First page for the current (category, text). Starting a new one aborts the
   // previous request, and the key check keeps an old response from ever landing.
   useEffect(() => {
     const current = new AbortController();
     controller.current?.abort();
     controller.current = current;
-    const forKey = `${category}\n${q}`;
-    fetchPage({ q, category, page: 1, lang }, current.signal).then(
+    const forKey = `${categoryId}\n${providerId ?? ""}\n${q}`;
+    fetchPage({ q, publicCodes, page: 1, lang }, current.signal).then(
       (page) => {
         if (current.signal.aborted) return;
         setResults({ ...page, key: forKey });
@@ -203,7 +247,7 @@ function ExploreContent({ onClose }: { onClose: () => void }) {
       },
     );
     return () => current.abort();
-  }, [q, category, lang, attempt]);
+  }, [q, categoryId, providerId, publicCodes, lang, attempt]); // publicCodes is memoized
 
   useEffect(() => () => controller.current?.abort(), []);
 
@@ -214,7 +258,7 @@ function ExploreContent({ onClose }: { onClose: () => void }) {
     controller.current?.abort();
     controller.current = current;
     setMore({ key: forKey, status: "loading" });
-    fetchPage({ q, category, page: results.nextPage, lang }, current.signal).then(
+    fetchPage({ q, publicCodes, page: results.nextPage, lang }, current.signal).then(
       (page) => {
         if (current.signal.aborted) return;
         setResults((previous) => {
@@ -236,29 +280,6 @@ function ExploreContent({ onClose }: { onClose: () => void }) {
         setMore({ key: forKey, status: "error" });
       },
     );
-  }
-
-  function selectCategory(index: number, focus = false) {
-    const next = searchCategories[(index + searchCategories.length) % searchCategories.length];
-    setCategory(next.id);
-    if (focus) {
-      const tab = tabs.current[searchCategories.indexOf(next)];
-      tab?.focus();
-      tab?.scrollIntoView({ inline: "nearest", block: "nearest" });
-    }
-  }
-
-  function onTabKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
-    const index = searchCategories.findIndex((item) => item.id === category);
-    const move: Record<string, number> = {
-      ArrowRight: index + 1,
-      ArrowLeft: index - 1,
-      Home: 0,
-      End: searchCategories.length - 1,
-    };
-    if (!(event.key in move)) return;
-    event.preventDefault();
-    selectCategory(move[event.key], true);
   }
 
   const games = results && !loading ? results.games : [];
@@ -333,43 +354,34 @@ function ExploreContent({ onClose }: { onClose: () => void }) {
         ) : null}
       </div>
 
-      <div
-        role="tablist"
-        aria-label={t.search.categoriesLabel}
-        onKeyDown={onTabKeyDown}
-        className="explore-tabs mx-4 mt-3 flex shrink-0 gap-1 overflow-x-auto sm:mx-6"
-      >
-        {searchCategories.map((item, index) => {
-          const selected = item.id === category;
-          return (
-            <button
-              key={item.id}
-              ref={(element) => {
-                tabs.current[index] = element;
-              }}
-              type="button"
-              role="tab"
-              id={`explore-tab-${item.id}`}
-              aria-selected={selected}
-              aria-controls="explore-panel"
-              tabIndex={selected ? 0 : -1}
-              onClick={() => selectCategory(index)}
-              className={`flex h-10 shrink-0 items-center gap-2 rounded-lg px-3.5 text-sm font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand ${
-                selected ? "bg-brand/15 text-brand" : "text-muted hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              {item.id === "all" ? <GridIcon /> : null}
-              {t.search.categories[item.titleKey]}
-            </button>
-          );
-        })}
-      </div>
+      {productCategories.length > 1 ? (
+        <CategoryChips
+          items={toCategoryChips(productCategories, t.lobby.all)}
+          value={String(categoryId)}
+          onChange={(id) => {
+            setCategoryId(Number(id));
+            setProviderId(null);
+          }}
+          label={t.search.categoriesLabel}
+          idPrefix="explore"
+          panelId="explore-panel"
+          className="explore-tabs mx-4 mt-3 sm:mx-6"
+        />
+      ) : null}
+
+      <ProviderRow
+        selected={providerId}
+        onSelect={setProviderId}
+        providers={visibleProviders}
+        className="mx-4 mt-3 sm:mx-6"
+        headingId="explore-provider-heading"
+      />
 
       <div ref={scroller} className="explore-scroll @container">
         <div
           id="explore-panel"
           role="tabpanel"
-          aria-labelledby={`explore-tab-${category}`}
+          aria-labelledby={`explore-tab-${categoryId}`}
           aria-busy={loading}
           className="px-4 pt-4 pb-6 sm:px-6"
         >
@@ -404,7 +416,12 @@ function ExploreContent({ onClose }: { onClose: () => void }) {
               <ul ref={list} tabIndex={-1} className={`${GRID} outline-none`}>
                 {games.map((game) => (
                   <li key={game.id} className="min-w-0">
-                    <SearchCard game={game} onGo={onClose} />
+                    <GameCover
+                      game={game}
+                      href={gameHref(game, defaultCasinoCategory.slug)}
+                      onGo={onClose}
+                      fluid
+                    />
                   </li>
                 ))}
               </ul>
@@ -445,51 +462,3 @@ function ExploreContent({ onClose }: { onClose: () => void }) {
 // 3 columns on phones, 4 / 6 / 8 as the pop-up gets wider (container queries on
 // the scroll area, so it follows the real width).
 const GRID = "grid grid-cols-3 gap-2.5 @xl:grid-cols-4 @xl:gap-3 @3xl:grid-cols-6 @5xl:grid-cols-8";
-
-// Opens the game page (and closes Explore). API results without a category open under
-// Trending games.
-function SearchCard({ game, onGo }: { game: Game; onGo: () => void }) {
-  const { locale, t } = useI18n();
-  const players = game.playing.toLocaleString(htmlLang(locale));
-  return (
-    <LobbyLink
-      href={gameHref(game, defaultCasinoCategory.slug)}
-      onGo={onGo}
-      ariaLabel={`${game.title}, ${game.provider}, ${fill(t.lobby.playing, { count: players })}`}
-      className="game-card block w-full rounded-xl text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-    >
-      <span
-        className="game-cover relative block aspect-[3/4] overflow-hidden rounded-xl"
-        style={{ background: `linear-gradient(180deg, ${game.from}, ${game.to})` }}
-      >
-        <span className="absolute top-1.5 right-1.5 flex items-center gap-0.5 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-semibold text-white/90">
-          <svg viewBox="0 0 24 24" className="size-2.5" fill="currentColor" aria-hidden="true">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 21 C4 16 8 14 12 14 C16 14 20 16 20 21 Z" />
-          </svg>
-          {players}
-        </span>
-        <span className="game-art absolute inset-0 flex items-center justify-center pb-6">
-          <SymbolMark symbol={game.symbol} className="size-[44%] drop-shadow-lg" />
-        </span>
-        <span className="absolute inset-x-1.5 bottom-6 block text-[12px] leading-[0.95] font-black tracking-tight text-white uppercase drop-shadow-md @3xl:text-[11px]">
-          {game.title}
-        </span>
-        <span className="absolute inset-x-1.5 bottom-1.5 block truncate text-[8px] font-semibold tracking-[0.12em] text-white/75 uppercase">
-          {game.provider}
-        </span>
-      </span>
-    </LobbyLink>
-  );
-}
-
-function GridIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden="true">
-      <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" />
-      <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" />
-      <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" />
-      <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
-    </svg>
-  );
-}

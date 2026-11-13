@@ -53,11 +53,11 @@ export const casinoCategories: CasinoCategory[] = [
   { slug: "slots", titleKey: "slots", title: "Slots", luckyPick: true },
   // Not on the home page for now (top bar link + its own page only).
   { slug: "live-dealer", titleKey: "liveDealer", title: "Live dealer games", showOnHome: false },
-  // pinLast: always the last home row. Not listed in the top bar or the sidebar.
+  // pinLast: always the last home row and the last sidebar games item. Not in the top bar.
   { slug: "all-games", titleKey: "allGames", title: "All Games", pinLast: true },
 ];
 
-// The rows of the home page (All Games is pinned last). Not shown in the top bar or sidebar.
+// The rows of the home page (All Games is pinned last). Not shown in the top bar.
 export const homeCategories = pinLastItems(
   casinoCategories.filter((category) => category.showOnHome !== false),
   (category) => category.pinLast === true,

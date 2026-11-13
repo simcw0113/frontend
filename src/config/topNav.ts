@@ -1,5 +1,5 @@
 import type { Dictionary } from "@/i18n";
-import { casinoCategories } from "@/config/categories";
+import { casinoCategories, findCasinoCategory, pinLastItems } from "@/config/categories";
 
 // Links of the top bar (after the logo), in this order. `path` is the app path without the
 // language prefix: LobbyLink adds /{lang} (so /casino/slots becomes /en/casino/slots).
@@ -25,8 +25,8 @@ function categoryNavItem(category: (typeof casinoCategories)[number]): TopNavIte
 
 const sportsNavItem: TopNavItem = { id: "sports", labelKey: "sports", path: "/sports" };
 
-// Casino categories + Sports. All Games stays on the home row and /casino/all-games,
-// but is omitted from the top bar and the sidebar.
+// Casino categories + Sports for the top bar. All Games is omitted from the top bar only;
+// the sidebar still lists it (sidebarNavItems below).
 const gameNavItems: TopNavItem[] = [
   ...casinoCategories.filter((category) => category.slug !== "all-games").map(categoryNavItem),
   sportsNavItem,
@@ -60,8 +60,11 @@ export const sidebarPromoItems = (["promotions", "vip"] as const).map((id) => {
   return { ...item, id };
 });
 
-// Top links that also appear in the sidebar (the games group, between the dividers).
-// Same order as the games cluster in the top bar.
-export const sidebarNavItems = gameNavItems;
+// The games group of the sidebar (between the dividers): the top bar's games cluster plus
+// All Games, which is pinned last here but not shown in the top bar.
+export const sidebarNavItems: TopNavItem[] = pinLastItems(
+  [...casinoCategories.map(categoryNavItem), sportsNavItem],
+  (item) => findCasinoCategory(item.id)?.pinLast === true,
+);
 export const sidebarNavIds = sidebarNavItems.map((item) => item.id);
 export type SidebarNavId = (typeof sidebarNavItems)[number]["id"];

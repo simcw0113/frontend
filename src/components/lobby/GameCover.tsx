@@ -183,7 +183,7 @@ export function gameHref(
 }
 
 // With `href` the whole tile is a link to the game page (lobby transition, same hover lift).
-export function GameCover({ game, fluid = false, href, className }: { game: Game; fluid?: boolean; href?: string; className?: string }) {
+export function GameCover({ game, fluid = false, href, onGo, className }: { game: Game; fluid?: boolean; href?: string; onGo?: () => void; className?: string }) {
   // A cover image that fails (also before hydration) falls back to the drawn cover.
   const [failed, setFailed] = useState(false);
   const image = game.image && !failed ? game.image : null;
@@ -249,6 +249,7 @@ export function GameCover({ game, fluid = false, href, className }: { game: Game
     return (
       <LobbyLink
         href={href}
+        onGo={onGo}
         className={`game-card block rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand ${size}${className ? ` ${className}` : ""}`}
       >
         {body}

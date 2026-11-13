@@ -1,8 +1,8 @@
-import { isSearchCategory, defaultSearchCategory } from "@/config/searchCategories";
-import { SEARCH_PAGE_SIZE, searchGames } from "@/lib/games";
+import { SEARCH_PAGE_SIZE } from "@/lib/games";
+import { queryLobbyGames } from "@/lib/lobbyGamesQuery";
 import { defaultSlug, isSlug } from "@/i18n/routing";
 
-// GET /api/games/search?q=&category=&page=&pageSize=&lang=
+// GET /api/games/search?q=&publicCodes=&page=&pageSize=&lang=
 // The browser's door to the games search (Next route handler: plain GET, so
 // requests can be aborted and run in parallel, unlike Server Actions). Inputs are
 // validated here; anything malformed gets a 400 with a short message.
@@ -31,9 +31,6 @@ export async function GET(request: Request) {
   if (q.length > MAX_QUERY_LENGTH) return fail(400, "q is too long");
   if (/[\u0000-\u001f\u007f]/.test(q)) return fail(400, "q has invalid characters");
 
-  const category = params.get("category") ?? defaultSearchCategory;
-  if (!isSearchCategory(category)) return fail(400, "unknown category");
-
   const page = integer(params.get("page"), 1, 1, MAX_PAGE);
   if (page === null) return fail(400, "invalid page");
   const pageSize = integer(params.get("pageSize"), SEARCH_PAGE_SIZE, 1, MAX_PAGE_SIZE);
@@ -41,10 +38,18 @@ export async function GET(request: Request) {
 
   const lang = params.get("lang");
   const slug = lang && isSlug(lang) ? lang : defaultSlug; // unknown language: fall back to English
+  const publicCodes = (params.get("publicCodes") ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const publicCode = (params.get("publicCode") ?? "").trim();
+  if (publicCode) publicCodes.push(publicCode);
 
   try {
-    const result = await searchGames({ q, category, page, pageSize, lang: slug, signal: request.signal });
-    return Response.json(result, { headers });
+    const result = await queryLobbyGames({ locale: slug, q, publicCodes, page, limit: pageSize });
+    if (result.error) return fail(502, "search is unavailable");
+    const nextPage = result.last_page != null && result.page < result.last_page ? result.page + 1 : undefined;
+    return Response.json({ games: result.games, total: result.total, nextPage }, { headers });
   } catch {
     return fail(502, "search is unavailable");
   }

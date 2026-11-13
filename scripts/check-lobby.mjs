@@ -69,16 +69,16 @@ for (const [lang, heading] of Object.entries(headings)) {
     /<button[^>]*aria-expanded="true"[^>]*aria-controls="lobby-sidebar"/.test(sidebar) && /<button[^>]*aria-controls="lobby-sidebar"[^>]*class="[^"]*lg:hidden/.test(header),
   );
   check(
-    `/${lang} sidebar items (Home, Recent, Favourites | Promotions, Missions, VIP, Affiliate | Hot Games, New Release, Slots, Live Dealer, Sports | Language) each have an icon and a label, with dividers`,
-    items.length === 14 && items.every(([, , inner]) => inner.includes("<svg") && /class="lobby-label[^"]*">[^<]+</.test(inner)) && (sidebar.match(/<hr/g) ?? []).length === 3,
+    `/${lang} sidebar items (Home, Recent, Favourites | Promotions, Missions, VIP, Affiliate | Hot Games, New Release, Slots, Live Dealer, Sports, All Games | Language) each have an icon and a label, with dividers`,
+    items.length === 15 && items.every(([, , inner]) => inner.includes("<svg") && /class="lobby-label[^"]*">[^<]+</.test(inner)) && (sidebar.match(/<hr/g) ?? []).length === 3,
   );
   // Groups (config/topNav.ts): Home + player pages | Promotions, VIP | games (same paths as the
   // top bar) | language selector.
   const groups = sidebar.split("<hr");
   const hrefsOf = (html) => [...(html ?? "").matchAll(/<a\b[^>]*href="([^"]*)"/g)].map((m) => m[1]);
-  const expectGroups = [["", "/recent", "/favourites"], ["/promotions", "/missions", "/vip", "/affiliate"], ["/casino/hot-games", "/casino/new-release", "/casino/slots", "/casino/live-dealer", "/sports"]];
+  const expectGroups = [["", "/recent", "/favourites"], ["/promotions", "/missions", "/vip", "/affiliate"], ["/casino/hot-games", "/casino/new-release", "/casino/slots", "/casino/live-dealer", "/sports", "/casino/all-games"]];
   check(
-    `/${lang} sidebar groups: Home, Recent, Favourites | Promotions, Missions, VIP, Affiliate | Hot Games, New Release, Slots, Live Dealer, Sports | language`,
+    `/${lang} sidebar groups: Home, Recent, Favourites | Promotions, Missions, VIP, Affiliate | Hot Games, New Release, Slots, Live Dealer, Sports, All Games | language`,
     expectGroups.every((paths, i) => hrefsOf(groups[i]).join() === paths.map((p) => `/${lang}${p}`).join()) && (groups[3] ?? "").includes("aria-expanded"),
   );
   check(
@@ -181,7 +181,7 @@ for (const path of ["/en/casino/slots", "/en/promotions", "/en/casino/live-deale
 }
 // Sidebar current page: only the matching sidebar link has aria-current="page" (none on the
 // category pages that have no sidebar entry).
-for (const [path, expected] of [["/en", "/en"], ["/en/recent", "/en/recent"], ["/en/favourites", "/en/favourites"], ["/en/vip", "/en/vip"], ["/en/missions", "/en/missions"], ["/en/affiliate", "/en/affiliate"], ["/en/casino/hot-games", "/en/casino/hot-games"], ["/en/casino/new-release", "/en/casino/new-release"], ["/en/casino/all-games", ""], ["/en/casino/slots", "/en/casino/slots"], ["/en/casino/live-dealer", "/en/casino/live-dealer"], ["/en/sports", "/en/sports"]]) {
+for (const [path, expected] of [["/en", "/en"], ["/en/recent", "/en/recent"], ["/en/favourites", "/en/favourites"], ["/en/vip", "/en/vip"], ["/en/missions", "/en/missions"], ["/en/affiliate", "/en/affiliate"], ["/en/casino/hot-games", "/en/casino/hot-games"], ["/en/casino/new-release", "/en/casino/new-release"], ["/en/casino/all-games", "/en/casino/all-games"], ["/en/casino/slots", "/en/casino/slots"], ["/en/casino/live-dealer", "/en/casino/live-dealer"], ["/en/sports", "/en/sports"]]) {
   const html = (await page(path)).html;
   const aside = html.slice(html.indexOf('<aside id="lobby-sidebar"'), html.indexOf("</aside>"));
   const current = [...aside.matchAll(/<a\b[^>]*>/g)].filter(([tag]) => tag.includes('aria-current="page"')).map(([tag]) => tag.match(/href="([^"]*)"/)?.[1]);

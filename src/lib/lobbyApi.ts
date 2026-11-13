@@ -51,6 +51,8 @@ type RawGroup = {
   title?: unknown;
   category?: unknown;
   products?: unknown;
+  product_code?: unknown;
+  type?: unknown;
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -259,6 +261,85 @@ function lobbyCountryId() {
   return apiConfig.lobbyCountryId || "1";
 }
 
+export const LOBBY_HOME_CATEGORY = -1;
+export const LOBBY_ALL_CATEGORY = 0;
+
+// One entry from GET /config `data.product` (Product::product_categories_format).
+// `title` is already localized. `publicCodes` are the products in that category
+// (empty on the All category, meaning no provider filter). Home (-1) is omitted.
+export type LobbyProductCategory = {
+  id: number;
+  title: string;
+  publicCodes: string[];
+};
+
+export function parseProductCategories(payload: unknown): LobbyProductCategory[] {
+  const groups = readGroups(payload);
+  const codeToPublic = new Map<string, string>();
+  for (const group of groups) {
+    const rec = asRecord(group) as RawGroup | null;
+    const nested = Array.isArray(rec?.products) ? (rec?.products as RawProduct[]) : [];
+    for (const item of nested) {
+      const code = text(item.code);
+      const publicCode = text(item.public_code);
+      if (code && publicCode) codeToPublic.set(code, publicCode);
+    }
+  }
+
+  const categories: LobbyProductCategory[] = [];
+  for (const group of groups) {
+    const rec = asRecord(group) as RawGroup | null;
+    if (!rec) continue;
+    const id = Number(rec.category);
+    if (!Number.isFinite(id) || id === LOBBY_HOME_CATEGORY) continue;
+    const title = text(rec.title);
+    if (!title) continue;
+
+    if (id === LOBBY_ALL_CATEGORY) {
+      categories.push({ id, title, publicCodes: [] });
+      continue;
+    }
+
+    const publicCodes: string[] = [];
+    const nested = Array.isArray(rec.products) ? (rec.products as RawProduct[]) : [];
+    for (const item of nested) {
+      const publicCode = text(item.public_code);
+      if (publicCode && !publicCodes.includes(publicCode)) publicCodes.push(publicCode);
+    }
+    // TYPE_PROVIDER categories carry an internal `product_code` and an empty products list.
+    const productCode = text(rec.product_code);
+    if (productCode) {
+      const publicCode = codeToPublic.get(productCode) ?? "";
+      if (publicCode && !publicCodes.includes(publicCode)) publicCodes.push(publicCode);
+    }
+    if (publicCodes.length === 0) continue;
+    categories.push({ id, title, publicCodes });
+  }
+
+  if (!categories.some((item) => item.id === LOBBY_ALL_CATEGORY)) {
+    categories.unshift({ id: LOBBY_ALL_CATEGORY, title: "", publicCodes: [] });
+  }
+  return categories;
+}
+
+export async function fetchLobbyCatalog(locale: string): Promise<{
+  providers: Provider[];
+  categories: LobbyProductCategory[];
+}> {
+  if (!apiConfig.baseUrl) return { providers: [], categories: [] };
+  const query = `?locale=${encodeURIComponent(locale)}`;
+  try {
+    const payload = await apiJson(`${apiConfig.configPath}${query}`, {
+      method: "GET",
+      auth: false,
+      cache: "no-store",
+    });
+    return { providers: parseProducts(payload), categories: parseProductCategories(payload) };
+  } catch {
+    return { providers: [], categories: [] };
+  }
+}
+
 export async function fetchLobbyProducts(locale: string): Promise<Provider[]> {
   if (!apiConfig.baseUrl) return [];
   const query = `?locale=${encodeURIComponent(locale)}`;
@@ -441,4 +522,12 @@ export function providersForCategory(providers: Provider[], slug?: string): Prov
   if (!key) return providers;
   const filtered = providers.filter((provider) => (provider.group ?? "").toLowerCase().includes(key));
   return filtered.length > 0 ? filtered : providers;
+}
+
+// Limit the provider row to the public_codes of one GET /config product category.
+// An empty list means the All category (no extra filter).
+export function providersInCodes(providers: Provider[], publicCodes?: string[]): Provider[] {
+  if (!publicCodes || publicCodes.length === 0) return providers;
+  const allowed = new Set(publicCodes);
+  return providers.filter((provider) => allowed.has(provider.id));
 }

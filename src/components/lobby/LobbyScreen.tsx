@@ -9,7 +9,8 @@ import { bannerSlides, type BannerSlide } from "@/config/banners";
 import { siteConfig } from "@/config/site";
 import { defaultCasinoCategory, findCasinoCategory } from "@/config/categories";
 import { AllGamesFromPromise } from "@/components/lobby/AllGamesList";
-import { CategoryIcon, HotGamesIcon, NewReleaseIcon } from "@/components/lobby/CategoryIcons";
+import { CategoryChips, toCategoryChips } from "@/components/lobby/CategoryChips";
+import { AllGamesIcon, CategoryIcon, HotGamesIcon, NewReleaseIcon } from "@/components/lobby/CategoryIcons";
 import { HOME_SCROLL_KEY, HomeGameContent } from "@/components/lobby/HomeGameContent";
 import { HowToRegister } from "@/components/lobby/HowToRegister";
 import { LobbyFooter } from "@/components/lobby/LobbyFooter";
@@ -37,7 +38,7 @@ import { fill } from "@/i18n";
 import { hreflang } from "@/i18n/routing";
 import type { Provider } from "@/config/providers";
 import type { CategoryGamesResult } from "@/lib/games";
-import { providersForCategory } from "@/lib/lobbyApi";
+import { LOBBY_ALL_CATEGORY, providersForCategory, providersInCodes, type LobbyProductCategory } from "@/lib/lobbyApi";
 import type { PartnersResult } from "@/lib/partners";
 import type { PromotionsResult } from "@/lib/promotions";
 import type { TopWinsResult } from "@/lib/topWins";
@@ -121,6 +122,8 @@ export function LobbyScreen({
   const [cookiesOn, setCookiesOn] = useState(false);
   const [provider, setProvider] = useState<string | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
+  const [productCategories, setProductCategories] = useState<LobbyProductCategory[]>([]);
+  const [productCategoryId, setProductCategoryId] = useState(LOBBY_ALL_CATEGORY);
   const [providersStatus, setProvidersStatus] = useState<"loading" | "ready" | "error">("loading");
   // Casino category where the player clicked "All". Cleared on leaving that page so the
   // next visit starts on the first provider again.
@@ -133,10 +136,11 @@ export function LobbyScreen({
     fetch(`/api/lobby/products?locale=${encodeURIComponent(lang)}`, { signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error("failed");
-        return (await response.json()) as { providers?: Provider[] };
+        return (await response.json()) as { providers?: Provider[]; categories?: LobbyProductCategory[] };
       })
       .then((payload) => {
         setProviders(Array.isArray(payload.providers) ? payload.providers : []);
+        setProductCategories(Array.isArray(payload.categories) ? payload.categories : []);
         setProvidersStatus("ready");
       })
       .catch((error: unknown) => {
@@ -266,10 +270,18 @@ export function LobbyScreen({
     setProvider(null);
     setAllSlug(null);
     setGameQuery("");
+    setProductCategoryId(LOBBY_ALL_CATEGORY);
   } else if (!casinoSlug && allSlug) {
     setAllSlug(null);
   }
-  const visibleProviders = providersForCategory(providers, casinoSlug ?? undefined);
+  const categoryCodes =
+    casinoSlug === "all-games"
+      ? (productCategories.find((item) => item.id === productCategoryId)?.publicCodes ?? [])
+      : [];
+  const visibleProviders = providersInCodes(
+    providersForCategory(providers, casinoSlug ?? undefined),
+    casinoSlug === "all-games" ? categoryCodes : undefined,
+  );
   const providerInList = provider != null && visibleProviders.some((item) => item.id === provider);
   const explicitAll = casinoSlug != null && allSlug === casinoSlug && provider === null;
   // Tagged lists (Hot Games, New Release) and All Games open on the full list, not
@@ -712,6 +724,20 @@ export function LobbyScreen({
             ) : null
           ) : gamesPage ? (
             <>
+              {focus === "casino" && casino.slug === "all-games" && productCategories.length > 1 ? (
+                <CategoryChips
+                  items={toCategoryChips(productCategories, t.lobby.all)}
+                  value={String(productCategoryId)}
+                  onChange={(id) => {
+                    setProductCategoryId(Number(id));
+                    selectProvider(null);
+                  }}
+                  label={t.search.categoriesLabel}
+                  idPrefix="product-category"
+                  panelId="all-games-panel"
+                  className="explore-tabs mt-5"
+                />
+              ) : null}
               {focus === "home" || (focus === "casino" && !casino.tagged) ? (
                 <ProviderRow selected={activeProvider} onSelect={selectProvider} providers={visibleProviders} />
               ) : null}
@@ -737,6 +763,7 @@ export function LobbyScreen({
                     promise={listGames[casino.slug] ?? Promise.resolve({ games: [] })}
                     category={casino.slug}
                     query={gameQuery}
+                    publicCodes={categoryCodes}
                   />
                 </Suspense>
               ) : focus === "casino" && providersStatus === "loading" && !casino.tagged ? (
@@ -1110,6 +1137,7 @@ const SIDEBAR_ICONS: Record<
   affiliate: AffiliateIcon,
   "hot-games": HotGamesIcon,
   "new-release": NewReleaseIcon,
+  "all-games": AllGamesIcon,
   slots: SlotsIcon,
   "live-dealer": LiveDealerIcon,
   sports: SportsIcon,
