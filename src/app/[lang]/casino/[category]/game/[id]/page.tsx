@@ -54,11 +54,10 @@ export default function GamePage({ params }: Props) {
     const details = findCasinoCategory(category) ? await getGameDetails(category, id, { lang }) : null;
     if (!details) return null;
     const token = await getAuthTokenFromCookie();
-    const launch = await getGameLaunch({
+    const launch = getGameLaunch({
       provider: details.game.publicCode,
       game: details.game.gameCode,
       name: details.game.title,
-      lang,
       token,
     });
     return { ...details, launch };

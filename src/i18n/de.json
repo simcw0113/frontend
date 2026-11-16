@@ -328,9 +328,16 @@
     "loadError": "Dieses Spiel konnte nicht geladen werden. Bitte versuche es später erneut.",
     "signIn": "Melde dich an, um dieses Spiel zu spielen.",
     "loading": "Spiel wird geladen…",
+    "amountLabel": "Spielbetrag",
+    "amountMax": "Max",
+    "amountBalance": "Guthaben: {amount}",
+    "amountHint": "Wähle, wie viel du ins Spiel mitnimmst.",
+    "play": "Spielen",
     "addFavourite": "Zu Favoriten hinzufügen",
     "removeFavourite": "Aus Favoriten entfernen",
-    "favouriteError": "Favoriten konnten nicht aktualisiert werden. Bitte versuche es erneut."
+    "favouriteError": "Favoriten konnten nicht aktualisiert werden. Bitte versuche es erneut.",
+    "favouriteAdded": "Zu Favoriten hinzugefügt",
+    "favouriteRemoved": "Aus Favoriten entfernt"
   },
   "sportsPage": {
     "meta": "Live-Sportwetten.",

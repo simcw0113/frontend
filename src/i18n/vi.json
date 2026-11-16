@@ -328,9 +328,16 @@
     "loadError": "Không tải được game này. Vui lòng thử lại sau.",
     "signIn": "Đăng nhập để chơi game này.",
     "loading": "Đang tải game…",
+    "amountLabel": "Số tiền chơi",
+    "amountMax": "Tối đa",
+    "amountBalance": "Số dư: {amount}",
+    "amountHint": "Chọn số tiền mang vào trò chơi.",
+    "play": "Chơi",
     "addFavourite": "Thêm vào yêu thích",
     "removeFavourite": "Xóa khỏi yêu thích",
-    "favouriteError": "Không thể cập nhật mục yêu thích. Vui lòng thử lại."
+    "favouriteError": "Không thể cập nhật mục yêu thích. Vui lòng thử lại.",
+    "favouriteAdded": "Đã thêm vào yêu thích",
+    "favouriteRemoved": "Đã xóa khỏi yêu thích"
   },
   "sportsPage": {
     "meta": "Cá cược thể thao trực tiếp.",

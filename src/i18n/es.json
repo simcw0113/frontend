@@ -328,9 +328,16 @@
     "loadError": "No se pudo cargar este juego. Inténtalo de nuevo más tarde.",
     "signIn": "Inicia sesión para jugar a este juego.",
     "loading": "Cargando juego…",
+    "amountLabel": "Monto para jugar",
+    "amountMax": "Máx",
+    "amountBalance": "Saldo: {amount}",
+    "amountHint": "Elige cuánto llevar al juego.",
+    "play": "Jugar",
     "addFavourite": "Añadir a favoritos",
     "removeFavourite": "Quitar de favoritos",
-    "favouriteError": "No se pudieron actualizar los favoritos. Inténtalo de nuevo."
+    "favouriteError": "No se pudieron actualizar los favoritos. Inténtalo de nuevo.",
+    "favouriteAdded": "Añadido a favoritos",
+    "favouriteRemoved": "Eliminado de favoritos"
   },
   "sportsPage": {
     "meta": "Apuestas deportivas en vivo.",

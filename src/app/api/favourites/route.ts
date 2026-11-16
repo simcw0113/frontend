@@ -2,11 +2,14 @@ import { NextResponse } from "next/server";
 import { apiConfig } from "@/config/site";
 import { ApiError, apiJson, isApiStatusFailure, readApiMessage } from "@/lib/api";
 import { getAuthTokenFromCookie } from "@/lib/authCookie";
+import { lobbyLocale } from "@/lib/lobbyApi";
 
 // Cookie auth_token -> Bearer for the player's favourites.
 // GET  /api/favourites -> { items: [{ public_code, game_code }] }  (backend simple=1)
-// POST /api/favourites { publicCode, gameCode } -> add (idempotent)
-// DELETE /api/favourites { publicCode, gameCode } -> remove
+// POST /api/favourites { publicCode, gameCode, locale? } -> add (idempotent)
+// DELETE /api/favourites { publicCode, gameCode, locale? } -> remove
+// `locale` is mapped with lobbyLocale and sent in the backend JSON body so
+// success/error `message` comes back already translated (header locale is ignored).
 
 type FavItem = { public_code: string; game_code: string };
 
@@ -25,6 +28,14 @@ function readItem(body: unknown): FavItem | null {
     (typeof rec.gameCode === "string" ? rec.gameCode : typeof rec.game_code === "string" ? rec.game_code : "").trim();
   if (!publicCode || !gameCode) return null;
   return { public_code: publicCode, game_code: gameCode };
+}
+
+function readLocale(body: unknown): string {
+  if (!body || typeof body !== "object") return "en";
+  const rec = body as Record<string, unknown>;
+  const value =
+    (typeof rec.locale === "string" ? rec.locale : typeof rec.lang === "string" ? rec.lang : "en").trim();
+  return lobbyLocale(value);
 }
 
 async function backendPost(path: string, token: string, body: Record<string, unknown>) {
@@ -89,8 +100,9 @@ async function mutate(request: Request, path: string) {
   }
   const item = readItem(raw);
   if (!item) return NextResponse.json({ ok: false, error: "bad_request" }, { status: 400, headers: noStore });
+  const locale = readLocale(raw);
   try {
-    const payload = await backendPost(path, token, item);
+    const payload = await backendPost(path, token, { ...item, locale });
     const message = readApiMessage(payload);
     if (isApiStatusFailure(payload)) {
       return NextResponse.json({ ok: false, message: message ?? "failed" }, { status: 400, headers: noStore });

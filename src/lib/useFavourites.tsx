@@ -60,13 +60,15 @@ function loadSimpleList(): Promise<FavItem[]> {
 export function FavouritesProvider({ children, onSignIn }: { children: ReactNode; onSignIn: () => void }) {
   const { user, ready: sessionReady } = useSession();
   const signedIn = Boolean(user);
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [keys, setKeys] = useState<Set<string>>(() => new Set());
   const [listReady, setListReady] = useState(false);
   const keysRef = useRef(keys);
   const pendingRef = useRef(new Set<string>());
   const requestIdRef = useRef(0);
-  const fallbackMessage = t.gamePage.favouriteError;
+  const errorMessage = t.gamePage.favouriteError;
+  const addedMessage = t.gamePage.favouriteAdded;
+  const removedMessage = t.gamePage.favouriteRemoved;
 
   useEffect(() => {
     keysRef.current = keys;
@@ -135,9 +137,10 @@ export function FavouritesProvider({ children, onSignIn }: { children: ReactNode
           method: adding ? "POST" : "DELETE",
           headers: { "Content-Type": "application/json" },
           cache: "no-store",
-          body: JSON.stringify({ publicCode, gameCode }),
+          body: JSON.stringify({ publicCode, gameCode, locale: lang }),
         });
         const payload = (await response.json().catch(() => null)) as { ok?: unknown; message?: unknown } | null;
+        const backendMessage = typeof payload?.message === "string" ? payload.message.trim() : "";
         if (!response.ok || payload?.ok === false) {
           setKeys((prev) => {
             const next = new Set(prev);
@@ -145,10 +148,11 @@ export function FavouritesProvider({ children, onSignIn }: { children: ReactNode
             else next.add(key);
             return next;
           });
-          const message = typeof payload?.message === "string" ? payload.message.trim() : "";
-          showToast(message || fallbackMessage);
+          showToast(backendMessage || errorMessage, "error");
           return false;
         }
+        // Optimistic heart stays; toast after the request succeeds.
+        showToast(backendMessage || (adding ? addedMessage : removedMessage), "success");
         return true;
       } catch {
         setKeys((prev) => {
@@ -157,13 +161,13 @@ export function FavouritesProvider({ children, onSignIn }: { children: ReactNode
           else next.add(key);
           return next;
         });
-        showToast(fallbackMessage);
+        showToast(errorMessage, "error");
         return false;
       } finally {
         pendingRef.current.delete(key);
       }
     },
-    [signedIn, onSignIn, fallbackMessage],
+    [signedIn, onSignIn, lang, errorMessage, addedMessage, removedMessage],
   );
 
   const value = useMemo<FavouritesContextValue>(

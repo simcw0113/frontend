@@ -328,9 +328,16 @@
     "loadError": "This game could not be loaded. Please try again later.",
     "signIn": "Sign in to play this game.",
     "loading": "Loading game…",
+    "amountLabel": "Amount to play",
+    "amountMax": "Max",
+    "amountBalance": "Balance: {amount}",
+    "amountHint": "Choose how much to bring into the game.",
+    "play": "Play",
     "addFavourite": "Add to favourites",
     "removeFavourite": "Remove from favourites",
-    "favouriteError": "Could not update favourites. Please try again."
+    "favouriteError": "Could not update favourites. Please try again.",
+    "favouriteAdded": "Added to favourites",
+    "favouriteRemoved": "Removed from favourites"
   },
   "sportsPage": {
     "meta": "Live sports betting.",

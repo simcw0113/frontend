@@ -328,9 +328,16 @@
     "loadError": "游戏加载失败，请稍后重试。",
     "signIn": "登录后即可畅玩此游戏。",
     "loading": "游戏加载中…",
+    "amountLabel": "游戏金额",
+    "amountMax": "最大",
+    "amountBalance": "余额：{amount}",
+    "amountHint": "选择要带进游戏的金额。",
+    "play": "开始游戏",
     "addFavourite": "加入收藏",
     "removeFavourite": "取消收藏",
-    "favouriteError": "无法更新收藏，请稍后重试。"
+    "favouriteError": "无法更新收藏，请稍后重试。",
+    "favouriteAdded": "已添加到收藏",
+    "favouriteRemoved": "已从收藏中移除"
   },
   "sportsPage": {
     "meta": "体育即时投注。",

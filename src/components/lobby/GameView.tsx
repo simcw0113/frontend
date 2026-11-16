@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
   type Ref,
@@ -27,6 +28,7 @@ import type { GameDetails } from "@/lib/games";
 import { revealGameOpener } from "@/lib/lobbyTransition";
 import { animate, reduceMotion } from "@/lib/motion";
 import { useFavourites } from "@/lib/useFavourites";
+import { loadBalance, type WalletBalance } from "@/lib/walletBalance";
 
 // Game page body (/casino/{category}/game/{id}, LobbyScreen focus "game").
 // Layout (styles: .gp-* in globals.css):
@@ -111,7 +113,9 @@ const ICON = "gp-icon";
 function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignIn: () => void }) {
   const { t, locale, href: localized } = useI18n();
   const router = useRouter();
-  const { game, launch, recommended } = data;
+  const { game, recommended } = data;
+  // { ask: true } until the player picks how much to bring in (AmountPanel), then { url }.
+  const [launch, setLaunch] = useState(data.launch);
   const category = findCasinoCategory(game.category ?? "");
   const frameRef = useRef<HTMLDivElement>(null);
   const { isFavourite, toggle, signedIn } = useFavourites();
@@ -245,6 +249,8 @@ function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignI
                   </div>
                 )}
               </>
+            ) : "ask" in launch ? (
+              <AmountPanel game={game} onLaunch={(url) => setLaunch({ url })} onSignIn={onSignIn} />
             ) : (
               <div className="gp-error">
                 <p>{"error" in launch && launch.error === "signin" ? t.gamePage.signIn : t.gamePage.loadError}</p>
@@ -369,6 +375,98 @@ function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignI
         onLeave={() => void leave()}
       />
     </div>
+  );
+}
+
+const AMOUNT = /^\d+(\.\d{1,2})?$/;
+
+// Before a real game opens: how much of the wallet to bring into it (POST /opengame moves the
+// money). Starts at the whole balance, like before. Sits inside the frame, so it is the same
+// on desktop (16:9 frame) and phones (full-screen frame).
+function AmountPanel({ game, onLaunch, onSignIn }: { game: Game; onLaunch: (url: string) => void; onSignIn: () => void }) {
+  const { t, lang } = useI18n();
+  const copy = t.gamePage;
+  const [wallet, setWallet] = useState<WalletBalance | null>(null);
+  const [amount, setAmount] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadBalance().then((next) => {
+      if (cancelled || !next) return;
+      setWallet(next);
+      setAmount((typed) => typed || (Number(next.balance) > 0 ? next.balance : ""));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const balance = wallet ? Number(wallet.balance) : null;
+  // Empty = null = bring nothing in (play with what is already in the game).
+  const valid = amount === "" || (AMOUNT.test(amount) && (balance === null || Number(amount) <= balance));
+
+  async function play(event: FormEvent) {
+    event.preventDefault();
+    if (!valid || busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const response = await fetch("/api/lobby/launch", {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ publicCode: game.publicCode, gameCode: game.gameCode, lang, amount: amount === "" ? null : amount }),
+      });
+      const payload = (await response.json().catch(() => ({ error: "failed" }))) as { url?: string; error?: string; message?: string };
+      if (payload.error === "signin") {
+        onSignIn();
+      } else if (!payload.error && payload.url) {
+        onLaunch(payload.url);
+        return;
+      } else {
+        setError(payload.message || copy.loadError);
+      }
+    } catch {
+      setError(copy.loadError);
+    }
+    setBusy(false);
+  }
+
+  return (
+    <form className="gp-amount" onSubmit={(event) => void play(event)}>
+      <label htmlFor="gp-amount-input" className="gp-amount-label">
+        {copy.amountLabel}
+      </label>
+      <div className="gp-amount-field">
+        {wallet?.currency ? <span className="gp-amount-currency">{wallet.currency}</span> : null}
+        <input
+          id="gp-amount-input"
+          inputMode="decimal"
+          autoComplete="off"
+          value={amount}
+          onChange={(event) => setAmount(event.target.value.replace(/[^\d.]/g, ""))}
+          placeholder="0.00"
+          aria-invalid={!valid || undefined}
+          aria-describedby="gp-amount-hint"
+          disabled={busy}
+        />
+        <button type="button" className="gp-amount-max" disabled={busy || !balance} onClick={() => setAmount(wallet?.balance ?? "")}>
+          {copy.amountMax}
+        </button>
+      </div>
+      <p id="gp-amount-hint" className="gp-amount-hint">
+        {wallet ? fill(copy.amountBalance, { amount: `${wallet.currency} ${wallet.balance}`.trim() }) : copy.amountHint}
+      </p>
+      {error ? (
+        <p role="alert" className="gp-amount-error">
+          {error}
+        </p>
+      ) : null}
+      <button type="submit" className="gp-cta gp-amount-play" disabled={!valid || busy}>
+        {busy ? copy.loading : copy.play}
+      </button>
+    </form>
   );
 }
 

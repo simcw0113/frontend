@@ -47,6 +47,7 @@ import { animate, reduceMotion } from "@/lib/motion";
 import { FavouritesProvider } from "@/lib/useFavourites";
 import { useSession } from "@/lib/useSession";
 import { setDrawerOpen, setSidebarOpen, useDrawerOpen, useSidebarOpen, useSidebarRail } from "@/lib/sidebarState";
+import { loadBalance, type WalletBalance } from "@/lib/walletBalance";
 
 // px-[14px] keeps the 20px icon centred in the 72px rail (12px aside padding + 14px), so the
 // icons do not move while the sidebar collapses or expands.
@@ -106,16 +107,13 @@ export function LobbyScreen({
   const { user, ready, signOut } = useSession();
   // Header wallet pill ("MYR 0.00", like KickWin). Refetched on each view change so it
   // catches up after a deposit, withdrawal or game; stays hidden until the first answer.
-  const [wallet, setWallet] = useState<{ balance: string; currency: string } | null>(null);
+  const [wallet, setWallet] = useState<WalletBalance | null>(null);
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
-    fetch("/api/wallet/balance", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((next) => {
-        if (!cancelled && next?.balance != null) setWallet(next);
-      })
-      .catch(() => {});
+    void loadBalance().then((next) => {
+      if (!cancelled && next) setWallet(next);
+    });
     return () => {
       cancelled = true;
     };
@@ -506,6 +504,15 @@ export function LobbyScreen({
         </h1>
         <TopNav route={navRoute} />
         <div className="ml-auto flex h-16 shrink-0 items-center gap-2">
+          {/* PC only; phones search from the bottom tab bar (MobileTabBar). */}
+          <button
+            type="button"
+            aria-label={t.search.open}
+            onClick={() => setSearchOpen(true)}
+            className="max-md:hidden grid size-10 place-items-center rounded-lg bg-white/5 text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [&_svg]:size-5"
+          >
+            <SearchIcon />
+          </button>
           {user?.username ? (
             <>
             {/* Wallet / deposit (KickWin's green wallet button, in our cyan). Goes to

@@ -328,9 +328,16 @@
     "loadError": "Permainan ini tidak dapat dimuatkan. Sila cuba lagi kemudian.",
     "signIn": "Log masuk untuk bermain permainan ini.",
     "loading": "Memuatkan permainan…",
+    "amountLabel": "Jumlah untuk bermain",
+    "amountMax": "Maks",
+    "amountBalance": "Baki: {amount}",
+    "amountHint": "Pilih jumlah untuk dibawa ke dalam permainan.",
+    "play": "Main",
     "addFavourite": "Tambah ke kegemaran",
     "removeFavourite": "Buang daripada kegemaran",
-    "favouriteError": "Tidak dapat mengemas kini kegemaran. Sila cuba lagi."
+    "favouriteError": "Tidak dapat mengemas kini kegemaran. Sila cuba lagi.",
+    "favouriteAdded": "Ditambah ke kegemaran",
+    "favouriteRemoved": "Dibuang daripada kegemaran"
   },
   "sportsPage": {
     "meta": "Pertaruhan sukan secara langsung.",

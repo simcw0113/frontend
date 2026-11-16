@@ -61,11 +61,10 @@ export default function ProviderGamePage({ params }: Props) {
     const details = await lobbyDetails(category, provider, gameCode, lang);
     if (!details) return null;
     const token = await getAuthTokenFromCookie();
-    const launch = await getGameLaunch({
+    const launch = getGameLaunch({
       provider,
       game: gameCode,
       name: details.game.title,
-      lang,
       token,
     });
     return { ...details, launch };

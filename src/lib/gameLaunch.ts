@@ -3,23 +3,19 @@ import { apiJson, isApiStatusFailure } from "@/lib/api";
 import { useStaticData as isStaticData } from "@/lib/apiMode";
 import { lobbyLocale } from "@/lib/lobbyApi";
 
-// The game page's iframe URL. Same static/API switch as the other lobby data
+// The game page's launch state. Same static/API switch as the other lobby data
 // (apiConfig.useStaticGameLaunch): static = TEST_GAME_URL (config/site.ts) for every game,
 // used as it is (only the local demo public/demo-game.html gets ?name=). Server only.
-//
-// Per player and per session, so NOT cached (no "use cache", fetch with cache: "no-store").
-// The token is an HttpOnly; Secure; SameSite=Lax cookie (set by /api/auth/login).
-// The page reads it with getAuthTokenFromCookie() and sends `Authorization: Bearer <token>`.
-// This lobby does not send `session_token`. Without a token the API is not called and
-// the page asks the guest to sign in (Register).
+// With the API the game is not opened here: POST /opengame moves wallet money into the game,
+// so the page first asks how much ({ ask: true }, GameView's AmountPanel) and then opens it
+// through /api/lobby/launch (getProviderLaunch with `amount`). Guests are asked to sign in.
 
-export type GameLaunch = { url: string } | { error: "signin" | "failed" };
+export type GameLaunch = { url: string } | { ask: true } | { error: "signin" | "failed" };
 
 export type GameLaunchOptions = {
   provider?: string; // product public_code
   game?: string; // inner game code (game_list game_code)
   name: string; // shown by the local demo
-  lang: string; // URL language slug: en | cn | de | es
   token?: string | null;
 };
 
@@ -50,36 +46,11 @@ function readLaunchUrl(payload: unknown): string {
   return text(asRecord(launcher)?.url);
 }
 
-// Never throws.
-export async function getGameLaunch(opts: GameLaunchOptions): Promise<GameLaunch> {
+export function getGameLaunch(opts: GameLaunchOptions): GameLaunch {
   const config: Partial<typeof apiConfig> = apiConfig;
   if (isStaticData(config.useStaticGameLaunch)) return { url: testGameUrl(opts.name) };
   if (!opts.token) return { error: "signin" };
-  const provider = opts.provider?.trim() ?? "";
-  const game = opts.game?.trim() ?? "";
-  if (!provider || !game) return { error: "failed" };
-  try {
-    const path = config.gameLaunchPath || DEFAULT_LAUNCH_PATH;
-    // POST /opengame { provider: public_code, game: game_code }.
-    const payload = await apiJson(`${path}?${new URLSearchParams({ lang: opts.lang, locale: lobbyLocale(opts.lang) })}`, {
-      method: "POST",
-      auth: false, // the token is passed in explicitly (the browser token helper is client-only)
-      headers: {
-        Authorization: `Bearer ${opts.token}`,
-        "Content-Type": "application/json",
-        "country-id": config.lobbyCountryId || "1",
-        locale: lobbyLocale(opts.lang),
-      },
-      body: JSON.stringify({ provider, game }),
-      cache: "no-store",
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-    if (isApiStatusFailure(payload)) return { error: "failed" };
-    const url = readLaunchUrl(payload);
-    return url ? { url } : { error: "failed" };
-  } catch {
-    return { error: "failed" };
-  }
+  return opts.provider?.trim() && opts.game?.trim() ? { ask: true } : { error: "failed" };
 }
 
 // Web (type 1), App (type 2) and Deep Link (type 4) products. POST /opengame
@@ -108,6 +79,7 @@ function readMessage(payload: unknown): string | undefined {
 export async function getProviderLaunch(opts: {
   provider: string;
   game?: string;
+  amount?: string | null; // wallet money to move into the game; null = none, omitted = all of it
   lang: string;
   token?: string | null;
 }): Promise<ProviderLaunch> {
@@ -127,7 +99,7 @@ export async function getProviderLaunch(opts: {
         "country-id": config.lobbyCountryId || "1",
         locale: lobbyLocale(opts.lang),
       },
-      body: JSON.stringify(game ? { provider, game } : { provider }),
+      body: JSON.stringify({ provider, ...(game ? { game } : {}), ...(opts.amount !== undefined ? { amount: opts.amount } : {}) }),
       cache: "no-store",
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });

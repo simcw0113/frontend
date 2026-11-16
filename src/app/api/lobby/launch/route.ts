@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { getAuthTokenFromCookie } from "@/lib/authCookie";
 import { getProviderLaunch } from "@/lib/gameLaunch";
 
-// POST { publicCode, gameCode?, lang } -> the opengame result for Web / App / Deep Link
+// POST { publicCode, gameCode?, amount?, lang } -> the opengame result for Web / App / Deep Link
 // products. The token stays in the HttpOnly cookie; the browser never sees it.
 export async function POST(request: Request) {
-  let body: { publicCode?: unknown; gameCode?: unknown; lang?: unknown };
+  let body: { publicCode?: unknown; gameCode?: unknown; amount?: unknown; lang?: unknown };
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -13,10 +13,14 @@ export async function POST(request: Request) {
   }
   const publicCode = typeof body.publicCode === "string" ? body.publicCode.trim() : "";
   if (!publicCode) return NextResponse.json({ error: "failed" }, { status: 400 });
+  // Wallet money to move into the game: omitted = all of it, null or "" = none.
+  const amount = body.amount === null ? "" : typeof body.amount === "string" ? body.amount.trim() : undefined;
+  if (amount && !/^\d+(\.\d{1,2})?$/.test(amount)) return NextResponse.json({ error: "failed" }, { status: 400 });
 
   const result = await getProviderLaunch({
     provider: publicCode,
     game: typeof body.gameCode === "string" ? body.gameCode : undefined,
+    amount: amount === "" ? null : amount,
     lang: typeof body.lang === "string" ? body.lang : "en",
     token: await getAuthTokenFromCookie(),
   });
