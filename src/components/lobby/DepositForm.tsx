@@ -19,11 +19,16 @@ import type {
   TopupCheckResult,
   TopupGroupId,
   TopupMethod,
+  TopupPayResult,
+  TopupPayTarget,
+  TopupSubmitResult,
 } from "@/lib/topup";
 
 // Shared deposit form (tabs, bank tiles, amount, bonus, receipt, pending). Used by the
 // wallet sheet (DepositSheet) and the /[lang]/deposit page. Data: the BFF routes
-// /api/topup/{banklist,check,submit,cancel} (lib/topup.ts). Styles: .dep-* in globals.css.
+// /api/topup/{banklist,check,submit,cancel,pay} (lib/topup.ts). Styles: .dep-* in globals.css.
+// Bank transfer uploads a receipt and waits for approval; gateway / e-wallet deposits are sent on
+// to the payment gateway (goToGateway), which used to be the backend payments.redirect page.
 
 type View = "loading" | "error" | "form" | "pending";
 type FieldErrors = { bank?: string; amount?: string; receipt?: string };
@@ -122,6 +127,28 @@ function DepositHead({ titleId, onClose }: { titleId: string; onClose?: () => vo
       ) : null}
     </div>
   );
+}
+
+// Same-tab navigation to the gateway: a plain GET, or an auto-submitted form for POST / params.
+function goToGateway(target: TopupPayTarget) {
+  const entries = Object.entries(target.params);
+  if (target.method === "GET" && entries.length === 0) {
+    window.location.assign(target.url);
+    return;
+  }
+  const form = document.createElement("form");
+  form.method = target.method;
+  form.action = target.url;
+  form.style.display = "none";
+  for (const [name, value] of entries) {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
+  }
+  document.body.appendChild(form);
+  form.submit();
 }
 
 function initials(method: TopupMethod) {
@@ -244,6 +271,8 @@ function DepositBody({ onClose, onSignIn, wide = false }: { onClose?: () => void
 
   const group = data?.groups.find((item) => item.id === groupId) ?? data?.groups[0];
   const method = group?.methods.find((item) => item.id === bankId) ?? null;
+  // Only bank transfer needs a receipt (the backend's isRequiredAttachment: online transfer).
+  const needsReceipt = group?.id === "bank_transfer";
 
   function pickGroup(next: TopupGroupId) {
     const target = data?.groups.find((item) => item.id === next);
@@ -263,7 +292,7 @@ function DepositBody({ onClose, onSignIn, wide = false }: { onClose?: () => void
         next.amount = fill(t.deposit.errAmount, { min: format(min ?? 0), max: format(max ?? value) });
       }
     }
-    if (!file) next.receipt = t.deposit.errReceipt;
+    if (needsReceipt && !file) next.receipt = t.deposit.errReceipt;
     return next;
   }
 
@@ -276,17 +305,32 @@ function DepositBody({ onClose, onSignIn, wide = false }: { onClose?: () => void
     setErrors(next);
     if (next.bank) return banksRef.current?.querySelector<HTMLElement>("button")?.focus();
     if (next.amount) return amountRef.current?.focus();
-    if (next.receipt || !method || !file) return fileRef.current?.focus();
+    if (next.receipt || !method || (needsReceipt && !file)) return fileRef.current?.focus();
     const form = new FormData();
     form.set("amount", amount);
     form.set("payment_id", String(method.id));
     if (bonusId) form.set("bonus_id", bonusId);
-    form.set("attachment", file, file.name);
+    if (needsReceipt && file) form.set("attachment", file, file.name);
     setSubmitting(true);
+    let leaving = false;
     try {
-      const result = await post<TopupActionResult>("submit", form);
+      const result = await post<TopupSubmitResult>("submit", form);
       if (!alive.current) return;
-      if (result.ok || result.error === "pending") {
+      if (result.ok && !needsReceipt && result.uniqueId) {
+        const body = new FormData();
+        body.set("unique_id", result.uniqueId);
+        const pay = await post<TopupPayResult>("pay", body);
+        if (!alive.current) return;
+        if (pay.ok) {
+          leaving = true; // keep the button busy while the browser leaves for the gateway
+          goToGateway(pay.data);
+          return;
+        }
+        if (pay.error === "signin") return onSignIn();
+        // The deposit exists but the gateway did not start: show it as pending (it can be cancelled).
+        setPendingMessage(pay.message || t.deposit.failed);
+        setView("pending");
+      } else if (result.ok || result.error === "pending") {
         setPendingMessage(result.message);
         setView("pending");
       } else if (result.error === "signin") {
@@ -297,7 +341,7 @@ function DepositBody({ onClose, onSignIn, wide = false }: { onClose?: () => void
     } catch {
       if (alive.current) setServerError(t.deposit.failed);
     } finally {
-      if (alive.current) setSubmitting(false);
+      if (alive.current && !leaving) setSubmitting(false);
     }
   }
 
@@ -536,6 +580,7 @@ function DepositBody({ onClose, onSignIn, wide = false }: { onClose?: () => void
         </div>
       ) : null}
 
+      {needsReceipt ? (
       <div className="dep-field">
         <span className="dep-label" id={`${id}-receipt-label`}>
           {t.deposit.receipt}
@@ -598,6 +643,7 @@ function DepositBody({ onClose, onSignIn, wide = false }: { onClose?: () => void
           </p>
         ) : null}
       </div>
+      ) : null}
 
       {data.notice ? (
         <div className="dep-notice">

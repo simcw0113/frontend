@@ -41,11 +41,21 @@ type RawProduct = {
   public_code?: unknown;
   name?: unknown;
   type?: unknown;
+  category?: unknown;
   image?: unknown;
   status?: unknown;
   sequence?: unknown;
   products?: unknown;
 };
+
+// Backend Product::CATEGORY_SPORTS. Sports products and the Sports category group are
+// left out of the lobby (providers, categories). The sports page still finds its product
+// through parseProductsWithStatus, which keeps them.
+const SPORTS_CATEGORY = 2;
+
+function isSports(raw: { category?: unknown }): boolean {
+  return Number(raw.category) === SPORTS_CATEGORY;
+}
 
 type RawGroup = {
   title?: unknown;
@@ -89,6 +99,7 @@ function toProvider(raw: RawProduct, group?: string): Provider | null {
   const name = text(raw.name);
   if (!id || !code || !name) return null;
   if (raw.status != null && raw.status !== 1) return null;
+  if (isSports(raw)) return null;
   const image = typeof raw.image === "string" && raw.image ? raw.image : undefined;
   const type = Number(raw.type);
   return {
@@ -280,6 +291,7 @@ export function parseProductCategories(payload: unknown): LobbyProductCategory[]
     const rec = asRecord(group) as RawGroup | null;
     const nested = Array.isArray(rec?.products) ? (rec?.products as RawProduct[]) : [];
     for (const item of nested) {
+      if (isSports(item)) continue;
       const code = text(item.code);
       const publicCode = text(item.public_code);
       if (code && publicCode) codeToPublic.set(code, publicCode);
@@ -291,7 +303,7 @@ export function parseProductCategories(payload: unknown): LobbyProductCategory[]
     const rec = asRecord(group) as RawGroup | null;
     if (!rec) continue;
     const id = Number(rec.category);
-    if (!Number.isFinite(id) || id === LOBBY_HOME_CATEGORY) continue;
+    if (!Number.isFinite(id) || id === LOBBY_HOME_CATEGORY || id === SPORTS_CATEGORY) continue;
     const title = text(rec.title);
     if (!title) continue;
 
@@ -303,6 +315,7 @@ export function parseProductCategories(payload: unknown): LobbyProductCategory[]
     const publicCodes: string[] = [];
     const nested = Array.isArray(rec.products) ? (rec.products as RawProduct[]) : [];
     for (const item of nested) {
+      if (isSports(item)) continue;
       const publicCode = text(item.public_code);
       if (publicCode && !publicCodes.includes(publicCode)) publicCodes.push(publicCode);
     }

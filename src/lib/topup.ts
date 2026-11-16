@@ -6,7 +6,10 @@ import { lobbyLocale } from "@/lib/lobbyApi";
 // the BFF routes under app/api/topup/ call these with the token from the HttpOnly cookie.
 // Backend (all POST, `Authorization: Bearer <token>` + `country-id`):
 //   /topup_banklist  -> payment methods per group + optional deposit promotions + notice
-//   /topup           -> multipart: amount, payment_id, attachment (receipt image), bonus_id?
+//   /topup           -> multipart: amount, payment_id, attachment? (receipt image, bank transfer
+//                       only), bonus_id?; answers unique_id for gateway / e-wallet deposits
+//   /topup_pay       -> unique_id: starts the payment gateway and answers where to send the
+//                       member ({ method, url, params }); the browser does the redirect
 //   /topup_check     -> status true = a deposit is still pending
 //   /topup_cancel    -> cancels the member's pending deposits
 // Every function returns a small normalized shape and never throws.
@@ -35,6 +38,11 @@ export type TopupError = { ok: false; error: "signin" | "pending" | "failed"; me
 export type TopupBanklistResult = { ok: true; data: TopupBanklist } | TopupError;
 export type TopupCheckResult = { ok: true; pending: boolean; message?: string } | TopupError;
 export type TopupActionResult = { ok: true; message?: string } | TopupError;
+// uniqueId: set when the deposit still has to be paid at a payment gateway (/topup_pay).
+export type TopupSubmitResult = { ok: true; message?: string; uniqueId: string | null } | TopupError;
+// Where to send the browser: GET without params = plain navigation, otherwise an auto-submitted form.
+export type TopupPayTarget = { method: "GET" | "POST"; url: string; params: Record<string, string> };
+export type TopupPayResult = { ok: true; data: TopupPayTarget } | TopupError;
 
 const TIMEOUT_MS = 10000;
 const SUBMIT_TIMEOUT_MS = 30000;
@@ -175,19 +183,57 @@ export async function checkTopup({ token, lang }: Auth): Promise<TopupCheckResul
 
 export async function submitTopup(
   { token, lang }: Auth,
-  fields: { amount: string; paymentId: string; bonusId?: string; attachment: File },
-): Promise<TopupActionResult> {
+  fields: { amount: string; paymentId: string; bonusId?: string; attachment?: File },
+): Promise<TopupSubmitResult> {
   if (!token) return { ok: false, error: "signin" };
   const body = new FormData();
   body.set("amount", fields.amount);
   body.set("payment_id", fields.paymentId);
   if (fields.bonusId) body.set("bonus_id", fields.bonusId);
-  body.set("attachment", fields.attachment, fields.attachment.name || "receipt.png");
+  if (fields.attachment) body.set("attachment", fields.attachment, fields.attachment.name || "receipt.png");
   try {
     const payload = await call("/topup", { token, lang, body, timeout: SUBMIT_TIMEOUT_MS });
+    const root = asRecord(payload);
+    if (root?.status !== true) return failure(payload);
+    // `data` is the legacy backend pay page URL: not used, /topup_pay replaces it.
+    return { ok: true, message: text(root.message) || undefined, uniqueId: text(root.unique_id) || null };
+  } catch {
+    return { ok: false, error: "failed" };
+  }
+}
+
+// Only http(s) targets: the URL ends up in location.href or a form action.
+function payUrl(value: unknown): string | null {
+  const raw = text(value);
+  try {
+    const url = new URL(raw);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+export function parsePayTarget(payload: unknown): TopupPayTarget | null {
+  const data = asRecord(asRecord(payload)?.data);
+  const url = payUrl(data?.url);
+  if (!data || !url) return null;
+  const params: Record<string, string> = {};
+  for (const [key, value] of Object.entries(asRecord(data.params) ?? {})) {
+    if (value === null || value === undefined) continue;
+    params[key] = typeof value === "object" ? JSON.stringify(value) : String(value);
+  }
+  return { method: text(data.method).toUpperCase() === "POST" ? "POST" : "GET", url, params };
+}
+
+export async function payTopup({ token, lang }: Auth, uniqueId: string): Promise<TopupPayResult> {
+  if (!token) return { ok: false, error: "signin" };
+  const body = new FormData();
+  body.set("unique_id", uniqueId);
+  try {
+    const payload = await call("/topup_pay", { token, lang, body, timeout: SUBMIT_TIMEOUT_MS });
     if (asRecord(payload)?.status !== true) return failure(payload);
-    // `data` is a legacy redirect URL: not used.
-    return { ok: true, message: text(asRecord(payload)?.message) || undefined };
+    const data = parsePayTarget(payload);
+    return data ? { ok: true, data } : { ok: false, error: "failed" };
   } catch {
     return { ok: false, error: "failed" };
   }
