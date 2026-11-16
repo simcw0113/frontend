@@ -124,8 +124,14 @@ export function WithdrawForm({ onSignIn }: { onSignIn: () => void }) {
     if (next.force_withdraw_all) setAmount(next.amount);
   }
 
-  async function loadBanks() {
+  // Retry button: clear the error, then fetch again.
+  function loadBanks() {
     setBanksError(undefined);
+    void fetchBanks();
+  }
+
+  // No state update before the first await (also runs from the mount effect).
+  async function fetchBanks() {
     try {
       const list = await post<WithdrawBanklistResult>("banklist");
       if (!alive.current) return;
@@ -151,9 +157,14 @@ export function WithdrawForm({ onSignIn }: { onSignIn: () => void }) {
     }
   }
 
-  async function loadLimit() {
+  function loadLimit() {
     setLimitLoading(true);
     setLimitError(undefined);
+    void fetchLimit();
+  }
+
+  // No state update before the first await (limitLoading starts true for the mount effect).
+  async function fetchLimit() {
     try {
       const result = await post<WithdrawLimitResult>("limit");
       if (!alive.current) return;
@@ -176,8 +187,8 @@ export function WithdrawForm({ onSignIn }: { onSignIn: () => void }) {
 
   useEffect(() => {
     alive.current = true;
-    void loadBanks();
-    void loadLimit();
+    void fetchBanks();
+    void fetchLimit();
     return () => {
       alive.current = false;
     };
@@ -188,30 +199,39 @@ export function WithdrawForm({ onSignIn }: { onSignIn: () => void }) {
     return `${bank.bank}|${bank.account}|${index}`;
   }
 
+  // A saved account only stores the bank name: match it to the bank list (id, logo).
+  function bankOf(bank: MemberBank, list: WithdrawBank[]) {
+    return list.find((item) => item.name.toLowerCase() === bank.bank.toLowerCase()) ?? null;
+  }
+
   function pickSaved(bank: MemberBank, list: WithdrawBank[], index: number) {
     setSavedKey(memberKey(bank, index));
-    const match = list.find((item) => item.name.toLowerCase() === bank.bank.toLowerCase());
-    setBankId(match?.id ?? null);
+    setBankId(bankOf(bank, list)?.id ?? null);
     setAccountName(bank.name);
     setAccountNumber(bank.account);
     setErrors({});
   }
 
-  function pickNew() {
-    setSavedKey("new");
-    setBankId(banks?.withdraw_bank.length === 1 ? banks.withdraw_bank[0].id : null);
-    setAccountName("");
-    setAccountNumber("");
-    setErrors({});
-  }
-
+  // Picking a bank below starts a new account: leaving a saved one clears its details.
   function pickBank(id: number) {
     setBankId(id);
-    if (savedKey !== "new") setSavedKey("new");
+    if (savedKey !== "new") {
+      setSavedKey("new");
+      setAccountName("");
+      setAccountNumber("");
+      setErrors({});
+      return;
+    }
     setErrors((prev) => ({ ...prev, bank: undefined }));
   }
 
   const selectedBank: WithdrawBank | null = banks?.withdraw_bank.find((item) => item.id === bankId) ?? null;
+  // "Choose a bank" leaves out the banks the member already has a saved account with.
+  const otherBanks = useMemo(() => {
+    if (!banks) return [];
+    const saved = new Set(banks.member_bank.map((item) => item.bank.toLowerCase()));
+    return banks.withdraw_bank.filter((item) => !saved.has(item.name.toLowerCase()));
+  }, [banks]);
 
   const blockReason = useMemo(() => {
     if (!limit) return null;
@@ -301,7 +321,7 @@ export function WithdrawForm({ onSignIn }: { onSignIn: () => void }) {
         <WithdrawHead titleId={titleId} />
         <div className="dep-body dep-state">
           <p>{banksError}</p>
-          <button type="button" onClick={() => void loadBanks()} className="dep-secondary">
+          <button type="button" onClick={loadBanks} className="dep-secondary">
             {t.withdraw.retry}
           </button>
         </div>
@@ -391,7 +411,7 @@ export function WithdrawForm({ onSignIn }: { onSignIn: () => void }) {
           {limitError ? (
             <div>
               <p className="dep-error">{limitError}</p>
-              <button type="button" onClick={() => void loadLimit()} className="dep-secondary mt-2">
+              <button type="button" onClick={loadLimit} className="dep-secondary mt-2">
                 {t.withdraw.retry}
               </button>
             </div>
@@ -406,6 +426,7 @@ export function WithdrawForm({ onSignIn }: { onSignIn: () => void }) {
             <div className="dep-banks">
               {banks.member_bank.map((item, index) => {
                 const key = memberKey(item, index);
+                const logo = bankOf(item, banks.withdraw_bank)?.image;
                 return (
                   <button
                     key={key}
@@ -414,27 +435,29 @@ export function WithdrawForm({ onSignIn }: { onSignIn: () => void }) {
                     aria-pressed={savedKey === key}
                     onClick={() => pickSaved(item, banks.withdraw_bank, index)}
                   >
-                    <span className="dep-bank-initials dep-bank-logo">{initials(item.bank || item.name)}</span>
+                    {logo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={logo} alt="" className="dep-bank-logo" />
+                    ) : (
+                      <span className="dep-bank-initials dep-bank-logo">{initials(item.bank || item.name)}</span>
+                    )}
                     <span className="dep-bank-name">{item.bank || t.withdraw.bank}</span>
                     <span className="dep-hint break-all">{item.account}</span>
                   </button>
                 );
               })}
-              <button type="button" className="dep-bank" aria-pressed={savedKey === "new"} onClick={pickNew}>
-                <span className="dep-bank-initials dep-bank-logo">+</span>
-                <span className="dep-bank-name">{t.withdraw.newAccount}</span>
-              </button>
             </div>
           </fieldset>
         ) : null}
 
+        {banks && banks.member_bank.length > 0 && otherBanks.length === 0 ? null : (
         <fieldset className="dep-field">
           <legend className="dep-label">{t.withdraw.chooseBank}</legend>
-          {banks && banks.withdraw_bank.length === 0 ? (
+          {banks && otherBanks.length === 0 ? (
             <p className="dep-hint">{t.withdraw.emptyBanks}</p>
           ) : (
             <div className="dep-banks">
-              {banks?.withdraw_bank.map((item) => (
+              {otherBanks.map((item) => (
                 <button
                   key={item.id}
                   type="button"
@@ -455,6 +478,7 @@ export function WithdrawForm({ onSignIn }: { onSignIn: () => void }) {
           )}
           {errors.bank ? <p className="dep-error">{errors.bank}</p> : null}
         </fieldset>
+        )}
         </div>
 
         <div className="contents md:col-start-2 md:flex md:flex-col md:gap-[1.125rem]">
