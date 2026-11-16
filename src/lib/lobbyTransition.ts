@@ -30,15 +30,16 @@ let installed = false;
 
 // The lobby ("/"), the casino category pages, the promotions, sports, VIP, Z-AI, deposit, withdraw
 // pages and the player's Recent games and Favourites, and Missions.
-const LOBBY_PAGES = new Set(["/", "/promotions", "/sports", "/vip", "/z-ai", "/recent", "/favourites", "/missions", "/affiliate", "/deposit", "/withdraw"]);
+const LOBBY_PAGES = new Set(["/", "/promotions", "/sports", "/vip", "/z-ai", "/recent", "/favourites", "/missions", "/affiliate", "/deposit", "/withdraw", "/profile"]);
 
 export function isLobbyRoute(path: string): path is LobbyRoute {
-  if (LOBBY_PAGES.has(path)) return true;
-  if (!path.startsWith("/casino/")) return false;
+  const clean = path.split("#")[0].split("?")[0];
+  if (LOBBY_PAGES.has(clean)) return true;
+  if (!clean.startsWith("/casino/")) return false;
   // /casino/{category}
   // /casino/{category}/game/{id}
   // /casino/{category}/provider/{public_code}/game/{game_code}
-  const [category, ...rest] = path.split("?")[0].slice("/casino/".length).split("/");
+  const [category, ...rest] = clean.slice("/casino/".length).split("/");
   if (findCasinoCategory(category) === undefined) return false;
   const staticGame = rest.length === 2 && rest[0] === "game" && rest[1].length > 0;
   const lobbyGame =

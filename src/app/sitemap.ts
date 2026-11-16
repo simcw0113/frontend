@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { casinoCategories } from "@/config/categories";
 import { siteConfig } from "@/config/site";
+import { VIP_ENABLED } from "@/config/vip";
 import { languageAlternates, localizedPath } from "@/i18n/routing";
 import { getSiteLanguages } from "@/lib/siteLanguages";
 
@@ -9,7 +10,7 @@ const pages = [
   ...casinoCategories.map(({ slug }) => ({ path: `/casino/${slug}`, priority: 0.8 })),
   { path: "/promotions", priority: 0.7 },
   { path: "/sports", priority: 0.5 },
-  { path: "/vip", priority: 0.5 },
+  ...(VIP_ENABLED ? [{ path: "/vip", priority: 0.5 }] : []),
   { path: "/z-ai", priority: 0.5 },
   { path: "/missions", priority: 0.5 },
   { path: "/affiliate", priority: 0.5 },

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { GameView, GameViewSkeleton } from "@/components/lobby/GameView";
 import { LobbyScreen } from "@/components/lobby/LobbyScreen";
 import { findCasinoCategory, tagLabelFor } from "@/config/categories";
 import { getAuthTokenFromCookie } from "@/lib/authCookie";
@@ -51,37 +52,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Provider public_code, then the inner game code. The shell renders at once; the
-// game and its launch URL stream behind Suspense.
+// Provider public_code, then the inner game code. The lobby shell renders at once; `params`
+// (URL data) is read only inside <Suspense> (ProviderGame), so it stays out of the App Shell.
 export default function ProviderGamePage({ params }: Props) {
-  const game = params.then(async ({ lang, category, provider, game: gameCode }) => {
-    // fetch and AbortSignal.timeout call Date.now(). With cacheComponents that
-    // clock is only allowed after the render reaches the dynamic stage.
-    await connection();
-    const details = await lobbyDetails(category, provider, gameCode, lang);
-    if (!details) return null;
-    const token = await getAuthTokenFromCookie();
-    const launch = getGameLaunch({
-      provider,
-      game: gameCode,
-      name: details.game.title,
-      token,
-    });
-    return { ...details, launch };
-  });
   return (
-    <>
-      <LobbyScreen focus="game" games={{}} gamePage={game} />
-      <Suspense fallback={null}>
-        <GameGuard params={params} />
-      </Suspense>
-    </>
+    <LobbyScreen
+      focus="game"
+      games={{}}
+      gamePage={
+        <Suspense fallback={<GameViewSkeleton />}>
+          <ProviderGame params={params} />
+        </Suspense>
+      }
+    />
   );
 }
 
-async function GameGuard({ params }: Pick<Props, "params">) {
+async function ProviderGame({ params }: Pick<Props, "params">) {
+  // fetch and AbortSignal.timeout call Date.now(). With cacheComponents that
+  // clock is only allowed after the render reaches the dynamic stage.
   await connection();
-  const { lang, category, provider, game } = await params;
-  if (!(await lobbyDetails(category, provider, game, lang))) notFound();
-  return null;
+  const { lang, category, provider, game: gameCode } = await params;
+  const details = await lobbyDetails(category, provider, gameCode, lang);
+  if (!details) notFound();
+  const token = await getAuthTokenFromCookie();
+  const launch = getGameLaunch({ provider, game: gameCode, name: details.game.title, token });
+  return <GameView data={{ ...details, launch }} />;
 }

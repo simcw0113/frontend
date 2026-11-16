@@ -308,6 +308,7 @@
     "close": "Cerrar"
   },
   "gamePage": {
+    "playing": "Jugando",
     "favourite": "Favorito",
     "theatre": "Modo cine",
     "fullscreen": "Pantalla completa",
@@ -526,5 +527,42 @@
     "referralTitle": "Tu enlace de referido",
     "referralCopy": "Copiar",
     "referralCopied": "Copiado"
+  },
+
+  "profile": {
+    "meta": "El perfil de tu cuenta.",
+    "title": "Perfil",
+    "myProfile": "Mi perfil",
+    "verification": "Verificación",
+    "security": "Seguridad",
+    "banking": "Banca",
+    "swap": "Intercambio",
+    "transactions": "Transacciones",
+    "rollover": "Rollover",
+    "betHistory": "Historial de apuestas",
+    "poster": "Póster",
+    "comingSoon": "Próximamente",
+    "signIn": "Inicia sesión para ver tu perfil.",
+    "logout": "Cerrar sesión",
+    "edit": "Editar",
+    "userId": "ID de usuario: {value}",
+    "copyId": "Copiar ID de usuario",
+    "copied": "Copiado",
+    "birthday": "Fecha de nacimiento: {value}",
+    "phone": "Número de teléfono:",
+    "email": "Correo:",
+    "verified": "Verificado",
+    "verifyNow": "Verificar ahora",
+    "statistics": "Estadísticas",
+    "totalWins": "Ganancias totales",
+    "totalWagered": "Total apostado",
+    "totalBets": "Total de apuestas",
+    "vipLevel": "Nivel VIP: {tier}",
+    "nextLevel": "Siguiente nivel: {tier}",
+    "topFavourites": "Top 3 juegos favoritos",
+    "noFavourites": "¡Aún no hay juegos favoritos!",
+    "wagerContest": "Concurso de apuestas",
+    "noContest": "¡Vaya! Todavía no hay datos.",
+    "empty": "-"
   }
 }

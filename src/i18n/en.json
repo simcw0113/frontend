@@ -308,6 +308,7 @@
     "close": "Close"
   },
   "gamePage": {
+    "playing": "Playing",
     "favourite": "Favourite",
     "theatre": "Theatre mode",
     "fullscreen": "Full screen",
@@ -526,5 +527,42 @@
     "referralTitle": "Your referral link",
     "referralCopy": "Copy",
     "referralCopied": "Copied"
+  },
+
+  "profile": {
+    "meta": "Your account profile.",
+    "title": "Profile",
+    "myProfile": "My Profile",
+    "verification": "Verification",
+    "security": "Security",
+    "banking": "Banking",
+    "swap": "Swap",
+    "transactions": "Transactions",
+    "rollover": "Rollover",
+    "betHistory": "Bet History",
+    "poster": "Poster",
+    "comingSoon": "Coming soon",
+    "signIn": "Sign in to view your profile.",
+    "logout": "Logout",
+    "edit": "Edit",
+    "userId": "User ID: {value}",
+    "copyId": "Copy user ID",
+    "copied": "Copied",
+    "birthday": "Birthday Date: {value}",
+    "phone": "Phone Number:",
+    "email": "Email:",
+    "verified": "Verified",
+    "verifyNow": "Verify Now",
+    "statistics": "Statistics",
+    "totalWins": "Total Wins",
+    "totalWagered": "Total Wagered",
+    "totalBets": "Total Bets",
+    "vipLevel": "VIP Level: {tier}",
+    "nextLevel": "Next Level: {tier}",
+    "topFavourites": "Top 3 Favourite Games",
+    "noFavourites": "No favourite games yet!",
+    "wagerContest": "Wager Contest",
+    "noContest": "Oops! There is no data yet!",
+    "empty": "-"
   }
 }

@@ -1,6 +1,9 @@
 // Sample VIP club for /{lang}/vip. Numbers only — names and labels live in i18n.
 // Temporary until the backend has a VIP endpoint. Not the signed-in player's level.
 
+// VIP is hidden for now: no links, not in the sitemap, /vip is a 404. Flip to true to bring it back.
+export const VIP_ENABLED = false;
+
 export const VIP_TIERS_IN_GROUP = 5;
 
 export const vipGroups = [

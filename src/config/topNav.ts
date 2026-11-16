@@ -1,5 +1,6 @@
 import type { Dictionary } from "@/i18n";
 import { casinoCategories, findCasinoCategory, pinLastItems } from "@/config/categories";
+import { VIP_ENABLED } from "@/config/vip";
 
 // Links of the top bar (after the logo), in this order. `path` is the app path without the
 // language prefix: LobbyLink adds /{lang} (so /casino/slots becomes /en/casino/slots).
@@ -34,12 +35,16 @@ const gameNavItems: TopNavItem[] = [
 
 const afterGamesNavItems: TopNavItem[] = [
   { id: "promotions", labelKey: "promotions", path: "/promotions" },
-  { id: "vip", labelKey: "vip", path: "/vip" },
+  ...(VIP_ENABLED ? [{ id: "vip", labelKey: "vip", path: "/vip" } as const] : []),
   // Brand name, the same in every language.
   { id: "z-ai", labelKey: "zAi", path: "/z-ai", featured: true },
 ];
 
 export const topNavItems: TopNavItem[] = [...gameNavItems, ...afterGamesNavItems];
+
+// PC top bar: false hides Hot Games … Promotions/VIP, leaving only the featured link (Z-AI).
+// The sidebar and footer still list them. Set true to show them again.
+export const TOP_NAV_LINKS_SHOWN = false;
 
 // Sidebar-only page of the promotions group, right below Promotions (label under `menu`).
 export const sidebarMissionsItem = { id: "missions", labelKey: "missions", path: "/missions" } as const;
@@ -54,7 +59,7 @@ export const sidebarPlayerItems = [
 ] as const;
 
 // Top links that also appear in the sidebar with Promotions (labels under `topNav`).
-export const sidebarPromoItems = (["promotions", "vip"] as const).map((id) => {
+export const sidebarPromoItems = (["promotions", "vip"] as const).filter((id) => VIP_ENABLED || id !== "vip").map((id) => {
   const item = topNavItems.find((entry) => entry.id === id);
   if (!item) throw new Error(`topNav: missing sidebar item "${id}"`);
   return { ...item, id };

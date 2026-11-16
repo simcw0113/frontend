@@ -1,6 +1,7 @@
 "use client";
 
 import { useI18n } from "@/components/I18nProvider";
+import { Avatar } from "@/components/lobby/Avatar";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 
 // Phone-only tab bar (<768px), matching Kickwin's 60px bar + safe-area:
@@ -13,6 +14,8 @@ export function MobileTabBar({
   drawerOpen,
   searchOpen,
   profileOpen,
+  profileHref,
+  profileAvatar,
   hidden,
   onMenu,
   onSearch,
@@ -22,6 +25,8 @@ export function MobileTabBar({
   drawerOpen: boolean;
   searchOpen: boolean;
   profileOpen: boolean;
+  profileHref?: string;
+  profileAvatar?: { src: string | null; name: string; initials?: string };
   hidden: boolean;
   onMenu: () => void;
   onSearch: () => void;
@@ -87,18 +92,42 @@ export function MobileTabBar({
             </LobbyLink>
           </li>
           <li>
-            <button
-              type="button"
-              data-account-tab=""
-              aria-current={profileOpen ? "true" : undefined}
-              aria-haspopup="menu"
-              aria-expanded={profileOpen}
-              onClick={onProfile}
-              className={tabClass(profileOpen)}
-            >
-              <ProfileTabIcon />
-              {t.bottomNav.profile}
-            </button>
+            {profileHref ? (
+              <LobbyLink href={profileHref} aria-current={profileOpen ? "page" : undefined} className={tabClass(profileOpen)}>
+                {profileAvatar ? (
+                  <Avatar
+                    src={profileAvatar.src}
+                    name={profileAvatar.name}
+                    initials={profileAvatar.initials}
+                    className="size-[22px] text-[8px]"
+                  />
+                ) : (
+                  <ProfileTabIcon />
+                )}
+                {t.bottomNav.profile}
+              </LobbyLink>
+            ) : (
+              <button
+                type="button"
+                data-account-tab=""
+                aria-current={profileOpen ? "true" : undefined}
+                aria-haspopup="dialog"
+                onClick={onProfile}
+                className={tabClass(profileOpen)}
+              >
+                {profileAvatar ? (
+                  <Avatar
+                    src={profileAvatar.src}
+                    name={profileAvatar.name}
+                    initials={profileAvatar.initials}
+                    className="size-[22px] text-[8px]"
+                  />
+                ) : (
+                  <ProfileTabIcon />
+                )}
+                {t.bottomNav.profile}
+              </button>
+            )}
           </li>
         </ul>
       </nav>

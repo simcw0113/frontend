@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { flushSync } from "react-dom";
 import type { JSAnimation } from "animejs";
 import {
+  createContext,
   use,
   useEffect,
   useLayoutEffect,
@@ -19,6 +20,7 @@ import { BrandLoader } from "@/components/BrandLoader";
 import { useI18n } from "@/components/I18nProvider";
 import { gameHref, SymbolMark } from "@/components/lobby/GameCover";
 import { hasInAppHistory, LobbyLink } from "@/components/lobby/LobbyLink";
+import { WalletPill } from "@/components/lobby/WalletPill";
 import { findCasinoCategory } from "@/config/categories";
 import { siteConfig } from "@/config/site";
 import type { Game } from "@/config/lobby";
@@ -40,8 +42,10 @@ import { loadBalance, type WalletBalance } from "@/lib/walletBalance";
 //     horizontal snap carousel below 1280px).
 // Theatre mode hides the side panel and gives the stage the full width.
 // Phones (portrait < 768px wide, or landscape <= 500px tall) get the KickWin layout instead:
-// the stage covers the whole screen, the dock becomes a compact top bar, and the game fills
-// the rest. Site header, nav, footer and cookie bar stay underneath (CSS only, see .gp-* in globals.css).
+// the page covers the whole screen and scrolls on its own, the dock becomes a compact top bar,
+// the game fills the screen down to the info card (now a bar: title, chips, favourite), and
+// Recommended follows below. Site header, nav, footer and cookie bar stay underneath (CSS only,
+// see .gp-* in globals.css).
 // Stops the game. An about:blank page has a light canvas, which would flash white inside the
 // dark page, so the frame is hidden first.
 function blankFrame(frame: HTMLIFrameElement | null) {
@@ -68,10 +72,14 @@ function subscribeFullscreen(listener: () => void) {
   return () => document.removeEventListener("fullscreenchange", listener);
 }
 
-export function GameView({ promise, onSignIn }: { promise: Promise<GamePageData>; onSignIn: () => void }) {
-  const data = use(promise);
-  if (!data) return null; // the page's notFound() answers
-  return <GameBody key={data.game.id} data={data} onSignIn={onSignIn} />;
+// What the lobby hands the game page: the header wallet and its sign-in dialog. A context, not
+// props: the page renders <GameView> itself (a server slot inside <Suspense>, so `params`, URL
+// data, stays out of the App Shell) and LobbyScreen only places that slot.
+export const GameHost = createContext<{ wallet: WalletBalance | null; onSignIn: () => void }>({ wallet: null, onSignIn: () => {} });
+
+export function GameView({ data }: { data: NonNullable<GamePageData> }) {
+  const { wallet, onSignIn } = use(GameHost);
+  return <GameBody key={data.game.id} data={data} wallet={wallet} onSignIn={onSignIn} />;
 }
 
 function Cover({ game, size }: { game: Game; size: number }) {
@@ -110,7 +118,7 @@ function DockButton({
 
 const ICON = "gp-icon";
 
-function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignIn: () => void }) {
+function GameBody({ data, wallet, onSignIn }: { data: NonNullable<GamePageData>; wallet: WalletBalance | null; onSignIn: () => void }) {
   const { t, locale, href: localized } = useI18n();
   const router = useRouter();
   const { game, recommended } = data;
@@ -224,9 +232,30 @@ function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignI
       : null,
   ].filter((stat): stat is { label: string; value: string; href?: string } => stat !== null);
 
+  // In the dock (tablet/desktop) and in the info bar under the game (phones, KickWin style).
+  const favouriteButton = (className: string) => (
+    <DockButton
+      label={favourite ? t.gamePage.removeFavourite : t.gamePage.addFavourite}
+      pressed={favourite}
+      onClick={() => {
+        if (!signedIn) {
+          onSignIn();
+          return;
+        }
+        if (game.publicCode && game.gameCode) void toggle(game.publicCode, game.gameCode);
+      }}
+      className={className}
+    >
+      {/* same heart as the game tiles (GameCover FavouriteToggle) */}
+      <svg viewBox="0 0 24 24" className={`${ICON}${favourite ? " text-rose-400" : ""}`} fill={favourite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 21s-6.5-4.2-9.3-8.1C.5 10.3.8 6.8 3.4 5.1 5.4 3.8 8 4.3 12 8c4-3.7 6.6-4.2 8.6-2.9 2.6 1.7 2.9 5.2.7 7.8C18.5 16.8 12 21 12 21z" />
+      </svg>
+    </DockButton>
+  );
+
   return (
     <div className={`gp${theatre ? " is-theatre" : ""}`}>
-      <section aria-label={game.title} className="gp-stage">
+      <section aria-label={game.title} className="gp-stage" data-playing={"url" in launch && phase !== "failed" ? "" : undefined}>
         <div className="gp-ambient" aria-hidden="true" />
         <div className="gp-shell">
           <div ref={frameRef} className="gp-frame">
@@ -279,29 +308,9 @@ function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignI
             </span>
           </div>
           <div className="gp-dock-buttons">
-            {/* Phones only: goes to /{lang}/deposit and leaves the game. To open the popup
-                over the game again, swap this LobbyLink for:
-                <button type="button" onClick={openDeposit} className="gp-deposit">
-                with `const openDeposit = useOpenDeposit();` (DepositContext). */}
-            <LobbyLink href="/deposit" className="gp-deposit no-underline">
-              {t.gamePage.deposit}
-            </LobbyLink>
-            <DockButton
-              label={favourite ? t.gamePage.removeFavourite : t.gamePage.addFavourite}
-              pressed={favourite}
-              onClick={() => {
-                if (!signedIn) {
-                  onSignIn();
-                  return;
-                }
-                if (game.publicCode && game.gameCode) void toggle(game.publicCode, game.gameCode);
-              }}
-              className="gp-btn-fav"
-            >
-              <svg viewBox="0 0 24 24" className={ICON} fill={favourite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
-                <path d="M12 3.5 14.6 9 20.5 9.6 16 13.6 17.3 19.5 12 16.5 6.7 19.5 8 13.6 3.5 9.6 9.4 9Z" />
-              </svg>
-            </DockButton>
+            {/* Phones only (the lobby header is hidden while a game fills the screen). */}
+            <WalletPill wallet={wallet} className="gp-deposit" />
+            {favouriteButton("gp-btn-fav")}
             <DockButton label={t.gamePage.theatre} pressed={theatre} onClick={() => setTheatre((on) => !on)} className="gp-btn-theatre">
               <svg viewBox="0 0 24 24" className={ICON} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="3" y="6" width="18" height="12" rx="2.5" />
@@ -339,9 +348,10 @@ function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignI
               <h2 id="gp-title" className="mt-1 text-xl leading-tight font-bold text-white">
                 {game.title}
               </h2>
-              <p className="mt-0.5 truncate text-sm text-white/60">{game.provider}</p>
+              <p className="gp-info-provider mt-0.5 truncate text-sm text-white/60">{game.provider}</p>
             </div>
           </div>
+          {favouriteButton("gp-info-fav")}
           {stats.length > 0 ? (
             <dl className="gp-stats">
               {stats.map((stat) => (

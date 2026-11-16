@@ -308,6 +308,7 @@
     "close": "关闭"
   },
   "gamePage": {
+    "playing": "游戏中",
     "favourite": "收藏",
     "theatre": "影院模式",
     "fullscreen": "全屏",
@@ -526,5 +527,42 @@
     "referralTitle": "你的推荐链接",
     "referralCopy": "复制",
     "referralCopied": "已复制"
+  },
+
+  "profile": {
+    "meta": "你的账户资料。",
+    "title": "个人资料",
+    "myProfile": "我的资料",
+    "verification": "认证",
+    "security": "安全",
+    "banking": "银行",
+    "swap": "兑换",
+    "transactions": "交易记录",
+    "rollover": "流水",
+    "betHistory": "投注记录",
+    "poster": "海报",
+    "comingSoon": "即将推出",
+    "signIn": "登录后即可查看个人资料。",
+    "logout": "退出登录",
+    "edit": "编辑",
+    "userId": "用户 ID：{value}",
+    "copyId": "复制用户 ID",
+    "copied": "已复制",
+    "birthday": "出生日期：{value}",
+    "phone": "手机号码：",
+    "email": "邮箱：",
+    "verified": "已验证",
+    "verifyNow": "立即验证",
+    "statistics": "统计",
+    "totalWins": "总赢额",
+    "totalWagered": "总投注额",
+    "totalBets": "总注单",
+    "vipLevel": "VIP 等级：{tier}",
+    "nextLevel": "下一等级：{tier}",
+    "topFavourites": "最爱的 3 款游戏",
+    "noFavourites": "还没有收藏的游戏！",
+    "wagerContest": "投注竞赛",
+    "noContest": "哎呀！暂无数据！",
+    "empty": "-"
   }
 }

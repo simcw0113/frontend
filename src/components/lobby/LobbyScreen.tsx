@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Suspense, use, useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { Suspense, use, useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import type { AuthView } from "@/components/auth/AuthFormPanel";
 import { SignInDialog } from "@/components/SignInDialog";
 import { useI18n } from "@/components/I18nProvider";
@@ -21,8 +21,9 @@ import { DepositContext } from "@/components/lobby/DepositContext";
 import { DepositHeader, DepositPage } from "@/components/lobby/DepositForm";
 import { WithdrawHeader, WithdrawPage } from "@/components/lobby/WithdrawForm";
 import { DepositSheet } from "@/components/lobby/DepositSheet";
+import { WalletPill } from "@/components/lobby/WalletPill";
 import { ToastHost } from "@/components/lobby/ToastHost";
-import { GameView, GameViewSkeleton, type GamePageData } from "@/components/lobby/GameView";
+import { GameHost } from "@/components/lobby/GameView";
 import { ProviderGames, ProviderGamesSkeleton } from "@/components/lobby/ProviderGames";
 import { ProviderLaunch } from "@/components/lobby/ProviderLaunch";
 import { ProviderRow } from "@/components/lobby/ProviderRow";
@@ -30,11 +31,14 @@ import { SearchModal } from "@/components/lobby/SearchModal";
 import { MobileTabBar } from "@/components/lobby/MobileTabBar";
 import { SportsView } from "@/components/lobby/SportsView";
 import { AffiliateHeader, AffiliatePage } from "@/components/lobby/AffiliatePage";
+import { Avatar, initialsFrom } from "@/components/lobby/Avatar";
+import { ProfilePage, ProfileSkeleton } from "@/components/lobby/ProfilePage";
 import { ComingSoonHeader, TopNav } from "@/components/lobby/TopNav";
 import { VipClub, VipHeader } from "@/components/lobby/VipClub";
 import { sidebarAffiliateItem, sidebarMissionsItem, sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
 import { PlayerGameList } from "@/components/lobby/HomeGameContent";
 import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
+import { VIP_ENABLED } from "@/config/vip";
 import { fill } from "@/i18n";
 import { hreflang } from "@/i18n/routing";
 import type { Provider } from "@/config/providers";
@@ -60,7 +64,7 @@ const TOGGLE =
   "grid size-11 shrink-0 place-items-center rounded-lg text-brand hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 
-export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites" | "missions" | "affiliate" | "game" | "deposit" | "withdraw";
+export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites" | "missions" | "affiliate" | "game" | "deposit" | "withdraw" | "profile";
 
 // `games` holds one promise per category slug, started on the server (lib/games.ts)
 // and read here with use() inside <Suspense>, so the page shell shows at once.
@@ -79,6 +83,7 @@ export function LobbyScreen({
   promotions,
   gamePage,
   banners,
+  profileFavourites,
 }: {
   focus?: LobbyFocus;
   category?: string;
@@ -88,8 +93,9 @@ export function LobbyScreen({
   topWins?: Promise<TopWinsResult>; // home only
   partners?: Promise<PartnersResult>; // home only
   promotions?: Promise<PromotionsResult>; // promotions page only
-  gamePage?: Promise<GamePageData>; // game page only (/casino/{category}/game/{id})
+  gamePage?: ReactNode; // game page only: <Suspense><GameView /></Suspense> rendered by the page
   banners?: Promise<BannerSlide[]>; // home only; GET /config data.banners
+  profileFavourites?: Promise<CategoryGamesResult>; // profile page, top favourite games
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
   // Category pages filter the open provider list in place. Home still opens Explore.
@@ -515,27 +521,18 @@ export function LobbyScreen({
           </button>
           {user?.username ? (
             <>
-            {/* Wallet / deposit (KickWin's green wallet button, in our cyan). Goes to
-                /{lang}/deposit. To open the popup again, swap this LobbyLink for:
-                <button type="button" onClick={openDeposit} className="dep-header-btn"> */}
-            <div className="dep-wallet">
-              {wallet ? (
-                <span className="dep-wallet-balance" title={t.providerLaunch.balance}>
-                  {wallet.currency} {wallet.balance}
-                </span>
-              ) : null}
-              <LobbyLink href="/deposit" aria-label={t.deposit.deposit} className="dep-header-btn no-underline">
-                <WalletIcon />
+            {/* PC: centred in the 64px main row of the header (sticky, so it is the containing block). */}
+            <WalletPill wallet={wallet} className="md:absolute md:left-1/2 md:top-8 md:-translate-x-1/2 md:-translate-y-1/2" />
+            {VIP_ENABLED ? (
+              <LobbyLink
+                href="/vip"
+                aria-label={t.topNav.vip}
+                className="md:hidden grid size-10 place-items-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                <CrownIcon />
               </LobbyLink>
-            </div>
-            <LobbyLink
-              href="/vip"
-              aria-label={t.topNav.vip}
-              className="md:hidden grid size-10 place-items-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-            >
-              <CrownIcon />
-            </LobbyLink>
-            <div className="relative md:hidden" ref={notifyRef}>
+            ) : null}
+            <div className="relative" ref={notifyRef}>
               <button
                 type="button"
                 aria-expanded={notifyOpen}
@@ -562,16 +559,29 @@ export function LobbyScreen({
                 type="button"
                 aria-expanded={accountOpen}
                 aria-haspopup="menu"
+                aria-label={user.username}
                 onClick={() => setAccountOpen((open) => !open)}
-                className="rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap hover:bg-white/10"
+                className="grid size-10 place-items-center rounded-full hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               >
-                {user.username}
+                <Avatar
+                  src={user.profile_image}
+                  name={user.username}
+                  initials={initialsFrom(user.full_name || user.username)}
+                  className="size-8 text-[11px]"
+                />
               </button>
               {accountOpen ? (
                 <div
                   role="menu"
-                  className="absolute right-0 z-50 mt-1 min-w-full rounded-lg border border-white/10 bg-lobby p-1 shadow-lg"
+                  className="absolute right-0 z-50 mt-1 min-w-44 rounded-lg border border-white/10 bg-lobby p-1 shadow-lg"
                 >
+                  <LobbyLink
+                    href="/profile?tab=profile"
+                    onGo={() => setAccountOpen(false)}
+                    className="block rounded-md px-3 py-2 text-sm font-semibold whitespace-nowrap hover:bg-white/10"
+                  >
+                    {t.profile.title}
+                  </LobbyLink>
                   <button
                     type="button"
                     role="menuitem"
@@ -652,7 +662,7 @@ export function LobbyScreen({
               <WithdrawHeader />
             ) : focus === "z-ai" || focus === "missions" ? (
               <ComingSoonHeader title={focus === "z-ai" ? t.topNav.zAi : t.menu.missions} />
-            ) : focus === "game" || focus === "sports" ? null : (
+            ) : focus === "game" || focus === "sports" || focus === "profile" ? null : (
               <div>
                 <LobbyLink
                   href="/"
@@ -741,17 +751,17 @@ export function LobbyScreen({
               </Suspense>
             ) : null
           ) : focus === "game" ? (
-            gamePage ? (
-              <Suspense fallback={<GameViewSkeleton />}>
-                <GameView
-                  promise={gamePage}
-                  onSignIn={() => {
-                    setAuthView("login");
-                    setSignInOpen(true);
-                  }}
-                />
-              </Suspense>
-            ) : null
+            <GameHost
+              value={{
+                wallet,
+                onSignIn: () => {
+                  setAuthView("login");
+                  setSignInOpen(true);
+                },
+              }}
+            >
+              {gamePage}
+            </GameHost>
           ) : playerPage ? (
             playerGames ? (
               <PlayerGameList
@@ -856,6 +866,16 @@ export function LobbyScreen({
                 setSignInOpen(true);
               }}
             />
+          ) : focus === "profile" ? (
+            <Suspense fallback={<ProfileSkeleton />}>
+              <ProfilePage
+                favourites={profileFavourites}
+                onSignIn={() => {
+                  setAuthView("login");
+                  setSignInOpen(true);
+                }}
+              />
+            </Suspense>
           ) : null}
           {focus === "sports" ? null : <LobbyFooter />}
           </div>
@@ -871,12 +891,21 @@ export function LobbyScreen({
         >
           <p className="px-3 py-2 text-sm font-semibold">{user.username}</p>
           <LobbyLink
-            href="/vip"
+            href="/profile?tab=profile"
             onGo={() => setAccountOpen(false)}
             className="block rounded-md px-3 py-2 text-sm font-semibold hover:bg-white/10"
           >
-            {t.topNav.vip}
+            {t.profile.title}
           </LobbyLink>
+          {VIP_ENABLED ? (
+            <LobbyLink
+              href="/vip"
+              onGo={() => setAccountOpen(false)}
+              className="block rounded-md px-3 py-2 text-sm font-semibold hover:bg-white/10"
+            >
+              {t.topNav.vip}
+            </LobbyLink>
+          ) : null}
           <button
             type="button"
             role="menuitem"
@@ -895,7 +924,17 @@ export function LobbyScreen({
         focus={focus}
         drawerOpen={drawerOpen}
         searchOpen={searchOpen}
-        profileOpen={accountOpen}
+        profileOpen={accountOpen || focus === "profile"}
+        profileHref={user ? "/profile?tab=profile" : undefined}
+        profileAvatar={
+          user
+            ? {
+                src: user.profile_image,
+                name: user.username,
+                initials: initialsFrom(user.full_name || user.username),
+              }
+            : undefined
+        }
         hidden={searchOpen || signInOpen || depositOpen}
         onMenu={() => setDrawerOpen((open) => !open)}
         onSearch={() => {
@@ -904,11 +943,8 @@ export function LobbyScreen({
         }}
         onProfile={() => {
           setDrawerOpen(false);
-          if (user) setAccountOpen((open) => !open);
-          else {
-            setAuthView("login");
-            setSignInOpen(true);
-          }
+          setAuthView("login");
+          setSignInOpen(true);
         }}
       />
 
@@ -947,7 +983,21 @@ function Hero({ banners = fallbackBanners }: { banners?: Promise<BannerSlide[]> 
   const [paused, setPaused] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const placed = useRef(false);
+  const slideAnim = useRef<ReturnType<typeof animate> | null>(null);
+  // Pointer drag state: start pointer x, track x at that moment, and whether it became a real drag.
+  const drag = useRef<{ startX: number; baseX: number; dx: number; moved: boolean } | null>(null);
+  const suppressClick = useRef(false);
   const count = slides.length;
+
+  function slideTo(x: number) {
+    const track = trackRef.current;
+    if (!track) return;
+    if (reduceMotion()) {
+      track.style.transform = `translateX(${x}px)`;
+      return;
+    }
+    slideAnim.current = animate(track, { x, duration: 780, ease: "outQuint" });
+  }
 
   useEffect(() => {
     const track = trackRef.current;
@@ -959,7 +1009,7 @@ function Hero({ banners = fallbackBanners }: { banners?: Promise<BannerSlide[]> 
       placed.current = true;
       track.style.transform = `translateX(${xFor()}px)`;
     } else {
-      animate(track, { x: xFor(), duration: 780, ease: "outQuint" });
+      slideAnim.current = animate(track, { x: xFor(), duration: 780, ease: "outQuint" });
     }
 
     let width = frame.clientWidth;
@@ -977,6 +1027,7 @@ function Hero({ banners = fallbackBanners }: { banners?: Promise<BannerSlide[]> 
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (media.matches || paused || count < 2) return;
     const id = window.setInterval(() => {
+      if (drag.current) return; // touch drags never fire mouseenter, so skip autoplay mid-drag
       setIndex((current) => (current + 1) % count);
     }, 6000);
     return () => window.clearInterval(id);
@@ -998,13 +1049,57 @@ function Hero({ banners = fallbackBanners }: { banners?: Promise<BannerSlide[]> 
     }
   }
 
+  function onPointerDown(event: ReactPointerEvent<HTMLElement>) {
+    const track = trackRef.current;
+    suppressClick.current = false; // a drag whose click never fired must not eat the next tap
+    if (count < 2 || !track || event.button !== 0) return;
+    slideAnim.current?.pause();
+    const baseX = track.getBoundingClientRect().left - event.currentTarget.getBoundingClientRect().left;
+    drag.current = { startX: event.clientX, baseX, dx: 0, moved: false };
+  }
+
+  function onPointerMove(event: ReactPointerEvent<HTMLElement>) {
+    const state = drag.current;
+    const track = trackRef.current;
+    if (!state || !track) return;
+    state.dx = event.clientX - state.startX;
+    if (!state.moved) {
+      if (Math.abs(state.dx) < 6) return; // below this it's a tap, let the link click through
+      state.moved = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+    track.style.transform = `translateX(${state.baseX + state.dx}px)`;
+  }
+
+  function onPointerUp(event: ReactPointerEvent<HTMLElement>) {
+    const state = drag.current;
+    drag.current = null;
+    if (!state?.moved) return;
+    suppressClick.current = true;
+    const width = event.currentTarget.clientWidth;
+    const step = state.dx < -width * 0.15 ? 1 : state.dx > width * 0.15 ? -1 : 0;
+    const next = (((index + step) % count) + count) % count;
+    if (next === index) slideTo(-index * width); // index unchanged, so the effect won't snap back for us
+    else setIndex(next);
+  }
+
   if (count === 0) return null;
 
   return (
     <section
       aria-roledescription="carousel"
       aria-label={t.lobby.promotions}
-      className="relative overflow-hidden rounded-2xl"
+      className="relative cursor-grab touch-pan-y overflow-hidden rounded-2xl select-none active:cursor-grabbing"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+      onClickCapture={(event) => {
+        if (!suppressClick.current) return;
+        suppressClick.current = false;
+        event.preventDefault();
+        event.stopPropagation();
+      }}
       onKeyDown={onKeyDown}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -1026,7 +1121,7 @@ function Hero({ banners = fallbackBanners }: { banners?: Promise<BannerSlide[]> 
           return (
             <article key={slide.id} aria-hidden={!active} className="aspect-[4/1] w-full shrink-0">
               {slide.href ? (
-                <a href={slide.href} className="block h-full w-full">
+                <a href={slide.href} tabIndex={active ? 0 : -1} draggable={false} className="block h-full w-full">
                   {image}
                 </a>
               ) : (
@@ -1036,38 +1131,6 @@ function Hero({ banners = fallbackBanners }: { banners?: Promise<BannerSlide[]> 
           );
         })}
       </div>
-      <div className="absolute inset-x-0 bottom-3 flex items-center justify-center gap-2">
-        {slides.map((slide, slideIndex) => (
-          <button
-            key={slide.id}
-            type="button"
-            aria-label={fill(t.lobby.showBanner, { n: slideIndex + 1 })}
-            aria-current={slideIndex === index ? "true" : undefined}
-            onClick={() => go(slideIndex)}
-            className={`h-2.5 rounded-full ${slideIndex === index ? "w-7 bg-white" : "w-2.5 bg-white/50"}`}
-          />
-        ))}
-      </div>
-      {count > 1 ? (
-        <>
-          <button
-            type="button"
-            aria-label={t.lobby.previous}
-            onClick={() => go(index - 1)}
-            className="absolute top-1/2 left-3 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white/15 text-lg text-white"
-          >
-            <span aria-hidden="true">‹</span>
-          </button>
-          <button
-            type="button"
-            aria-label={t.lobby.next}
-            onClick={() => go(index + 1)}
-            className="absolute top-1/2 right-3 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white/15 text-lg text-white"
-          >
-            <span aria-hidden="true">→</span>
-          </button>
-        </>
-      ) : null}
     </section>
   );
 }
@@ -1213,16 +1276,6 @@ function BellIcon() {
     <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M6 9.5 C6 6.5 8.5 4 12 4 C15.5 4 18 6.5 18 9.5 V14 L20 16.5 H4 L6 14 Z" />
       <path d="M10 18.5 C10.4 19.5 11.2 20 12 20 C12.8 20 13.6 19.5 14 18.5" />
-    </svg>
-  );
-}
-
-function WalletIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M4 7.5 C4 6.1 5.1 5 6.5 5 H17 V8" />
-      <path d="M4 7.5 V17.5 C4 18.9 5.1 20 6.5 20 H19.5 V8 H6.5 C5.1 8 4 6.9 4 7.5" />
-      <path d="M15.5 14 H16.5" strokeWidth="2.4" />
     </svg>
   );
 }

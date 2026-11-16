@@ -308,6 +308,7 @@
     "close": "Schließen"
   },
   "gamePage": {
+    "playing": "Im Spiel",
     "favourite": "Favorit",
     "theatre": "Kinomodus",
     "fullscreen": "Vollbild",
@@ -526,5 +527,42 @@
     "referralTitle": "Dein Empfehlungslink",
     "referralCopy": "Kopieren",
     "referralCopied": "Kopiert"
+  },
+
+  "profile": {
+    "meta": "Dein Kontoprofil.",
+    "title": "Profil",
+    "myProfile": "Mein Profil",
+    "verification": "Verifizierung",
+    "security": "Sicherheit",
+    "banking": "Bankkonto",
+    "swap": "Tausch",
+    "transactions": "Transaktionen",
+    "rollover": "Umsatz",
+    "betHistory": "Wettverlauf",
+    "poster": "Poster",
+    "comingSoon": "Demnächst",
+    "signIn": "Melde dich an, um dein Profil zu sehen.",
+    "logout": "Abmelden",
+    "edit": "Bearbeiten",
+    "userId": "Benutzer-ID: {value}",
+    "copyId": "Benutzer-ID kopieren",
+    "copied": "Kopiert",
+    "birthday": "Geburtstag: {value}",
+    "phone": "Telefonnummer:",
+    "email": "E-Mail:",
+    "verified": "Verifiziert",
+    "verifyNow": "Jetzt verifizieren",
+    "statistics": "Statistiken",
+    "totalWins": "Gesamtgewinne",
+    "totalWagered": "Gesamteinsatz",
+    "totalBets": "Anzahl Wetten",
+    "vipLevel": "VIP-Level: {tier}",
+    "nextLevel": "Nächstes Level: {tier}",
+    "topFavourites": "Top 3 Lieblingsspiele",
+    "noFavourites": "Noch keine Lieblingsspiele!",
+    "wagerContest": "Wett-Contest",
+    "noContest": "Hoppla! Es gibt noch keine Daten!",
+    "empty": "-"
   }
 }

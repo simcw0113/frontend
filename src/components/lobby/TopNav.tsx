@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useI18n } from "@/components/I18nProvider";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { CategoryIcon, categoryIcon } from "@/components/lobby/CategoryIcons";
-import { topNavItems } from "@/config/topNav";
+import { TOP_NAV_LINKS_SHOWN, topNavItems } from "@/config/topNav";
 
 // The top bar links (config/topNav.ts). From lg they sit inline after the logo; below lg the
 // same list wraps to a second, horizontally scrollable row under the header (.top-nav in
@@ -39,7 +39,7 @@ export function TopNav({ route }: { route: string }) {
   return (
     <nav aria-label={t.topNav.label} className="top-nav max-md:hidden">
       <ul ref={listRef} className="top-nav-list">
-        {topNavItems.map((item) => {
+        {topNavItems.filter((item) => TOP_NAV_LINKS_SHOWN || item.featured).map((item) => {
           const active = item.path === route;
           return (
             <li key={item.id} className="shrink-0 snap-start">

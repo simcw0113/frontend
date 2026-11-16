@@ -308,6 +308,7 @@
     "close": "Đóng"
   },
   "gamePage": {
+    "playing": "Đang chơi",
     "favourite": "Yêu thích",
     "theatre": "Chế độ rạp",
     "fullscreen": "Toàn màn hình",
@@ -526,5 +527,42 @@
     "referralTitle": "Liên kết giới thiệu của bạn",
     "referralCopy": "Sao chép",
     "referralCopied": "Đã sao chép"
+  },
+
+  "profile": {
+    "meta": "Hồ sơ tài khoản của bạn.",
+    "title": "Hồ sơ",
+    "myProfile": "Hồ sơ của tôi",
+    "verification": "Xác minh",
+    "security": "Bảo mật",
+    "banking": "Ngân hàng",
+    "swap": "Đổi",
+    "transactions": "Giao dịch",
+    "rollover": "Doanh số",
+    "betHistory": "Lịch sử cược",
+    "poster": "Poster",
+    "comingSoon": "Sắp ra mắt",
+    "signIn": "Đăng nhập để xem hồ sơ của bạn.",
+    "logout": "Đăng xuất",
+    "edit": "Chỉnh sửa",
+    "userId": "ID người dùng: {value}",
+    "copyId": "Sao chép ID người dùng",
+    "copied": "Đã sao chép",
+    "birthday": "Ngày sinh: {value}",
+    "phone": "Số điện thoại:",
+    "email": "Email:",
+    "verified": "Đã xác minh",
+    "verifyNow": "Xác minh ngay",
+    "statistics": "Thống kê",
+    "totalWins": "Tổng thắng",
+    "totalWagered": "Tổng cược",
+    "totalBets": "Tổng số cược",
+    "vipLevel": "Cấp VIP: {tier}",
+    "nextLevel": "Cấp tiếp theo: {tier}",
+    "topFavourites": "3 trò chơi yêu thích hàng đầu",
+    "noFavourites": "Chưa có trò chơi yêu thích!",
+    "wagerContest": "Cuộc thi cược",
+    "noContest": "Rất tiếc! Chưa có dữ liệu!",
+    "empty": "-"
   }
 }

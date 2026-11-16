@@ -308,6 +308,7 @@
     "close": "ปิด"
   },
   "gamePage": {
+    "playing": "กำลังเล่น",
     "favourite": "รายการโปรด",
     "theatre": "โหมดโรงละคร",
     "fullscreen": "เต็มจอ",
@@ -526,5 +527,42 @@
     "referralTitle": "ลิงก์แนะนำของคุณ",
     "referralCopy": "คัดลอก",
     "referralCopied": "คัดลอกแล้ว"
+  },
+
+  "profile": {
+    "meta": "โปรไฟล์บัญชีของคุณ",
+    "title": "โปรไฟล์",
+    "myProfile": "โปรไฟล์ของฉัน",
+    "verification": "การยืนยันตัวตน",
+    "security": "ความปลอดภัย",
+    "banking": "บัญชีธนาคาร",
+    "swap": "แลกเปลี่ยน",
+    "transactions": "รายการธุรกรรม",
+    "rollover": "ยอดหมุนเวียน",
+    "betHistory": "ประวัติการเดิมพัน",
+    "poster": "โปสเตอร์",
+    "comingSoon": "เร็วๆ นี้",
+    "signIn": "เข้าสู่ระบบเพื่อดูโปรไฟล์ของคุณ",
+    "logout": "ออกจากระบบ",
+    "edit": "แก้ไข",
+    "userId": "รหัสผู้ใช้: {value}",
+    "copyId": "คัดลอกรหัสผู้ใช้",
+    "copied": "คัดลอกแล้ว",
+    "birthday": "วันเกิด: {value}",
+    "phone": "เบอร์โทรศัพท์:",
+    "email": "อีเมล:",
+    "verified": "ยืนยันแล้ว",
+    "verifyNow": "ยืนยันเลย",
+    "statistics": "สถิติ",
+    "totalWins": "ยอดชนะทั้งหมด",
+    "totalWagered": "ยอดเดิมพันทั้งหมด",
+    "totalBets": "จำนวนเดิมพันทั้งหมด",
+    "vipLevel": "ระดับ VIP: {tier}",
+    "nextLevel": "ระดับถัดไป: {tier}",
+    "topFavourites": "3 เกมโปรดยอดนิยม",
+    "noFavourites": "ยังไม่มีเกมโปรด!",
+    "wagerContest": "การแข่งขันเดิมพัน",
+    "noContest": "อุ๊ย! ยังไม่มีข้อมูล!",
+    "empty": "-"
   }
 }

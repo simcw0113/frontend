@@ -308,6 +308,7 @@
     "close": "Tutup"
   },
   "gamePage": {
+    "playing": "Sedang bermain",
     "favourite": "Kegemaran",
     "theatre": "Mod teater",
     "fullscreen": "Skrin penuh",
@@ -526,5 +527,42 @@
     "referralTitle": "Pautan rujukan anda",
     "referralCopy": "Salin",
     "referralCopied": "Disalin"
+  },
+
+  "profile": {
+    "meta": "Profil akaun anda.",
+    "title": "Profil",
+    "myProfile": "Profil Saya",
+    "verification": "Pengesahan",
+    "security": "Keselamatan",
+    "banking": "Perbankan",
+    "swap": "Tukar",
+    "transactions": "Transaksi",
+    "rollover": "Rollover",
+    "betHistory": "Sejarah Pertaruhan",
+    "poster": "Poster",
+    "comingSoon": "Akan datang",
+    "signIn": "Log masuk untuk melihat profil anda.",
+    "logout": "Log keluar",
+    "edit": "Edit",
+    "userId": "ID Pengguna: {value}",
+    "copyId": "Salin ID pengguna",
+    "copied": "Disalin",
+    "birthday": "Tarikh lahir: {value}",
+    "phone": "Nombor telefon:",
+    "email": "E-mel:",
+    "verified": "Disahkan",
+    "verifyNow": "Sahkan sekarang",
+    "statistics": "Statistik",
+    "totalWins": "Jumlah Menang",
+    "totalWagered": "Jumlah Bertaruh",
+    "totalBets": "Jumlah Pertaruhan",
+    "vipLevel": "Tahap VIP: {tier}",
+    "nextLevel": "Tahap seterusnya: {tier}",
+    "topFavourites": "3 Permainan Kegemaran Teratas",
+    "noFavourites": "Belum ada permainan kegemaran!",
+    "wagerContest": "Peraduan Wager",
+    "noContest": "Alamak! Tiada data lagi!",
+    "empty": "-"
   }
 }
