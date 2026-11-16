@@ -9,6 +9,7 @@ import { Partners, PartnersSkeleton } from "@/components/lobby/Partners";
 import { defaultCasinoCategory, homeCategories, type CasinoCategory } from "@/config/categories";
 import type { CategoryGamesResult } from "@/lib/games";
 import type { PartnersResult } from "@/lib/partners";
+import { useFavourites } from "@/lib/useFavourites";
 
 export const HOME_SCROLL_KEY = "lobby-home-scroll";
 const PREVIEW_COUNT = 8;
@@ -93,15 +94,22 @@ export function PlayerGameList({
   promise,
   emptyText,
   labelledBy,
+  dropUnfavourited = false,
 }: {
   promise: Promise<CategoryGamesResult>;
   emptyText: string;
   labelledBy: string;
+  dropUnfavourited?: boolean;
 }) {
   return (
     <section aria-labelledby={labelledBy} className="mt-6">
       <Suspense fallback={<GridSkeleton count={8} />}>
-        <GameGrid promise={promise} category={defaultCasinoCategory.slug} emptyText={emptyText} />
+        <GameGrid
+          promise={promise}
+          category={defaultCasinoCategory.slug}
+          emptyText={emptyText}
+          dropUnfavourited={dropUnfavourited}
+        />
       </Suspense>
     </section>
   );
@@ -190,20 +198,32 @@ function GameGrid({
   limit,
   emptyText,
   homeRow = false,
+  dropUnfavourited = false,
 }: {
   promise: Promise<CategoryGamesResult>;
   category: string;
   limit?: number;
   emptyText?: string;
   homeRow?: boolean;
+  dropUnfavourited?: boolean;
 }) {
   const { t } = useI18n();
+  const favs = useFavourites();
   const result = use(promise);
   if (result.error) return <Notice>{t.lobby.loadError}</Notice>;
-  if (result.games.length === 0) return <Notice>{emptyText ?? t.lobby.empty}</Notice>;
+  let games = result.games;
+  // Favourites page: unfavouriting removes the card. Wait until the simple list
+  // is ready so the server-rendered list does not flash empty, and keep games
+  // that have no provider/game codes (static samples).
+  if (dropUnfavourited && favs.ready && favs.signedIn) {
+    games = games.filter(
+      (game) => !game.publicCode || !game.gameCode || favs.isFavourite(game.publicCode, game.gameCode),
+    );
+  }
+  if (games.length === 0) return <Notice>{emptyText ?? t.lobby.empty}</Notice>;
   return (
     <div className={homeRow ? HOME_ROW : GRID}>
-      {(limit ? result.games.slice(0, limit) : result.games).map((game) => (
+      {(limit ? games.slice(0, limit) : games).map((game) => (
         <GameCover
           key={game.id}
           game={game}

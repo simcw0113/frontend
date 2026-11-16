@@ -21,6 +21,7 @@ import { DepositContext } from "@/components/lobby/DepositContext";
 import { DepositHeader, DepositPage } from "@/components/lobby/DepositForm";
 import { WithdrawHeader, WithdrawPage } from "@/components/lobby/WithdrawForm";
 import { DepositSheet } from "@/components/lobby/DepositSheet";
+import { ToastHost } from "@/components/lobby/ToastHost";
 import { GameView, GameViewSkeleton, type GamePageData } from "@/components/lobby/GameView";
 import { ProviderGames, ProviderGamesSkeleton } from "@/components/lobby/ProviderGames";
 import { ProviderLaunch } from "@/components/lobby/ProviderLaunch";
@@ -43,6 +44,7 @@ import type { PartnersResult } from "@/lib/partners";
 import type { PromotionsResult } from "@/lib/promotions";
 import type { TopWinsResult } from "@/lib/topWins";
 import { animate, reduceMotion } from "@/lib/motion";
+import { FavouritesProvider } from "@/lib/useFavourites";
 import { useSession } from "@/lib/useSession";
 import { setDrawerOpen, setSidebarOpen, useDrawerOpen, useSidebarOpen, useSidebarRail } from "@/lib/sidebarState";
 
@@ -102,6 +104,22 @@ export function LobbyScreen({
   const [signInOpen, setSignInOpen] = useState(false);
   const [authView, setAuthView] = useState<AuthView>("login");
   const { user, ready, signOut } = useSession();
+  // Header wallet pill ("MYR 0.00", like KickWin). Refetched on each view change so it
+  // catches up after a deposit, withdrawal or game; stays hidden until the first answer.
+  const [wallet, setWallet] = useState<{ balance: string; currency: string } | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    fetch("/api/wallet/balance", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((next) => {
+        if (!cancelled && next?.balance != null) setWallet(next);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [user, focus]);
   const [accountOpen, setAccountOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
   // Wallet / deposit sheet (DepositContext): signed-in players get the sheet, guests the
@@ -329,8 +347,15 @@ export function LobbyScreen({
 
   return (
     <DepositContext value={openDeposit}>
+    <FavouritesProvider
+      onSignIn={() => {
+        setAuthView("login");
+        setSignInOpen(true);
+      }}
+    >
     <div className={`lobby-root min-h-full bg-lobby text-ink${collapsed ? " is-collapsed" : ""}${drawerOpen ? " drawer-open" : ""}`}>
       <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} initialView={authView} />
+      <ToastHost />
       <DepositSheet
         open={depositOpen}
         onClose={() => setDepositOpen(false)}
@@ -486,10 +511,16 @@ export function LobbyScreen({
             {/* Wallet / deposit (KickWin's green wallet button, in our cyan). Goes to
                 /{lang}/deposit. To open the popup again, swap this LobbyLink for:
                 <button type="button" onClick={openDeposit} className="dep-header-btn"> */}
-            <LobbyLink href="/deposit" className="dep-header-btn no-underline">
-              <WalletIcon />
-              <span className="dep-header-label">{t.deposit.deposit}</span>
-            </LobbyLink>
+            <div className="dep-wallet">
+              {wallet ? (
+                <span className="dep-wallet-balance" title={t.providerLaunch.balance}>
+                  {wallet.currency} {wallet.balance}
+                </span>
+              ) : null}
+              <LobbyLink href="/deposit" aria-label={t.deposit.deposit} className="dep-header-btn no-underline">
+                <WalletIcon />
+              </LobbyLink>
+            </div>
             <LobbyLink
               href="/vip"
               aria-label={t.topNav.vip}
@@ -720,6 +751,7 @@ export function LobbyScreen({
                 promise={playerGames}
                 labelledBy="player-games-title"
                 emptyText={focus === "recent" ? t.playerGames.recentEmpty : t.playerGames.favouritesEmpty}
+                dropUnfavourited={focus === "favourites"}
               />
             ) : null
           ) : gamesPage ? (
@@ -889,6 +921,7 @@ export function LobbyScreen({
         </div>
       ) : null}
     </div>
+    </FavouritesProvider>
     </DepositContext>
   );
 }

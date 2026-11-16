@@ -26,6 +26,7 @@ import type { GameLaunch } from "@/lib/gameLaunch";
 import type { GameDetails } from "@/lib/games";
 import { revealGameOpener } from "@/lib/lobbyTransition";
 import { animate, reduceMotion } from "@/lib/motion";
+import { useFavourites } from "@/lib/useFavourites";
 
 // Game page body (/casino/{category}/game/{id}, LobbyScreen focus "game").
 // Layout (styles: .gp-* in globals.css):
@@ -113,7 +114,8 @@ function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignI
   const { game, launch, recommended } = data;
   const category = findCasinoCategory(game.category ?? "");
   const frameRef = useRef<HTMLDivElement>(null);
-  const [favourite, setFavourite] = useState(false); // TODO(API): load/save the player's favourite
+  const { isFavourite, toggle, signedIn } = useFavourites();
+  const favourite = Boolean(game.publicCode && game.gameCode && isFavourite(game.publicCode, game.gameCode));
   const [theatre, setTheatre] = useState(false);
   const canFullscreen = useSyncExternalStore(
     subscribeFullscreen,
@@ -278,7 +280,18 @@ function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignI
             <LobbyLink href="/deposit" className="gp-deposit no-underline">
               {t.gamePage.deposit}
             </LobbyLink>
-            <DockButton label={t.gamePage.favourite} pressed={favourite} onClick={() => setFavourite((on) => !on)} className="gp-btn-fav">
+            <DockButton
+              label={favourite ? t.gamePage.removeFavourite : t.gamePage.addFavourite}
+              pressed={favourite}
+              onClick={() => {
+                if (!signedIn) {
+                  onSignIn();
+                  return;
+                }
+                if (game.publicCode && game.gameCode) void toggle(game.publicCode, game.gameCode);
+              }}
+              className="gp-btn-fav"
+            >
               <svg viewBox="0 0 24 24" className={ICON} fill={favourite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
                 <path d="M12 3.5 14.6 9 20.5 9.6 16 13.6 17.3 19.5 12 16.5 6.7 19.5 8 13.6 3.5 9.6 9.4 9Z" />
               </svg>

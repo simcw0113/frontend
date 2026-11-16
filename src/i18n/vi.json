@@ -327,7 +327,10 @@
     "description": "Quay {name} để thắng tiền thật. Xem luật chơi trong game để biết dòng thanh toán, tính năng và giới hạn.",
     "loadError": "Không tải được game này. Vui lòng thử lại sau.",
     "signIn": "Đăng nhập để chơi game này.",
-    "loading": "Đang tải game…"
+    "loading": "Đang tải game…",
+    "addFavourite": "Thêm vào yêu thích",
+    "removeFavourite": "Xóa khỏi yêu thích",
+    "favouriteError": "Không thể cập nhật mục yêu thích. Vui lòng thử lại."
   },
   "sportsPage": {
     "meta": "Cá cược thể thao trực tiếp.",

@@ -327,7 +327,10 @@
     "description": "Putar {name} untuk menang wang sebenar. Semak peraturan permainan di dalam permainan untuk garis bayaran, ciri dan had.",
     "loadError": "Permainan ini tidak dapat dimuatkan. Sila cuba lagi kemudian.",
     "signIn": "Log masuk untuk bermain permainan ini.",
-    "loading": "Memuatkan permainan…"
+    "loading": "Memuatkan permainan…",
+    "addFavourite": "Tambah ke kegemaran",
+    "removeFavourite": "Buang daripada kegemaran",
+    "favouriteError": "Tidak dapat mengemas kini kegemaran. Sila cuba lagi."
   },
   "sportsPage": {
     "meta": "Pertaruhan sukan secara langsung.",

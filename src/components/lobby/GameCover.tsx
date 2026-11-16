@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type MouseEvent, type PointerEvent } from "react";
+import { useI18n } from "@/components/I18nProvider";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import type { Game, GameSymbol } from "@/config/lobby";
+import { useFavourites } from "@/lib/useFavourites";
 
 export function SymbolMark({ symbol, className }: { symbol: GameSymbol; className?: string }) {
   const common = className ?? "h-24 w-24 drop-shadow-lg";
@@ -182,6 +184,53 @@ export function gameHref(
   return `/casino/${category}/game/${encodeURIComponent(game.id)}`;
 }
 
+function FavouriteToggle({ game }: { game: Game }) {
+  const { t } = useI18n();
+  const { isFavourite, toggle, signedIn, requestSignIn } = useFavourites();
+  if (!game.publicCode || !game.gameCode) return null;
+  const on = isFavourite(game.publicCode, game.gameCode);
+  const label = on ? t.gamePage.removeFavourite : t.gamePage.addFavourite;
+
+  function onClick(event: MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!game.publicCode || !game.gameCode) return;
+    if (!signedIn) {
+      requestSignIn();
+      return;
+    }
+    void toggle(game.publicCode, game.gameCode);
+  }
+
+  function onPointerDown(event: PointerEvent<HTMLButtonElement>) {
+    event.stopPropagation();
+  }
+
+  return (
+    <button
+      type="button"
+      aria-pressed={on}
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      onPointerDown={onPointerDown}
+      className="absolute top-1.5 right-1.5 z-10 grid size-6 place-items-center rounded-full bg-black/55 text-white shadow-sm backdrop-blur-[2px] hover:bg-black/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:size-7"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        className={`size-3 sm:size-3.5 ${on ? "text-rose-400" : ""}`}
+        fill={on ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M12 21s-6.5-4.2-9.3-8.1C.5 10.3.8 6.8 3.4 5.1 5.4 3.8 8 4.3 12 8c4-3.7 6.6-4.2 8.6-2.9 2.6 1.7 2.9 5.2.7 7.8C18.5 16.8 12 21 12 21z" />
+      </svg>
+    </button>
+  );
+}
+
 // With `href` the whole tile is a link to the game page (lobby transition, same hover lift).
 export function GameCover({ game, fluid = false, href, onGo, className }: { game: Game; fluid?: boolean; href?: string; onGo?: () => void; className?: string }) {
   // A cover image that fails (also before hydration) falls back to the drawn cover.
@@ -212,7 +261,7 @@ export function GameCover({ game, fluid = false, href, onGo, className }: { game
           />
         ) : (
           <>
-            <p className="absolute top-2 right-2 left-2 truncate text-[9px] font-semibold tracking-[0.14em] text-white/75 uppercase">
+            <p className="absolute top-2 right-9 left-2 truncate text-[9px] font-semibold tracking-[0.14em] text-white/75 uppercase">
               {game.provider}
             </p>
             <div className="game-art absolute inset-0 flex items-center justify-center pt-2">
@@ -236,6 +285,7 @@ export function GameCover({ game, fluid = false, href, onGo, className }: { game
             <path d="M8 5.5v13l11-6.5z" />
           </svg>
         </span>
+        <FavouriteToggle game={game} />
       </div>
       <div className="mt-1.5 min-w-0">
         <h3 className="truncate text-[11px] font-medium leading-tight text-white">{game.title}</h3>

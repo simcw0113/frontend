@@ -2467,6 +2467,20 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
   font-weight: 800;
   white-space: nowrap;
 }
+/* Balance pill joined to the wallet button (KickWin's header wallet). */
+.dep-wallet {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.625rem;
+  background: rgb(255 255 255 / 0.06);
+}
+.dep-wallet-balance {
+  padding-inline: 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .dep-header-btn:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 2px;
@@ -2476,15 +2490,15 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
     filter: brightness(1.08);
   }
 }
-@media (max-width: 379.98px) {
-  .dep-header-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
+/* KickWin: the wallet button is an icon-only square, flush against the balance. */
+.dep-wallet .dep-header-btn {
+  width: 2.5rem;
+  justify-content: center;
+  padding-inline: 0;
+}
+.dep-wallet-balance + .dep-header-btn {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
 }
 .dep-dialog {
   width: min(100% - 2rem, 28rem);

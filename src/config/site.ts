@@ -33,6 +33,7 @@ export const apiConfig = {
   loginPath: "/signin",
   registerPath: "/signup",
   infoPath: "/info",
+  balancePath: "/get_balance",
   configPath: "/config",
   gameListPath: "/game_list",
   // POST /game_tags. Optional body/query: label (default hot), limit (default 30, max 60), locale.
@@ -53,10 +54,12 @@ export const apiConfig = {
   // POST /promotion. Body: { locale }. Header: country-id. Text is already localized.
   // `data[0]` is every promo (category 0 = all); later indexes are category buckets.
   promotionsPath: "/promotion",
-  // TODO(API): placeholders for the signed-in player's lists (user-specific: sent with the
-  // auth token as a Bearer header, never cached); lang is sent as a query parameter.
-  recentGamesPath: "/player/games/recent",
-  favouriteGamesPath: "/player/games/favourites",
+  // POST /recent_games and /favourite_games (Bearer token, never cached).
+  // Body: { locale } (and `simple: 1` for the compact favourite list of public_code + game_code).
+  recentGamesPath: "/recent_games",
+  favouriteGamesPath: "/favourite_games",
+  favouriteGamesAddPath: "/favourite_games_add",
+  favouriteGamesRemovePath: "/favourite_games_remove",
   // POST /opengame. Body is { provider: public_code, game: game_code }.
   // Sent with Authorization: Bearer <token> and a country-id header. Never cached.
   gameLaunchPath: "/opengame",

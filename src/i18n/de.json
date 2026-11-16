@@ -327,7 +327,10 @@
     "description": "Spiele {name} um echtes Geld. Gewinnlinien, Features und Limits findest du in den Spielregeln im Spiel.",
     "loadError": "Dieses Spiel konnte nicht geladen werden. Bitte versuche es später erneut.",
     "signIn": "Melde dich an, um dieses Spiel zu spielen.",
-    "loading": "Spiel wird geladen…"
+    "loading": "Spiel wird geladen…",
+    "addFavourite": "Zu Favoriten hinzufügen",
+    "removeFavourite": "Aus Favoriten entfernen",
+    "favouriteError": "Favoriten konnten nicht aktualisiert werden. Bitte versuche es erneut."
   },
   "sportsPage": {
     "meta": "Live-Sportwetten.",

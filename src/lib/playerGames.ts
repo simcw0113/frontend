@@ -1,9 +1,9 @@
 import { apiConfig } from "@/config/site";
 import { categoryGames, staticGameId, type Game } from "@/config/lobby";
-import { apiJson } from "@/lib/api";
+import { apiJson, isApiStatusFailure } from "@/lib/api";
 import { useStaticData as isStaticData } from "@/lib/apiMode";
-import { mapResponse, type CategoryGamesDto, type CategoryGamesResult, type GameDto } from "@/lib/games";
-import { lobbyLocale } from "@/lib/lobbyApi";
+import type { CategoryGamesResult } from "@/lib/games";
+import { lobbyLocale, parseGameListPage } from "@/lib/lobbyApi";
 
 // The signed-in player's own game lists: /{lang}/recent and /{lang}/favourites.
 // Same static/API switch as the other lobby data (apiConfig.useStaticPlayerGames, static
@@ -15,6 +15,10 @@ import { lobbyLocale } from "@/lib/lobbyApi";
 // getAuthTokenFromCookie() and pass it as `token`; it is sent as
 // `Authorization: Bearer <token>`. Without a token the API is not called and the
 // list is empty (the page shows the empty state).
+//
+// Backend: POST /recent_games and POST /favourite_games with { locale }. The payload is
+// the same flat { games, total } shape as a limited game_list, mapped with parseGameListPage
+// so GameCover can use the real image / public_code / game_code fields.
 
 export type PlayerGamesOptions = {
   lang: string; // URL language slug: en | cn | de | es
@@ -36,18 +40,31 @@ function staticEnabled(): boolean {
   return isStaticData(config.useStaticPlayerGames);
 }
 
+function lobbyCountryId() {
+  return apiConfig.lobbyCountryId || "1";
+}
+
 // Never throws: failures come back as { games: [], error: true }.
-async function fromApi(path: string | undefined, fallback: string, opts: PlayerGamesOptions): Promise<CategoryGamesResult> {
+async function fromApi(path: string, opts: PlayerGamesOptions): Promise<CategoryGamesResult> {
   if (!opts.token) return { games: [] };
   try {
-    const query = new URLSearchParams({ lang: opts.lang, locale: lobbyLocale(opts.lang) });
-    const payload = await apiJson<CategoryGamesDto | GameDto[]>(`${path || fallback}?${query}`, {
+    const locale = lobbyLocale(opts.lang);
+    const query = new URLSearchParams({ locale, lang: opts.lang });
+    const payload = await apiJson(`${path}?${query}`, {
+      method: "POST",
       auth: false, // the token is passed in explicitly (the browser token helper is client-only)
-      headers: { Authorization: `Bearer ${opts.token}` },
+      headers: {
+        "Content-Type": "application/json",
+        "country-id": lobbyCountryId(),
+        Authorization: `Bearer ${opts.token}`,
+      },
+      body: JSON.stringify({ locale }),
       cache: "no-store",
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
-    return mapResponse(payload);
+    if (isApiStatusFailure(payload)) return { games: [], error: true };
+    const page = parseGameListPage(payload);
+    return { games: page.games, total: page.total };
   } catch {
     return { games: [], error: true };
   }
@@ -58,7 +75,7 @@ export async function getRecentGames(opts: PlayerGamesOptions): Promise<Category
     const games = pick(STATIC_RECENT);
     return { games, total: games.length };
   }
-  return fromApi(apiConfig.recentGamesPath, "/player/games/recent", opts);
+  return fromApi(apiConfig.recentGamesPath || "/recent_games", opts);
 }
 
 export async function getFavouriteGames(opts: PlayerGamesOptions): Promise<CategoryGamesResult> {
@@ -66,5 +83,5 @@ export async function getFavouriteGames(opts: PlayerGamesOptions): Promise<Categ
     const games = pick(STATIC_FAVOURITES);
     return { games, total: games.length };
   }
-  return fromApi(apiConfig.favouriteGamesPath, "/player/games/favourites", opts);
+  return fromApi(apiConfig.favouriteGamesPath || "/favourite_games", opts);
 }

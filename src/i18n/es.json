@@ -327,7 +327,10 @@
     "description": "Juega a {name} con dinero real. Consulta las reglas dentro del juego para ver líneas de pago, funciones y límites.",
     "loadError": "No se pudo cargar este juego. Inténtalo de nuevo más tarde.",
     "signIn": "Inicia sesión para jugar a este juego.",
-    "loading": "Cargando juego…"
+    "loading": "Cargando juego…",
+    "addFavourite": "Añadir a favoritos",
+    "removeFavourite": "Quitar de favoritos",
+    "favouriteError": "No se pudieron actualizar los favoritos. Inténtalo de nuevo."
   },
   "sportsPage": {
     "meta": "Apuestas deportivas en vivo.",

@@ -327,7 +327,10 @@
     "description": "Spin {name} for real-money wins. Check the game rules inside the game for paylines, features and limits.",
     "loadError": "This game could not be loaded. Please try again later.",
     "signIn": "Sign in to play this game.",
-    "loading": "Loading game…"
+    "loading": "Loading game…",
+    "addFavourite": "Add to favourites",
+    "removeFavourite": "Remove from favourites",
+    "favouriteError": "Could not update favourites. Please try again."
   },
   "sportsPage": {
     "meta": "Live sports betting.",
