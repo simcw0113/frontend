@@ -1,12 +1,11 @@
 import { apiConfig, sportsConfig } from "@/config/site";
 import { apiJson, isApiStatusFailure, readApiMessage } from "@/lib/api";
-import { lobbyLocale, lookupLobbyProductByCode } from "@/lib/lobbyApi";
+import { lobbyLocale, lookupSportsProduct } from "@/lib/lobbyApi";
 
 // Sports page launch. Same /opengame endpoint as casino games, but the body is
 // { provider: public_code, isMobile } — not { code } and not { provider, game }.
-// public_code is resolved from the lobby product list (GET /config) by matching
-// sportsConfig.launchCode (IBC_T[ORI]) to Provider.code / name, unless an
-// explicit sportsConfig.publicCode override is set. Success: { status: true,
+// public_code is the BO-selected sports product (GET /config data.sports_product),
+// unless an explicit sportsConfig.publicCode override is set. Success: { status: true,
 // type: "redirect", launcher: { url } }.
 //
 // Product `status` is checked before the sign-in gate and before /opengame:
@@ -67,7 +66,7 @@ export function sportsStateFromStatus(status: number): Exclude<SportsProductStat
 
 export async function getSportsProductStatus(lang: string): Promise<SportsProductStatus> {
   const override = sportsConfig.publicCode.trim();
-  const lookup = await lookupLobbyProductByCode(sportsConfig.launchCode, lobbyLocale(lang));
+  const lookup = await lookupSportsProduct(lobbyLocale(lang));
   if (!lookup.ok) return { state: "unknown", ...(override ? { publicCode: override } : {}) };
   if (!lookup.product) return { state: "unavailable" };
   const state = sportsStateFromStatus(lookup.product.status);

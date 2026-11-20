@@ -429,21 +429,10 @@ export function parseProductsWithStatus(payload: unknown): LobbyProductRecord[] 
   return products;
 }
 
-function matchProductByCode<T extends { code: string; name: string }>(products: T[], code: string): T | null {
-  const needle = code.trim().toLowerCase();
-  if (!needle) return null;
-  return (
-    products.find((item) => item.code.toLowerCase() === needle) ??
-    products.find((item) => item.name.toLowerCase() === needle) ??
-    products.find((item) => item.name.toLowerCase().includes(needle)) ??
-    null
-  );
-}
-
-// Fetch GET /config and locate a product by internal `code` (or name), including
-// non-active statuses. `{ ok: false }` means the request itself failed (network /
+// Fetch GET /config and return the BO-selected sports product (data.sports_product),
+// including non-active statuses. No sports_product set -> product null. `{ ok: false }` means the request itself failed (network /
 // missing API base) — callers must not treat that as "product missing".
-export async function lookupLobbyProductByCode(code: string, locale: string): Promise<LobbyProductLookup> {
+export async function lookupSportsProduct(locale: string): Promise<LobbyProductLookup> {
   if (!apiConfig.baseUrl) return { ok: false };
   const query = `?locale=${encodeURIComponent(locale)}`;
   try {
@@ -454,20 +443,11 @@ export async function lookupLobbyProductByCode(code: string, locale: string): Pr
     });
     const products = parseProductsWithStatus(payload);
     const preferred = text(asRecord(asRecord(payload)?.data)?.sports_product);
-    const product = (preferred && products.find((item) => item.id === preferred)) || matchProductByCode(products, code);
+    const product = (preferred && products.find((item) => item.id === preferred)) || null;
     return { ok: true, product };
   } catch {
     return { ok: false };
   }
-}
-
-// Locate a lobby-listable (status 1) product by its internal `code` (e.g. IBC_T[ORI])
-// or display name. Returns the Provider whose `id` is the public_code used by /opengame.
-// For status-aware lookups (maintenance / coming soon), use lookupLobbyProductByCode.
-export async function findLobbyProductByCode(code: string, locale: string): Promise<Provider | null> {
-  const products = await fetchLobbyProducts(locale);
-  const match = matchProductByCode(products, code);
-  return match ?? null;
 }
 
 // One game from a provider's list, plus the other games in that list (the game page's
