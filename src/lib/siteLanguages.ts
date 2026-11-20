@@ -29,7 +29,9 @@ async function fromApi(): Promise<SiteLanguage[]> {
     });
     const languages = parseLanguages(payload);
     if (languages.length > 0) {
-      cacheLife({ stale: 60, revalidate: 60, expire: 3600 });
+      // stale must be ≥ 300 s or the result is left out of the App Shell, and the [lang] layout
+      // awaiting it outside Suspense blocks every navigation (instant-shell insight).
+      cacheLife({ stale: 300, revalidate: 60, expire: 3600 });
       return languages;
     }
   } catch {
@@ -37,7 +39,8 @@ async function fromApi(): Promise<SiteLanguage[]> {
   }
   // The [lang] layout reads this outside any Suspense boundary, so a failure is cached
   // briefly (not zero, which would make the whole shell dynamic) and retried after 30 s.
-  cacheLife({ stale: 30, revalidate: 30, expire: 300 });
+  // stale stays at 300 for the App Shell rule above; revalidate drives the server retry.
+  cacheLife({ stale: 300, revalidate: 30, expire: 300 });
   return FALLBACK_LANGUAGES;
 }
 

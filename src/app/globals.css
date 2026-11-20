@@ -1821,6 +1821,8 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
   inset: 0;
   margin: auto;
   display: grid;
+  /* minmax(0, …): the input's intrinsic width must not widen the column past the panel */
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.625rem;
   width: min(100% - 2rem, 26rem);
   height: fit-content;

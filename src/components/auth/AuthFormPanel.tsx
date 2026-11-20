@@ -51,7 +51,7 @@ export function AuthFormPanel({
               <BenefitChips />
             </>
           )}
-          <SocialLogin />
+          <SocialLogin onSuccess={onSuccess} />
         </div>
       </div>
     </div>

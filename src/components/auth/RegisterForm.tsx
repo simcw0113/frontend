@@ -24,7 +24,7 @@ type Errors = {
 // a username must include at least one letter and one digit so a pure
 // number cannot be registered and later treated as a phone at login.
 // full_name is letters/spaces/apostrophes; password min 6 on the API (kept at 8 here).
-const USERNAME_PATTERN = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_-]{6,20}$/;
+export const USERNAME_PATTERN = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_-]{6,20}$/;
 const REAL_NAME_PATTERN = /^[A-Za-z]+(?:[ '][A-Za-z]+)*$/;
 const PHONE_MIN = 6;
 const PHONE_MAX = 12;

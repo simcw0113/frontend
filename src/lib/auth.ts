@@ -51,6 +51,8 @@ async function postAuth(url: string, body: unknown) {
       asErrorCode(record.code) ?? (record.message ? undefined : "api_failed"),
     );
   }
+
+  return payload;
 }
 
 export async function loginWithPassword({ identifier, password, remember }: LoginInput) {
@@ -82,4 +84,13 @@ export async function registerAccount(input: RegisterInput) {
     referral: input.referral || undefined,
   });
   markSignedIn();
+}
+
+// Google: { id_token }. Telegram: the raw Telegram.Login.auth user object.
+// Returns false when this is a new account and the backend needs `member_username` first.
+export async function loginWithSocial(provider: "google" | "telegram", data: Record<string, unknown>) {
+  const payload = await postAuth("/api/auth/social", { ...data, provider });
+  if ((payload as { needUsername?: unknown } | null)?.needUsername === true) return false;
+  markSignedIn();
+  return true;
 }

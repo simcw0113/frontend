@@ -452,7 +452,10 @@ export async function lookupLobbyProductByCode(code: string, locale: string): Pr
       auth: false,
       cache: "no-store",
     });
-    return { ok: true, product: matchProductByCode(parseProductsWithStatus(payload), code) };
+    const products = parseProductsWithStatus(payload);
+    const preferred = text(asRecord(asRecord(payload)?.data)?.sports_product);
+    const product = (preferred && products.find((item) => item.id === preferred)) || matchProductByCode(products, code);
+    return { ok: true, product };
   } catch {
     return { ok: false };
   }
