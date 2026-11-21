@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/missions">
   const t = dictionaryFor(lang);
   return {
     title: t.menu.missions,
-    description: t.comingSoon.missionsMeta,
+    description: t.missions.meta,
     alternates: {
       canonical: localizedPath(lang, PATH),
       languages: languageAlternates(PATH, await getSiteLanguages()),
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/missions">
   };
 }
 
-// Placeholder inside the lobby shell (header, sidebar, footer): title + "Coming soon".
+// Missions inside the lobby shell (header, sidebar, footer): components/lobby/Missions.tsx.
 export default function MissionsPage() {
   return <LobbyScreen focus="missions" games={{}} />;
 }

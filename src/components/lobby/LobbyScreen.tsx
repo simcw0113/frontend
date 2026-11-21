@@ -34,6 +34,7 @@ import { AffiliateHeader, AffiliatePage } from "@/components/lobby/AffiliatePage
 import { Avatar, initialsFrom } from "@/components/lobby/Avatar";
 import { ProfilePage, ProfileSkeleton } from "@/components/lobby/ProfilePage";
 import { ComingSoonHeader, TopNav } from "@/components/lobby/TopNav";
+import { MissionsHeader, MissionsPage } from "@/components/lobby/Missions";
 import { VipClub, VipHeader } from "@/components/lobby/VipClub";
 import { sidebarAffiliateItem, sidebarMissionsItem, sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
 import { PlayerGameList } from "@/components/lobby/HomeGameContent";
@@ -660,8 +661,10 @@ export function LobbyScreen({
               <DepositHeader />
             ) : focus === "withdraw" ? (
               <WithdrawHeader />
-            ) : focus === "z-ai" || focus === "missions" ? (
-              <ComingSoonHeader title={focus === "z-ai" ? t.topNav.zAi : t.menu.missions} />
+            ) : focus === "missions" ? (
+              <MissionsHeader />
+            ) : focus === "z-ai" ? (
+              <ComingSoonHeader title={t.topNav.zAi} />
             ) : focus === "game" || focus === "sports" || focus === "profile" ? null : (
               <div>
                 <LobbyLink
@@ -830,6 +833,15 @@ export function LobbyScreen({
             </>
           ) : focus === "vip" ? (
             <VipClub />
+          ) : focus === "missions" ? (
+            <MissionsPage
+              signedIn={Boolean(user)}
+              ready={ready}
+              onSignIn={() => {
+                setAuthView("login");
+                setSignInOpen(true);
+              }}
+            />
           ) : focus === "deposit" ? (
             <DepositPage
               onSignIn={() => {

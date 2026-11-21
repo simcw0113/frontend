@@ -292,8 +292,7 @@
     "text": "Demnächst verfügbar",
     "sportsMeta": "Sportwetten sind bald verfügbar.",
     "vipMeta": "VIP-Stufen, Rakeback und Cashback.",
-    "zAiMeta": "Z-AI kommt bald.",
-    "missionsMeta": "Missionen sind bald verfügbar."
+    "zAiMeta": "Z-AI kommt bald."
   },
   "playerGames": {
     "recentEmpty": "Noch keine zuletzt gespielten Spiele",
@@ -532,7 +531,6 @@
     "referralCopy": "Kopieren",
     "referralCopied": "Kopiert"
   },
-
   "profile": {
     "meta": "Dein Kontoprofil.",
     "title": "Profil",

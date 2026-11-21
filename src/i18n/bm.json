@@ -292,8 +292,7 @@
     "text": "Akan datang",
     "sportsMeta": "Pertaruhan sukan akan datang tidak lama lagi.",
     "vipMeta": "Tahap VIP, rebat dan pulangan tunai.",
-    "zAiMeta": "Z-AI akan datang tidak lama lagi.",
-    "missionsMeta": "Misi akan datang tidak lama lagi."
+    "zAiMeta": "Z-AI akan datang tidak lama lagi."
   },
   "playerGames": {
     "recentEmpty": "Belum ada permainan terkini",
@@ -532,7 +531,6 @@
     "referralCopy": "Salin",
     "referralCopied": "Disalin"
   },
-
   "profile": {
     "meta": "Profil akaun anda.",
     "title": "Profil",
@@ -568,5 +566,42 @@
     "wagerContest": "Peraduan Wager",
     "noContest": "Alamak! Tiada data lagi!",
     "empty": "-"
+  },
+  "missions": {
+    "subtitle": "Selesaikan cabaran, capai sasaran dan tuntut ganjaran anda.",
+    "meta": "Misi harian dan mingguan: capai sasaran, tuntut ganjaran.",
+    "tabs": {
+      "ongoing": "Sedang berjalan",
+      "my_complete": "Selesai saya",
+      "finished": "Tamat"
+    },
+    "target": "Sasaran",
+    "reward": "Ganjaran",
+    "progress": "Kemajuan",
+    "minBet": "Pertaruhan min. {amount}",
+    "goal": {
+      "Login": "Log masuk {n} hari",
+      "Deposit": "Deposit {amount}",
+      "Turnover": "Pertaruhan {amount}",
+      "Winover": "Menang {x}x · {n} kali"
+    },
+    "cycle": {
+      "Daily": "Harian",
+      "Weekly": "Mingguan",
+      "Monthly": "Bulanan",
+      "Yearly": "Tahunan"
+    },
+    "timeLeft": "Tinggal {time}",
+    "ended": "Tamat",
+    "claim": "Tuntut",
+    "claimed": "Dituntut",
+    "completed": "Selesai",
+    "claimFailed": "Ganjaran tidak dapat dituntut. Sila cuba lagi.",
+    "play": "Main",
+    "signIn": "Log masuk untuk sertai",
+    "empty": "Tiada misi buat masa ini.",
+    "error": "Misi tidak dapat dimuatkan.",
+    "retry": "Cuba lagi",
+    "terms": "Terma"
   }
 }

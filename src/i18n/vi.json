@@ -292,8 +292,7 @@
     "text": "Sắp ra mắt",
     "sportsMeta": "Cá cược thể thao sắp ra mắt.",
     "vipMeta": "Cấp VIP, hoàn trả và hoàn tiền.",
-    "zAiMeta": "Z-AI sắp ra mắt.",
-    "missionsMeta": "Nhiệm vụ sắp ra mắt."
+    "zAiMeta": "Z-AI sắp ra mắt."
   },
   "playerGames": {
     "recentEmpty": "Chưa có game gần đây",
@@ -532,7 +531,6 @@
     "referralCopy": "Sao chép",
     "referralCopied": "Đã sao chép"
   },
-
   "profile": {
     "meta": "Hồ sơ tài khoản của bạn.",
     "title": "Hồ sơ",
@@ -568,5 +566,42 @@
     "wagerContest": "Cuộc thi cược",
     "noContest": "Rất tiếc! Chưa có dữ liệu!",
     "empty": "-"
+  },
+  "missions": {
+    "subtitle": "Hoàn thành thử thách, đạt mục tiêu và nhận thưởng.",
+    "meta": "Nhiệm vụ hằng ngày và hằng tuần: đạt mục tiêu, nhận thưởng.",
+    "tabs": {
+      "ongoing": "Đang diễn ra",
+      "my_complete": "Tôi đã hoàn thành",
+      "finished": "Đã kết thúc"
+    },
+    "target": "Mục tiêu",
+    "reward": "Phần thưởng",
+    "progress": "Tiến độ",
+    "minBet": "Cược tối thiểu {amount}",
+    "goal": {
+      "Login": "Đăng nhập {n} ngày",
+      "Deposit": "Nạp {amount}",
+      "Turnover": "Cược {amount}",
+      "Winover": "Thắng {x}x · {n} lần"
+    },
+    "cycle": {
+      "Daily": "Hằng ngày",
+      "Weekly": "Hằng tuần",
+      "Monthly": "Hằng tháng",
+      "Yearly": "Hằng năm"
+    },
+    "timeLeft": "Còn {time}",
+    "ended": "Đã kết thúc",
+    "claim": "Nhận",
+    "claimed": "Đã nhận",
+    "completed": "Đã hoàn thành",
+    "claimFailed": "Không thể nhận thưởng. Vui lòng thử lại.",
+    "play": "Chơi",
+    "signIn": "Đăng nhập để tham gia",
+    "empty": "Hiện chưa có nhiệm vụ.",
+    "error": "Không tải được nhiệm vụ.",
+    "retry": "Thử lại",
+    "terms": "Điều khoản"
   }
 }

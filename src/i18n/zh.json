@@ -292,8 +292,7 @@
     "text": "敬请期待",
     "sportsMeta": "体育投注即将上线。",
     "vipMeta": "VIP 等级、返水与回馈。",
-    "zAiMeta": "Z-AI 即将上线。",
-    "missionsMeta": "任务即将推出。"
+    "zAiMeta": "Z-AI 即将上线。"
   },
   "playerGames": {
     "recentEmpty": "暂无最近游戏",
@@ -532,7 +531,6 @@
     "referralCopy": "复制",
     "referralCopied": "已复制"
   },
-
   "profile": {
     "meta": "你的账户资料。",
     "title": "个人资料",
@@ -568,5 +566,42 @@
     "wagerContest": "投注竞赛",
     "noContest": "哎呀！暂无数据！",
     "empty": "-"
+  },
+  "missions": {
+    "subtitle": "完成挑战，达成目标，领取奖励。",
+    "meta": "每日与每周任务：达成目标即可领取奖励。",
+    "tabs": {
+      "ongoing": "进行中",
+      "my_complete": "我已完成",
+      "finished": "已结束"
+    },
+    "target": "目标",
+    "reward": "奖励",
+    "progress": "进度",
+    "minBet": "最低投注 {amount}",
+    "goal": {
+      "Login": "登录 {n} 天",
+      "Deposit": "存款 {amount}",
+      "Turnover": "投注 {amount}",
+      "Winover": "赢得 {x}x · {n} 次"
+    },
+    "cycle": {
+      "Daily": "每日",
+      "Weekly": "每周",
+      "Monthly": "每月",
+      "Yearly": "每年"
+    },
+    "timeLeft": "剩余 {time}",
+    "ended": "已结束",
+    "claim": "领取",
+    "claimed": "已领取",
+    "completed": "已完成",
+    "claimFailed": "领取失败，请重试。",
+    "play": "开始游戏",
+    "signIn": "登录参与",
+    "empty": "目前没有任务。",
+    "error": "任务加载失败。",
+    "retry": "重试",
+    "terms": "条款"
   }
 }

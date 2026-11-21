@@ -82,8 +82,8 @@ export function htmlToText(value: string): string {
 }
 
 // Banner and content images are often site-root paths (`/storage/...`).
-function mediaUrl(value: string): string {
-  if (!value || /^https?:\/\//i.test(value)) return value;
+export function mediaUrl(value: string): string {
+  if (!value || /^(https?:)?\/\//i.test(value)) return value; // absolute or protocol-relative (//cdn...)
   const origin = (apiConfig.baseUrl || "").replace(/\/api\/?$/, "");
   if (!origin) return value;
   return `${origin}${value.startsWith("/") ? value : `/${value}`}`;

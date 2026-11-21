@@ -63,6 +63,9 @@ export const apiConfig = {
   // POST /opengame. Body is { provider: public_code, game: game_code }.
   // Sent with Authorization: Bearer <token> and a country-id header. Never cached.
   gameLaunchPath: "/opengame",
+  // POST /task_list (token optional: adds progress) and /claim_task_reward { task_id }. Body has { locale }.
+  taskListPath: "/task_list",
+  claimTaskPath: "/claim_task_reward",
 };
 
 // Sportsbook. The product is the one picked in BO (GET /config data.sports_product);

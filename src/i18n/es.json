@@ -292,8 +292,7 @@
     "text": "Próximamente",
     "sportsMeta": "Las apuestas deportivas llegan pronto.",
     "vipMeta": "Niveles VIP, rakeback y cashback.",
-    "zAiMeta": "Z-AI llega pronto.",
-    "missionsMeta": "Las misiones llegarán pronto."
+    "zAiMeta": "Z-AI llega pronto."
   },
   "playerGames": {
     "recentEmpty": "Aún no hay juegos recientes",
@@ -532,7 +531,6 @@
     "referralCopy": "Copiar",
     "referralCopied": "Copiado"
   },
-
   "profile": {
     "meta": "El perfil de tu cuenta.",
     "title": "Perfil",
