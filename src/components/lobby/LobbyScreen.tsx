@@ -975,7 +975,7 @@ export function LobbyScreen({
 }
 
 function BannerSkeleton() {
-  return <div className="aspect-[4/1] animate-pulse rounded-2xl bg-white/5" />;
+  return <div className="aspect-[5/2] animate-pulse rounded-2xl bg-white/5" />;
 }
 
 // Stable fallback so Hero can always call use(). Home passes GET /config banners.
@@ -1120,11 +1120,11 @@ function Hero({ banners = fallbackBanners }: { banners?: Promise<BannerSlide[]> 
           const image = (
             <picture className="block h-full">
               {slide.mobileUrl ? <source media="(max-width: 767px)" srcSet={slide.mobileUrl} /> : null}
-              <img src={slide.imageUrl} alt={alt} className="h-full w-full object-contain" draggable={false} />
+              <img src={slide.imageUrl} alt={alt} className="h-full w-full object-cover" draggable={false} />
             </picture>
           );
           return (
-            <article key={slide.id} aria-hidden={!active} className="aspect-[4/1] w-full shrink-0">
+            <article key={slide.id} aria-hidden={!active} className="aspect-[5/2] w-full shrink-0">
               {slide.href ? (
                 <a href={slide.href} tabIndex={active ? 0 : -1} draggable={false} className="block h-full w-full">
                   {image}
