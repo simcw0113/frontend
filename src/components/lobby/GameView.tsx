@@ -86,7 +86,7 @@ function Cover({ game, size }: { game: Game; size: number }) {
   const [failed, setFailed] = useState(false);
   return game.image && !failed ? (
     // eslint-disable-next-line @next/next/no-img-element -- covers may come from any API host
-    <img src={game.image} alt="" width={size} height={Math.round((size * 4) / 3)} loading="lazy" decoding="async" onError={() => setFailed(true)} className="absolute inset-0 size-full object-cover" />
+    <img src={game.image} alt="" width={size} height={Math.round((size * 4) / 3)} loading="lazy" decoding="async" onError={() => setFailed(true)} className="absolute inset-0 size-full object-contain" />
   ) : (
     <span className="absolute inset-0 grid place-items-center">
       <SymbolMark symbol={game.symbol} className="size-3/5 drop-shadow-lg" />

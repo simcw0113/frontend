@@ -1356,7 +1356,7 @@ html[data-lobby-dir="back"]::view-transition-new(lobby-content) {
 }
 
 .promo-banner--image {
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   background: var(--lobby-deep);
 }

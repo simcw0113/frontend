@@ -257,7 +257,7 @@ export function GameCover({ game, fluid = false, href, onGo, className }: { game
             loading="lazy"
             decoding="async"
             onError={() => setFailed(true)}
-            className="game-art absolute inset-0 size-full object-cover"
+            className="game-art absolute inset-0 size-full object-contain"
           />
         ) : (
           <>
