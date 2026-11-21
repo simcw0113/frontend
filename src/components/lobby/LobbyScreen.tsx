@@ -1127,7 +1127,7 @@ function Hero({ banners = fallbackBanners }: { banners?: Promise<BannerSlide[]> 
           const image = (
             <picture className="block h-full">
               {slide.mobileUrl ? <source media="(max-width: 767px)" srcSet={slide.mobileUrl} /> : null}
-              <img src={slide.imageUrl} alt={alt} className="h-full w-full object-cover" draggable={false} />
+              <img src={slide.imageUrl} alt={alt} className="h-full w-full object-contain" draggable={false} />
             </picture>
           );
           return (

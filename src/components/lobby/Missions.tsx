@@ -213,7 +213,7 @@ function MissionCard({
             loading="lazy"
             decoding="async"
             onError={() => setFailed(true)}
-            className="absolute inset-0 size-full object-cover"
+            className="absolute inset-0 size-full object-contain"
           />
         ) : (
           <p aria-hidden="true" className="absolute inset-0 grid place-items-center text-4xl font-black text-brand/60">
