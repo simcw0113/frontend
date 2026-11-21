@@ -7,11 +7,12 @@ import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { defaultCasinoCategory } from "@/config/categories";
 import type { SportsProductState } from "@/lib/sportsLaunch";
 
-// Full-height IBC sportsbook iframe for /{lang}/sports (KickWin-style: below the
+// Full-height sportsbook iframe for /{lang}/sports (KickWin-style: below the
 // top bar, beside the desktop sidebar, above the phone tab bar). Product status
 // is checked first (signed-out users see the same unavailable / maintenance /
-// coming-soon cards). Launch goes through /api/sports/launch so the member token
-// never reaches the browser.
+// coming-soon cards). Launch goes through /api/sports/launch (backend /opengame)
+// so the member token never reaches the browser. Signed out: demo link (demo: true) if
+// the provider has one, otherwise the sign-in card. Signing in re-launches with the token.
 
 const SANDBOX =
   "allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox allow-forms";
@@ -74,10 +75,6 @@ export function SportsView({
       }
       if (!ready) {
         setPhase("session");
-        return;
-      }
-      if (!signedIn) {
-        setPhase("signin");
         return;
       }
 

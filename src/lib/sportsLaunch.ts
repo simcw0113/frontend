@@ -2,8 +2,9 @@ import { apiConfig, sportsConfig } from "@/config/site";
 import { apiJson, isApiStatusFailure, readApiMessage } from "@/lib/api";
 import { lobbyLocale, lookupSportsProduct } from "@/lib/lobbyApi";
 
-// Sports page launch. Same /opengame endpoint as casino games, but the body is
-// { provider: public_code, isMobile } — not { code } and not { provider, game }.
+// Sports page launch: POST /opengame { provider: public_code, isMobile }.
+// Signed out it also sends demo: true -> the provider's demo link (e.g. TGSport guest view)
+// when it has one, otherwise a login error -> "signin".
 // public_code is the BO-selected sports product (GET /config data.sports_product),
 // unless an explicit sportsConfig.publicCode override is set. Success: { status: true,
 // type: "redirect", launcher: { url } }.
@@ -84,7 +85,6 @@ export async function getSportsLaunch(opts: {
   if (status.state === "unavailable" || status.state === "maintenance" || status.state === "comingSoon") {
     return { error: status.state };
   }
-  if (!opts.token) return { error: "signin" };
   const provider = status.publicCode ?? "";
   if (!provider) return { error: "failed" };
   const config: Partial<typeof apiConfig> = apiConfig;
@@ -94,16 +94,16 @@ export async function getSportsLaunch(opts: {
       method: "POST",
       auth: false,
       headers: {
-        Authorization: `Bearer ${opts.token}`,
+        ...(opts.token ? { Authorization: `Bearer ${opts.token}` } : {}),
         "Content-Type": "application/json",
         "country-id": config.lobbyCountryId || "1",
         locale: lobbyLocale(opts.lang),
       },
-      body: JSON.stringify({ provider, isMobile: opts.isMobile }),
+      body: JSON.stringify({ provider, isMobile: opts.isMobile, ...(opts.token ? {} : { demo: true }) }),
       cache: "no-store",
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
-    if (isApiStatusFailure(payload)) return { error: "failed", message: readApiMessage(payload) ?? undefined };
+    if (isApiStatusFailure(payload)) return { error: opts.token ? "failed" : "signin", message: readApiMessage(payload) ?? undefined };
     const url = readLaunchUrl(payload);
     return url ? { url } : { error: "failed", message: readApiMessage(payload) ?? undefined };
   } catch {
