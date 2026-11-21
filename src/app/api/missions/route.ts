@@ -3,11 +3,11 @@ import { apiConfig } from "@/config/site";
 import { ApiError, apiJson, isApiStatusFailure, readApiMessage } from "@/lib/api";
 import { getAuthTokenFromCookie } from "@/lib/authCookie";
 import { lobbyLocale } from "@/lib/lobbyApi";
-import { htmlToText, mediaUrl } from "@/lib/promotions";
+import { mediaUrl } from "@/lib/promotions";
 
 // GET  /api/missions?locale=en -> backend POST /task_list. Token optional (signed out = no progress).
 //      { ongoing: Mission[], finished: Mission[], my_complete: Mission[] } (fields: Mission in components/lobby/Missions.tsx).
-//      description / terms arrive as CMS HTML and leave as plain text; image paths become absolute.
+//      Image paths become absolute.
 // POST /api/missions { taskId, locale } -> backend POST /claim_task_reward. Needs the cookie token.
 
 const noStore = { "Cache-Control": "no-store" };
@@ -21,14 +21,10 @@ async function backendPost(path: string, token: string | null, body: Record<stri
 const str = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
 
 function clean(item: Record<string, unknown>) {
-  const description = str(item.description);
-  const terms = str(item.terms);
   const image = str(item.image);
   const gameImage = str(item.game_image);
   return {
     ...item,
-    description: description && htmlToText(description),
-    terms: terms && htmlToText(terms),
     image: image && mediaUrl(image),
     game_image: gameImage && mediaUrl(gameImage),
   };

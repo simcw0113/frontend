@@ -572,36 +572,17 @@
     "meta": "Misi harian dan mingguan: capai sasaran, tuntut ganjaran.",
     "tabs": {
       "ongoing": "Sedang berjalan",
-      "my_complete": "Selesai saya",
-      "finished": "Tamat"
+      "finished": "Tamat",
+      "my_complete": "Selesai saya"
     },
     "target": "Sasaran",
     "reward": "Ganjaran",
-    "progress": "Kemajuan",
-    "minBet": "Pertaruhan min. {amount}",
-    "goal": {
-      "Login": "Log masuk {n} hari",
-      "Deposit": "Deposit {amount}",
-      "Turnover": "Pertaruhan {amount}",
-      "Winover": "Menang {x}x · {n} kali"
-    },
-    "cycle": {
-      "Daily": "Harian",
-      "Weekly": "Mingguan",
-      "Monthly": "Bulanan",
-      "Yearly": "Tahunan"
-    },
-    "timeLeft": "Tinggal {time}",
-    "ended": "Tamat",
+    "minBet": "Pertaruhan Min",
     "claim": "Tuntut",
     "claimed": "Dituntut",
-    "completed": "Selesai",
     "claimFailed": "Ganjaran tidak dapat dituntut. Sila cuba lagi.",
-    "play": "Main",
-    "signIn": "Log masuk untuk sertai",
     "empty": "Tiada misi buat masa ini.",
     "error": "Misi tidak dapat dimuatkan.",
-    "retry": "Cuba lagi",
-    "terms": "Terma"
+    "retry": "Cuba lagi"
   }
 }

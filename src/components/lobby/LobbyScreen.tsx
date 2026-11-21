@@ -834,14 +834,7 @@ export function LobbyScreen({
           ) : focus === "vip" ? (
             <VipClub />
           ) : focus === "missions" ? (
-            <MissionsPage
-              signedIn={Boolean(user)}
-              ready={ready}
-              onSignIn={() => {
-                setAuthView("login");
-                setSignInOpen(true);
-              }}
-            />
+            <MissionsPage signedIn={Boolean(user)} ready={ready} />
           ) : focus === "deposit" ? (
             <DepositPage
               onSignIn={() => {

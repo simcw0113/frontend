@@ -571,37 +571,18 @@
     "subtitle": "Complete challenges, hit the targets and claim your rewards.",
     "meta": "Daily and weekly missions: hit the target, claim the reward.",
     "tabs": {
-      "ongoing": "Ongoing",
-      "my_complete": "My completed",
-      "finished": "Finished"
+      "ongoing": "On-Going",
+      "finished": "Finished",
+      "my_complete": "My Complete"
     },
     "target": "Target",
     "reward": "Reward",
-    "progress": "Progress",
-    "minBet": "Min. bet {amount}",
-    "goal": {
-      "Login": "Log in {n} days",
-      "Deposit": "Deposit {amount}",
-      "Turnover": "Wager {amount}",
-      "Winover": "Hit {x}x · {n} times"
-    },
-    "cycle": {
-      "Daily": "Daily",
-      "Weekly": "Weekly",
-      "Monthly": "Monthly",
-      "Yearly": "Yearly"
-    },
-    "timeLeft": "{time} left",
-    "ended": "Ended",
+    "minBet": "Min Bet",
     "claim": "Claim",
     "claimed": "Claimed",
-    "completed": "Completed",
     "claimFailed": "Could not claim the reward. Please try again.",
-    "play": "Play",
-    "signIn": "Sign in to join",
     "empty": "No missions here right now.",
     "error": "Missions could not be loaded.",
-    "retry": "Try again",
-    "terms": "Terms"
+    "retry": "Try again"
   }
 }

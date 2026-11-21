@@ -572,36 +572,17 @@
     "meta": "Nhiệm vụ hằng ngày và hằng tuần: đạt mục tiêu, nhận thưởng.",
     "tabs": {
       "ongoing": "Đang diễn ra",
-      "my_complete": "Tôi đã hoàn thành",
-      "finished": "Đã kết thúc"
+      "finished": "Đã kết thúc",
+      "my_complete": "Đã hoàn thành"
     },
     "target": "Mục tiêu",
     "reward": "Phần thưởng",
-    "progress": "Tiến độ",
-    "minBet": "Cược tối thiểu {amount}",
-    "goal": {
-      "Login": "Đăng nhập {n} ngày",
-      "Deposit": "Nạp {amount}",
-      "Turnover": "Cược {amount}",
-      "Winover": "Thắng {x}x · {n} lần"
-    },
-    "cycle": {
-      "Daily": "Hằng ngày",
-      "Weekly": "Hằng tuần",
-      "Monthly": "Hằng tháng",
-      "Yearly": "Hằng năm"
-    },
-    "timeLeft": "Còn {time}",
-    "ended": "Đã kết thúc",
+    "minBet": "Cược tối thiểu",
     "claim": "Nhận",
     "claimed": "Đã nhận",
-    "completed": "Đã hoàn thành",
     "claimFailed": "Không thể nhận thưởng. Vui lòng thử lại.",
-    "play": "Chơi",
-    "signIn": "Đăng nhập để tham gia",
     "empty": "Hiện chưa có nhiệm vụ.",
     "error": "Không tải được nhiệm vụ.",
-    "retry": "Thử lại",
-    "terms": "Điều khoản"
+    "retry": "Thử lại"
   }
 }

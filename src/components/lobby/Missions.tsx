@@ -4,30 +4,19 @@ import { useEffect, useState } from "react";
 import { useI18n } from "@/components/I18nProvider";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import { showToast } from "@/components/lobby/ToastHost";
-import { fill, htmlLang } from "@/i18n";
 
-// Missions page (/missions), laid out like KickWin's Challenges: tabs, then a grid of
-// cards (game art, target, reward, progress, time left, Play / Claim).
+// Missions page (/missions), like KickWin's Challenges: three tabs, then game cards with
+// a provider tab on top and Target / Min Bet / Reward below. The card opens the game.
 // Data: GET /api/missions -> backend POST /task_list (see src/app/api/missions/route.ts).
 
 export type Mission = {
   id: number;
   title: string;
-  description: string | null; // plain text (route strips the HTML)
-  terms: string | null;
   image: string | null; // absolute URL
-  type: "Daily" | "Weekly" | "Monthly" | "Yearly" | string;
-  condition: "Login" | "Deposit" | "Turnover" | "Winover" | string;
-  target: number;
-  progress: number;
-  progress_percentage: number;
-  status: "Pending" | "Completed" | "Claimed" | "Expired" | string;
   can_claim: boolean;
-  cycle_end: string; // "Y-m-d H:i:s", server time
-  currency: string;
-  target_label: string;
+  status: "Pending" | "Completed" | "Claimed" | "Expired" | string;
+  target_label: string; // "700x", "MYR 100.00", "3 Days"
   min_bet_label: string | null;
-  winover_multiplier: number;
   reward_label: string;
   provider_badge: string | null;
   game_name: string | null;
@@ -36,9 +25,11 @@ export type Mission = {
   product_public_code: string | null;
 };
 
-type Lists = { ongoing: Mission[]; my_complete: Mission[]; finished: Mission[] };
+type Lists = { ongoing: Mission[]; finished: Mission[]; my_complete: Mission[] };
 type Tab = keyof Lists;
-const TABS: Tab[] = ["ongoing", "my_complete", "finished"];
+const TABS: Tab[] = ["ongoing", "finished", "my_complete"];
+// Provider tab colours, picked by provider name so a provider keeps its colour.
+const BADGE_COLORS = ["#c07a2c", "#f07c00", "#4fc232", "#e23a4b", "#1e3a5f", "#7c3aed"];
 
 export function MissionsHeader() {
   const { t } = useI18n();
@@ -52,16 +43,15 @@ export function MissionsHeader() {
   );
 }
 
-export function MissionsPage({ signedIn, ready, onSignIn }: { signedIn: boolean; ready: boolean; onSignIn: () => void }) {
-  const { lang, locale, t } = useI18n();
+export function MissionsPage({ signedIn, ready }: { signedIn: boolean; ready: boolean }) {
+  const { lang, t } = useI18n();
   const [lists, setLists] = useState<Lists | null>(null);
   const [error, setError] = useState(false);
   const [tab, setTab] = useState<Tab>("ongoing");
   const [claiming, setClaiming] = useState<number | null>(null);
-
   const [reload, setReload] = useState(0);
 
-  // Wait for the session so a signed-in player gets their progress on the first request.
+  // Wait for the session so a signed-in player gets their own status on the first request.
   useEffect(() => {
     if (!ready) return;
     let live = true;
@@ -99,24 +89,22 @@ export function MissionsPage({ signedIn, ready, onSignIn }: { signedIn: boolean;
   }
 
   const items = lists?.[tab] ?? [];
-  const tabs = signedIn ? TABS : TABS.filter((id) => id !== "my_complete");
 
   return (
     <section aria-labelledby="missions-title" className="mt-6">
-      <div role="tablist" aria-label={t.menu.missions} className="flex gap-2 overflow-x-auto">
-        {tabs.map((id) => (
+      <div role="tablist" aria-label={t.menu.missions} className="inline-flex max-w-full gap-1 overflow-x-auto rounded-2xl bg-black/30 p-1.5">
+        {TABS.map((id) => (
           <button
             key={id}
             type="button"
             role="tab"
             aria-selected={tab === id}
             onClick={() => setTab(id)}
-            className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
-              tab === id ? "bg-brand text-lobby" : "bg-white/5 text-muted hover:bg-white/10 hover:text-white"
+            className={`shrink-0 rounded-xl px-5 py-2.5 text-sm font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+              tab === id ? "bg-white/10 text-white" : "text-muted hover:text-white"
             }`}
           >
             {t.missions.tabs[id]}
-            {lists ? <span className="ml-1.5 opacity-70">{lists[id].length}</span> : null}
           </button>
         ))}
       </div>
@@ -134,18 +122,10 @@ export function MissionsPage({ signedIn, ready, onSignIn }: { signedIn: boolean;
         ) : items.length === 0 ? (
           <Notice>{t.missions.empty}</Notice>
         ) : (
-          <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
             {items.map((mission) => (
               <li key={mission.id}>
-                <MissionCard
-                  mission={mission}
-                  signedIn={signedIn}
-                  finished={tab === "finished"}
-                  claiming={claiming === mission.id}
-                  onClaim={() => void claim(mission)}
-                  onSignIn={onSignIn}
-                  numberLocale={htmlLang(locale)}
-                />
+                <MissionCard mission={mission} claiming={claiming === mission.id} onClaim={() => void claim(mission)} />
               </li>
             ))}
           </ul>
@@ -155,178 +135,85 @@ export function MissionsPage({ signedIn, ready, onSignIn }: { signedIn: boolean;
   );
 }
 
-function MissionCard({
-  mission,
-  signedIn,
-  finished,
-  claiming,
-  onClaim,
-  onSignIn,
-  numberLocale,
-}: {
-  mission: Mission;
-  signedIn: boolean;
-  finished: boolean;
-  claiming: boolean;
-  onClaim: () => void;
-  onSignIn: () => void;
-  numberLocale: string;
-}) {
+function MissionCard({ mission, claiming, onClaim }: { mission: Mission; claiming: boolean; onClaim: () => void }) {
   const { t } = useI18n();
   const [failed, setFailed] = useState(false);
   const art = mission.game_image || mission.image;
-  const percent = Math.max(0, Math.min(100, Math.round(mission.progress_percentage)));
-  const claimed = mission.status === "Claimed";
-  const done = claimed || mission.status === "Completed";
-  const playHref =
+  const name = mission.game_name || mission.title;
+  const href =
     mission.product_public_code && mission.game_code
       ? `/casino/all-games/provider/${encodeURIComponent(mission.product_public_code)}/game/${encodeURIComponent(mission.game_code)}`
       : null;
-  const cycle = t.missions.cycle[mission.type as keyof typeof t.missions.cycle] ?? mission.type;
+  const badge = mission.provider_badge;
+  const badgeColor = badge ? BADGE_COLORS[[...badge].reduce((sum, c) => sum + c.charCodeAt(0), 0) % BADGE_COLORS.length] : "";
 
-  const count = (n: number) => n.toLocaleString(numberLocale, { maximumFractionDigits: 2 });
-  const money = (n: number) => `${mission.currency} ${n.toLocaleString(numberLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  const goal =
-    mission.condition === "Login"
-      ? fill(t.missions.goal.Login, { n: count(mission.target) })
-      : mission.condition === "Winover"
-        ? fill(t.missions.goal.Winover, { x: count(mission.winover_multiplier), n: count(mission.target) })
-        : fill(mission.condition === "Deposit" ? t.missions.goal.Deposit : t.missions.goal.Turnover, { amount: mission.target_label });
-  const progressText =
-    mission.condition === "Deposit" || mission.condition === "Turnover"
-      ? `${money(mission.progress)} / ${money(mission.target)}`
-      : `${count(mission.progress)} / ${count(mission.target)}`;
+  const cover = (
+    <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-brand/25 via-lobby-soft to-lobby">
+      {art && !failed ? (
+        // eslint-disable-next-line @next/next/no-img-element -- images come from the API, any host
+        <img
+          ref={(img) => {
+            if (img && img.complete && img.naturalWidth === 0) setFailed(true);
+          }}
+          src={art}
+          alt={name}
+          width={330}
+          height={440}
+          loading="lazy"
+          decoding="async"
+          onError={() => setFailed(true)}
+          className="absolute inset-0 size-full object-cover"
+        />
+      ) : (
+        <p className="absolute inset-0 grid place-items-center p-3 text-center text-lg font-black">{name}</p>
+      )}
+      {badge ? (
+        <span
+          className="absolute top-0 left-1/2 max-w-[85%] -translate-x-1/2 truncate rounded-b-lg px-3 py-1 text-[11px] font-extrabold tracking-wide text-white uppercase"
+          style={{ backgroundColor: badgeColor }}
+        >
+          {badge}
+        </span>
+      ) : null}
+    </div>
+  );
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
-      <div className="relative aspect-[16/9] bg-gradient-to-br from-brand/25 via-lobby-soft to-lobby">
-        {art && !failed ? (
-          // eslint-disable-next-line @next/next/no-img-element -- images come from the API, any host
-          <img
-            ref={(img) => {
-              if (img && img.complete && img.naturalWidth === 0) setFailed(true);
-            }}
-            src={art}
-            alt=""
-            width={640}
-            height={360}
-            loading="lazy"
-            decoding="async"
-            onError={() => setFailed(true)}
-            className="absolute inset-0 size-full object-contain"
-          />
-        ) : (
-          <p aria-hidden="true" className="absolute inset-0 grid place-items-center text-4xl font-black text-brand/60">
-            {mission.condition === "Winover" ? `${count(mission.winover_multiplier)}x` : mission.target_label}
-          </p>
-        )}
-        <span className="absolute top-2 left-2 rounded-full bg-black/60 px-2.5 py-1 text-xs font-semibold backdrop-blur">{cycle}</span>
-        {done ? (
-          <span className="absolute top-2 right-2 rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-lobby">
-            {claimed ? t.missions.claimed : t.missions.completed}
-          </span>
-        ) : null}
-      </div>
-
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div>
-          <h3 className="font-bold">{mission.title}</h3>
-          {mission.game_name || mission.provider_badge ? (
-            <p className="mt-0.5 text-xs text-muted">{[mission.game_name, mission.provider_badge].filter(Boolean).join(" · ")}</p>
-          ) : null}
-          {mission.description ? <p className="mt-2 line-clamp-2 text-sm text-muted">{mission.description}</p> : null}
-        </div>
-
-        <dl className="grid grid-cols-2 gap-2 text-sm">
-          <div className="rounded-xl bg-white/5 px-3 py-2">
-            <dt className="text-xs text-muted">{t.missions.target}</dt>
-            <dd className="mt-0.5 font-semibold">{goal}</dd>
-            {mission.min_bet_label ? (
-              <dd className="mt-0.5 text-xs text-muted">{fill(t.missions.minBet, { amount: mission.min_bet_label })}</dd>
-            ) : null}
-          </div>
-          <div className="rounded-xl bg-white/5 px-3 py-2">
-            <dt className="text-xs text-muted">{t.missions.reward}</dt>
-            <dd className="mt-0.5 font-bold text-brand">{mission.reward_label}</dd>
-          </div>
-        </dl>
-
-        {signedIn ? (
-          <div>
-            <div className="flex justify-between text-xs text-muted">
-              <span>{t.missions.progress}</span>
-              <span className="text-white">{progressText}</span>
-            </div>
-            <div
-              className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/10"
-              role="progressbar"
-              aria-label={t.missions.progress}
-              aria-valuenow={percent}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            >
-              <div className="h-full rounded-full bg-brand" style={{ width: `${percent}%` }} />
-            </div>
-          </div>
-        ) : null}
-
-        {mission.terms ? (
-          <details className="text-xs text-muted">
-            <summary className="cursor-pointer font-semibold hover:text-white">{t.missions.terms}</summary>
-            <p className="mt-1.5">{mission.terms}</p>
-          </details>
-        ) : null}
-
-        <div className="mt-auto flex items-center justify-between gap-3 pt-1">
-          <p className="text-xs text-muted">{finished ? t.missions.ended : <TimeLeft end={mission.cycle_end} />}</p>
-          {!signedIn ? (
-            <ActionButton onClick={onSignIn}>{t.missions.signIn}</ActionButton>
-          ) : mission.can_claim ? (
-            <ActionButton onClick={onClaim} disabled={claiming}>
-              {t.missions.claim}
-            </ActionButton>
-          ) : claimed || finished ? null : playHref ? (
-            <LobbyLink
-              href={playHref}
-              className="rounded-lg bg-white/10 px-4 py-2 text-sm font-bold hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-            >
-              {t.missions.play}
-            </LobbyLink>
-          ) : null}
-        </div>
-      </div>
+    <article className="flex h-full flex-col overflow-hidden rounded-2xl bg-black/30 pb-4">
+      {href ? (
+        <LobbyLink href={href} className="block focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand">
+          {cover}
+        </LobbyLink>
+      ) : (
+        cover
+      )}
+      <dl className="mt-4 space-y-1.5 px-4 text-sm">
+        <Row label={t.missions.target} value={mission.target_label} />
+        {mission.min_bet_label ? <Row label={t.missions.minBet} value={mission.min_bet_label} /> : null}
+        <Row label={t.missions.reward} value={mission.reward_label} />
+      </dl>
+      {mission.can_claim ? (
+        <button
+          type="button"
+          onClick={onClaim}
+          disabled={claiming}
+          className="mx-4 mt-3 rounded-lg bg-brand py-2 text-sm font-extrabold text-lobby disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          {t.missions.claim}
+        </button>
+      ) : mission.status === "Claimed" ? (
+        <p className="mx-4 mt-3 rounded-lg bg-white/5 py-2 text-center text-sm font-semibold text-muted">{t.missions.claimed}</p>
+      ) : null}
     </article>
   );
 }
 
-// shortcut: cycle_end is server time read as the viewer's local time; fine while players share the server's timezone, send an ISO offset from /task_list when they don't.
-function TimeLeft({ end }: { end: string }) {
-  const { t } = useI18n();
-  // Cards render only after the client fetch, so reading the clock here cannot mismatch SSR.
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 60_000);
-    return () => window.clearInterval(id);
-  }, []);
-  const endAt = new Date(end.replace(" ", "T")).getTime();
-  if (Number.isNaN(endAt)) return null;
-  const minutes = Math.max(0, Math.floor((endAt - now) / 60_000));
-  const d = Math.floor(minutes / 1440);
-  const h = Math.floor((minutes % 1440) / 60);
-  const m = minutes % 60;
-  return <>{fill(t.missions.timeLeft, { time: d > 0 ? `${d}d ${h}h` : `${h}h ${m}m` })}</>;
-}
-
-function ActionButton({ children, onClick, disabled }: { children: React.ReactNode; onClick: () => void; disabled?: boolean }) {
+function Row({ label, value }: { label: string; value: string }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="rounded-lg bg-brand px-4 py-2 text-sm font-extrabold text-lobby disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-    >
-      {children}
-    </button>
+    <div className="flex items-baseline justify-between gap-2">
+      <dt className="text-muted">{label}</dt>
+      <dd className="truncate font-medium">{value}</dd>
+    </div>
   );
 }
 
@@ -336,14 +223,14 @@ function Notice({ children }: { children: React.ReactNode }) {
 
 function MissionsSkeleton() {
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-hidden="true" data-skeleton="">
-      {Array.from({ length: 6 }, (_, i) => (
-        <li key={i} className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
-          <div className="aspect-[16/9] bg-white/5 motion-safe:animate-pulse" />
-          <div className="space-y-3 p-4">
-            <div className="h-4 w-3/5 rounded bg-white/10" />
-            <div className="h-14 rounded-xl bg-white/5" />
-            <div className="h-2 rounded-full bg-white/10" />
+    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5" aria-hidden="true" data-skeleton="">
+      {Array.from({ length: 5 }, (_, i) => (
+        <li key={i} className="overflow-hidden rounded-2xl bg-black/30 pb-4">
+          <div className="aspect-[3/4] bg-white/5 motion-safe:animate-pulse" />
+          <div className="mt-4 space-y-2 px-4">
+            <div className="h-3.5 rounded bg-white/10" />
+            <div className="h-3.5 rounded bg-white/10" />
+            <div className="h-3.5 rounded bg-white/10" />
           </div>
         </li>
       ))}
