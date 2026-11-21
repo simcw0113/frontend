@@ -34,11 +34,13 @@ const BADGE_COLORS = ["#c07a2c", "#f07c00", "#4fc232", "#e23a4b", "#1e3a5f", "#7
 export function MissionsHeader() {
   const { t } = useI18n();
   return (
-    <div className="promo-header">
-      <h2 id="missions-title" className="text-xl font-bold">
-        {t.menu.missions}
-      </h2>
-      <p className="mt-1 max-w-xl text-sm text-muted">{t.missions.subtitle}</p>
+    // KickWin-style banner: plain title on a lighter panel with a darker strip below, no border.
+    <div className="overflow-hidden rounded-2xl bg-white/[0.03] pb-6">
+      <div className="bg-white/[0.05] px-6 py-10 sm:px-8 sm:py-12">
+        <h2 id="missions-title" className="text-2xl font-bold sm:text-3xl">
+          {t.menu.missions}
+        </h2>
+      </div>
     </div>
   );
 }
