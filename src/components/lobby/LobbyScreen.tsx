@@ -36,7 +36,7 @@ import { ProfilePage, ProfileSkeleton } from "@/components/lobby/ProfilePage";
 import { ComingSoonHeader, TopNav } from "@/components/lobby/TopNav";
 import { MissionsHeader, MissionsPage } from "@/components/lobby/Missions";
 import { VipClub, VipHeader } from "@/components/lobby/VipClub";
-import { sidebarAffiliateItem, sidebarMissionsItem, sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
+import { sidebarAffiliateItem, sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
 import { PlayerGameList } from "@/components/lobby/HomeGameContent";
 import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
 import { VIP_ENABLED } from "@/config/vip";
@@ -332,18 +332,10 @@ export function LobbyScreen({
       { path: "/", label: t.menu.home, Icon: HomeIcon },
       ...sidebarPlayerItems.map((item) => ({ path: item.path, label: t.menu[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
     ],
-    [
-      ...sidebarPromoItems.flatMap((item) => {
-        const entry = { path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] };
-        // Missions sits right below Promotions (sidebar only, not in the top bar).
-        if (item.id !== "promotions") return [entry];
-        const missions = sidebarMissionsItem;
-        return [entry, { path: missions.path, label: t.menu[missions.labelKey], Icon: SIDEBAR_ICONS[missions.id] }];
-      }),
-      // Affiliate is sidebar-only, after VIP (not in the top bar).
-      { path: sidebarAffiliateItem.path, label: t.menu[sidebarAffiliateItem.labelKey], Icon: SIDEBAR_ICONS[sidebarAffiliateItem.id] },
-    ],
+    sidebarPromoItems.map((item) => ({ path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
     sidebarNavItems.map((item) => ({ path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
+    // Affiliate sits with the language selector at the bottom (sidebar only, not in the top bar).
+    [{ path: sidebarAffiliateItem.path, label: t.menu[sidebarAffiliateItem.labelKey], Icon: SIDEBAR_ICONS[sidebarAffiliateItem.id] }],
   ];
   const openRegister = () => {
     setAuthView("register");
@@ -395,8 +387,8 @@ export function LobbyScreen({
           </button>
         </div>
         <div className="lobby-aside-body flex flex-col p-3">
-          {/* Groups (config/topNav.ts): Home + the player's pages | Promotions, VIP | games, then
-              the language selector. The shown page's link is aria-current="page". */}
+          {/* Groups (config/topNav.ts): Home + the player's pages (+ Missions) | Promotions, VIP |
+              games | Affiliate | the language selector. The shown page's link is aria-current="page". */}
           {sideGroups.map((group, groupIndex) => (
             <div key={groupIndex} className="contents">
               {groupIndex > 0 ? <hr className="my-3 border-white/10" /> : null}
@@ -1233,7 +1225,6 @@ const SIDEBAR_ICONS: Record<
   | (typeof sidebarNavItems)[number]["id"]
   | (typeof sidebarPlayerItems)[number]["id"]
   | (typeof sidebarPromoItems)[number]["id"]
-  | typeof sidebarMissionsItem.id
   | typeof sidebarAffiliateItem.id,
   () => ReactNode
 > = {

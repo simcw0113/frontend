@@ -46,16 +46,14 @@ export const topNavItems: TopNavItem[] = [...gameNavItems, ...afterGamesNavItems
 // The sidebar and footer still list them. Set true to show them again.
 export const TOP_NAV_LINKS_SHOWN = false;
 
-// Sidebar-only page of the promotions group, right below Promotions (label under `menu`).
-export const sidebarMissionsItem = { id: "missions", labelKey: "missions", path: "/missions" } as const;
-
-// Sidebar-only, after VIP (not in the top bar). Label under `menu`.
+// Sidebar-only, in the bottom group right above the language selector (not in the top bar). Label under `menu`.
 export const sidebarAffiliateItem = { id: "affiliate", labelKey: "affiliate", path: "/affiliate" } as const;
 
 // Sidebar items of the player's own pages, right under Home (labels under `menu`).
 export const sidebarPlayerItems = [
   { id: "recent", labelKey: "recent", path: "/recent" },
   { id: "favourites", labelKey: "favourites", path: "/favourites" },
+  { id: "missions", labelKey: "missions", path: "/missions" },
 ] as const;
 
 // Top links that also appear in the sidebar with Promotions (labels under `topNav`).
