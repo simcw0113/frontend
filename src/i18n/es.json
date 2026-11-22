@@ -207,11 +207,15 @@
       "all": "Todos los juegos",
       "slots": "Tragaperras",
       "liveCasino": "Casino en vivo",
+      "liveDealer": "Crupier en vivo",
       "baccarat": "Bacará",
       "blackjack": "Blackjack",
       "roulette": "Ruleta",
       "gameShows": "Game shows",
-      "sicBo": "Sic Bo"
+      "sicBo": "Sic Bo",
+      "lottery": "Lotería",
+      "fishing": "Pesca",
+      "fastGame": "Juego rápido"
     }
   },
   "topNav": {

@@ -782,7 +782,7 @@ export function LobbyScreen({
             <>
               {focus === "casino" && casino.slug === "all-games" && productCategories.length > 1 ? (
                 <CategoryChips
-                  items={toCategoryChips(productCategories, t.lobby.all)}
+                  items={toCategoryChips(productCategories, t.lobby.all, t.search.categories)}
                   value={String(productCategoryId)}
                   onChange={(id) => {
                     setProductCategoryId(Number(id));
@@ -1246,6 +1246,8 @@ function ProvidersIcon() {
 }
 
 // /providers: every product from GET /config as a logo card; a card opens All Games on it.
+// A working logo is shown with object-fit: contain and no title. Missing or failed
+// images keep the mark avatar plus the provider name.
 function ProvidersGrid({ providers, status }: { providers: Provider[]; status: "loading" | "ready" | "error" }) {
   const { t } = useI18n();
   const grid = "mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6";
@@ -1264,27 +1266,46 @@ function ProvidersGrid({ providers, status }: { providers: Provider[]; status: "
     <ul className={grid} aria-labelledby="providers-title">
       {providers.map((provider) => (
         <li key={provider.id}>
-          <LobbyLink
-            href={`/casino/all-games?provider=${encodeURIComponent(provider.id)}`}
-            className="flex h-28 flex-col items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-3 text-center text-sm font-semibold transition-colors hover:border-brand/60 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-          >
-            {provider.image ? (
-              // eslint-disable-next-line @next/next/no-img-element -- provider logos come from any API host
-              <img src={provider.image} alt="" className="h-12 w-full max-w-[120px] object-contain" />
-            ) : (
-              <span
-                aria-hidden="true"
-                className="grid size-12 place-items-center rounded-full text-sm font-black"
-                style={{ color: provider.accent, backgroundColor: `color-mix(in srgb, ${provider.accent} 20%, #081a1f)` }}
-              >
-                {provider.mark}
-              </span>
-            )}
-            <span className="line-clamp-1">{provider.name}</span>
-          </LobbyLink>
+          <ProviderCard provider={provider} />
         </li>
       ))}
     </ul>
+  );
+}
+
+function ProviderCard({ provider }: { provider: Provider }) {
+  const [failed, setFailed] = useState(false);
+  const showImage = Boolean(provider.image) && !failed;
+  return (
+    <LobbyLink
+      href={`/casino/all-games?provider=${encodeURIComponent(provider.id)}`}
+      ariaLabel={provider.name}
+      className={`flex h-28 flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/[0.07] text-center text-sm font-semibold transition-colors hover:border-brand/60 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+        showImage ? "p-0" : "px-3 py-3"
+      }`}
+    >
+      {showImage ? (
+        // eslint-disable-next-line @next/next/no-img-element -- provider logos come from any API host
+        <img
+          src={provider.image}
+          alt=""
+          onError={() => setFailed(true)}
+          className="h-full w-full object-contain"
+          style={{ objectFit: "contain" }}
+        />
+      ) : (
+        <>
+          <span
+            aria-hidden="true"
+            className="grid size-12 place-items-center rounded-full text-sm font-black"
+            style={{ color: provider.accent, backgroundColor: `color-mix(in srgb, ${provider.accent} 20%, #081a1f)` }}
+          >
+            {provider.mark}
+          </span>
+          <span className="line-clamp-1">{provider.name}</span>
+        </>
+      )}
+    </LobbyLink>
   );
 }
 

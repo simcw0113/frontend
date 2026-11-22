@@ -207,11 +207,15 @@
       "all": "Semua Permainan",
       "slots": "Slot",
       "liveCasino": "Kasino Langsung",
+      "liveDealer": "Kasino Langsung",
       "baccarat": "Bakarat",
       "blackjack": "Blackjack",
       "roulette": "Rolet",
       "gameShows": "Rancangan Permainan",
-      "sicBo": "Sic Bo"
+      "sicBo": "Sic Bo",
+      "lottery": "Loteri",
+      "fishing": "Memancing",
+      "fastGame": "Permainan Pantas"
     }
   },
   "topNav": {

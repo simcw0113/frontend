@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import type { Dictionary } from "@/i18n";
 import { LOBBY_ALL_CATEGORY, type LobbyProductCategory } from "@/lib/lobbyApi";
 
 // Horizontal category chips, same pattern as the Explore search pop-up tabs:
@@ -13,10 +14,60 @@ export type CategoryChip = {
   icon?: "grid";
 };
 
-export function toCategoryChips(categories: LobbyProductCategory[], allLabel: string): CategoryChip[] {
+type CategoryLabels = Dictionary["search"]["categories"];
+
+function normalizeCategoryName(value: string) {
+  return value.trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
+}
+
+// Backend GET /config product titles are often English even when locale=cn.
+// Map known names and category ids to i18n keys; otherwise keep the backend title.
+const CATEGORY_ALIASES: Record<string, keyof CategoryLabels> = {
+  all: "all",
+  "all games": "all",
+  slots: "slots",
+  slot: "slots",
+  "live dealer": "liveDealer",
+  "live dealer games": "liveDealer",
+  "live casino": "liveCasino",
+  lottery: "lottery",
+  fishing: "fishing",
+  "fishing games": "fishing",
+  "fast game": "fastGame",
+  "fast games": "fastGame",
+  baccarat: "baccarat",
+  blackjack: "blackjack",
+  roulette: "roulette",
+  "game shows": "gameShows",
+  "game show": "gameShows",
+  "sic bo": "sicBo",
+  sicbo: "sicBo",
+};
+
+const CATEGORY_IDS: Record<number, keyof CategoryLabels> = {
+  [LOBBY_ALL_CATEGORY]: "all",
+  1: "liveDealer",
+  3: "slots",
+  4: "lottery",
+  5: "fishing",
+  11: "fastGame",
+};
+
+export function productCategoryLabel(item: LobbyProductCategory, allLabel: string, labels: CategoryLabels): string {
+  if (item.id === LOBBY_ALL_CATEGORY) return allLabel;
+  const key = CATEGORY_ALIASES[normalizeCategoryName(item.title)] ?? CATEGORY_IDS[item.id];
+  if (key && labels[key]) return labels[key];
+  return item.title || String(item.id);
+}
+
+export function toCategoryChips(
+  categories: LobbyProductCategory[],
+  allLabel: string,
+  labels: CategoryLabels,
+): CategoryChip[] {
   return categories.map((item) => ({
     id: String(item.id),
-    label: item.title || (item.id === LOBBY_ALL_CATEGORY ? allLabel : String(item.id)),
+    label: productCategoryLabel(item, allLabel, labels),
     icon: item.id === LOBBY_ALL_CATEGORY ? "grid" : undefined,
   }));
 }

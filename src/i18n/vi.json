@@ -207,11 +207,15 @@
       "all": "Tất cả game",
       "slots": "Slots",
       "liveCasino": "Live Casino",
+      "liveDealer": "Live Casino",
       "baccarat": "Baccarat",
       "blackjack": "Blackjack",
       "roulette": "Roulette",
       "gameShows": "Game shows",
-      "sicBo": "Sic Bo"
+      "sicBo": "Sic Bo",
+      "lottery": "Xổ số",
+      "fishing": "Bắn cá",
+      "fastGame": "Game nhanh"
     }
   },
   "topNav": {

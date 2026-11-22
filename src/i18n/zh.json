@@ -207,11 +207,15 @@
       "all": "全部游戏",
       "slots": "老虎机",
       "liveCasino": "真人娱乐场",
+      "liveDealer": "真人荷官",
       "baccarat": "百家乐",
       "blackjack": "二十一点",
       "roulette": "轮盘",
       "gameShows": "游戏秀",
-      "sicBo": "骰宝"
+      "sicBo": "骰宝",
+      "lottery": "彩票",
+      "fishing": "捕鱼",
+      "fastGame": "快速游戏"
     }
   },
   "topNav": {

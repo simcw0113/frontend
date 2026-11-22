@@ -356,7 +356,7 @@ function ExploreContent({ onClose }: { onClose: () => void }) {
 
       {productCategories.length > 1 ? (
         <CategoryChips
-          items={toCategoryChips(productCategories, t.lobby.all)}
+          items={toCategoryChips(productCategories, t.lobby.all, t.search.categories)}
           value={String(categoryId)}
           onChange={(id) => {
             setCategoryId(Number(id));

@@ -207,11 +207,15 @@
       "all": "เกมทั้งหมด",
       "slots": "สล็อต",
       "liveCasino": "ไลฟ์คาสิโน",
+      "liveDealer": "ไลฟ์คาสิโน",
       "baccarat": "บาคาร่า",
       "blackjack": "แบล็คแจ็ค",
       "roulette": "รูเล็ต",
       "gameShows": "เกมโชว์",
-      "sicBo": "ซิกโบ"
+      "sicBo": "ซิกโบ",
+      "lottery": "ลอตเตอรี่",
+      "fishing": "ยิงปลา",
+      "fastGame": "เกมเร็ว"
     }
   },
   "topNav": {
