@@ -5,9 +5,9 @@ import { LobbyLink } from "@/components/lobby/LobbyLink";
 import type { WalletBalance } from "@/lib/walletBalance";
 
 // Header wallet: amount on the left (grows when the pill is widened) and a brand
-// icon-only deposit button flush to the right. Used by the lobby header and the
-// phone game top bar. Goes to /{lang}/deposit; to open the popup instead, swap
-// the LobbyLink for <button type="button" onClick={useOpenDeposit()} className="dep-header-btn">.
+// icon-only deposit button flush to the right. Used by the lobby header only.
+// Goes to /{lang}/deposit; to open the popup instead, swap the LobbyLink for
+// <button type="button" onClick={useOpenDeposit()} className="dep-header-btn">.
 export function WalletPill({ wallet, className = "" }: { wallet: WalletBalance | null; className?: string }) {
   const { t } = useI18n();
   return (
@@ -26,7 +26,7 @@ export function WalletPill({ wallet, className = "" }: { wallet: WalletBalance |
       ) : null}
       <LobbyLink
         href="/deposit"
-        aria-label={t.deposit.deposit}
+        ariaLabel={t.deposit.deposit}
         className={`dep-header-btn no-underline ml-auto shrink-0 bg-brand text-lobby${wallet ? " rounded-l-none" : ""}`}
       >
         <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

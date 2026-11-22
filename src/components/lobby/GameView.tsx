@@ -20,7 +20,6 @@ import { BrandLoader } from "@/components/BrandLoader";
 import { useI18n } from "@/components/I18nProvider";
 import { gameHref, SymbolMark } from "@/components/lobby/GameCover";
 import { hasInAppHistory, LobbyLink } from "@/components/lobby/LobbyLink";
-import { WalletPill } from "@/components/lobby/WalletPill";
 import { findCasinoCategory } from "@/config/categories";
 import { siteConfig } from "@/config/site";
 import type { Game } from "@/config/lobby";
@@ -72,14 +71,14 @@ function subscribeFullscreen(listener: () => void) {
   return () => document.removeEventListener("fullscreenchange", listener);
 }
 
-// What the lobby hands the game page: the header wallet and its sign-in dialog. A context, not
-// props: the page renders <GameView> itself (a server slot inside <Suspense>, so `params`, URL
-// data, stays out of the App Shell) and LobbyScreen only places that slot.
-export const GameHost = createContext<{ wallet: WalletBalance | null; onSignIn: () => void }>({ wallet: null, onSignIn: () => {} });
+// What the lobby hands the game page: the sign-in dialog. A context, not props: the page
+// renders <GameView> itself (a server slot inside <Suspense>, so `params`, URL data, stays
+// out of the App Shell) and LobbyScreen only places that slot.
+export const GameHost = createContext<{ onSignIn: () => void }>({ onSignIn: () => {} });
 
 export function GameView({ data }: { data: NonNullable<GamePageData> }) {
-  const { wallet, onSignIn } = use(GameHost);
-  return <GameBody key={data.game.id} data={data} wallet={wallet} onSignIn={onSignIn} />;
+  const { onSignIn } = use(GameHost);
+  return <GameBody key={data.game.id} data={data} onSignIn={onSignIn} />;
 }
 
 function Cover({ game, size }: { game: Game; size: number }) {
@@ -118,7 +117,7 @@ function DockButton({
 
 const ICON = "gp-icon";
 
-function GameBody({ data, wallet, onSignIn }: { data: NonNullable<GamePageData>; wallet: WalletBalance | null; onSignIn: () => void }) {
+function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignIn: () => void }) {
   const { t, locale, href: localized } = useI18n();
   const router = useRouter();
   const { game, recommended } = data;
@@ -308,8 +307,6 @@ function GameBody({ data, wallet, onSignIn }: { data: NonNullable<GamePageData>;
             </span>
           </div>
           <div className="gp-dock-buttons">
-            {/* Phones only (the lobby header is hidden while a game fills the screen). */}
-            <WalletPill wallet={wallet} className="gp-deposit" />
             {favouriteButton("gp-btn-fav")}
             <DockButton label={t.gamePage.theatre} pressed={theatre} onClick={() => setTheatre((on) => !on)} className="gp-btn-theatre">
               <svg viewBox="0 0 24 24" className={ICON} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

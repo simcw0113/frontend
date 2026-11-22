@@ -761,7 +761,6 @@ export function LobbyScreen({
           ) : focus === "game" ? (
             <GameHost
               value={{
-                wallet,
                 onSignIn: () => {
                   setAuthView("login");
                   setSignInOpen(true);
@@ -796,7 +795,7 @@ export function LobbyScreen({
                 />
               ) : null}
               {focus === "home" || (focus === "casino" && !casino.tagged) ? (
-                <ProviderRow selected={activeProvider} onSelect={selectProvider} providers={visibleProviders} />
+                <ProviderRow selected={activeProvider} onSelect={selectProvider} providers={visibleProviders} allHref={focus === "home" ? "/providers" : undefined} />
               ) : null}
               {activeProduct && activeProduct.type != null && activeProduct.type !== 3 ? (
                 // Web / App / Deep Link products have no game list in our lobby.
