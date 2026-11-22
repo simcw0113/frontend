@@ -4,15 +4,19 @@ import { useI18n } from "@/components/I18nProvider";
 import { LobbyLink } from "@/components/lobby/LobbyLink";
 import type { WalletBalance } from "@/lib/walletBalance";
 
-// KickWin's header wallet: "MYR 0.00" joined to an icon-only deposit button. Used by the lobby
-// header and the phone game top bar. Goes to /{lang}/deposit; to open the popup instead, swap
+// Header wallet: amount on the left (grows when the pill is widened) and a brand
+// icon-only deposit button flush to the right. Used by the lobby header and the
+// phone game top bar. Goes to /{lang}/deposit; to open the popup instead, swap
 // the LobbyLink for <button type="button" onClick={useOpenDeposit()} className="dep-header-btn">.
 export function WalletPill({ wallet, className = "" }: { wallet: WalletBalance | null; className?: string }) {
   const { t } = useI18n();
   return (
-    <div className={`dep-wallet ${className}`}>
+    // display:flex overrides .dep-wallet { inline-flex } so min-width on the pill
+    // actually gives leftover space to the amount, not an empty gap after the button.
+    // overflow-hidden keeps both ends on the same 0.625rem radius.
+    <div className={`dep-wallet overflow-hidden ${className}`.trim()} style={{ display: "flex" }}>
       {wallet ? (
-        <span className="dep-wallet-balance" title={t.providerLaunch.balance}>
+        <span className="dep-wallet-balance min-w-0 flex-1" title={t.providerLaunch.balance}>
           <span className="dep-wallet-amount">
             {wallet.currency} {wallet.balance}
           </span>
@@ -20,7 +24,11 @@ export function WalletPill({ wallet, className = "" }: { wallet: WalletBalance |
           <span className="dep-wallet-playing">{t.gamePage.playing}</span>
         </span>
       ) : null}
-      <LobbyLink href="/deposit" aria-label={t.deposit.deposit} className="dep-header-btn no-underline">
+      <LobbyLink
+        href="/deposit"
+        aria-label={t.deposit.deposit}
+        className={`dep-header-btn no-underline ml-auto shrink-0 bg-brand text-lobby${wallet ? " rounded-l-none" : ""}`}
+      >
         <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M4 7.5 C4 6.1 5.1 5 6.5 5 H17 V8" />
           <path d="M4 7.5 V17.5 C4 18.9 5.1 20 6.5 20 H19.5 V8 H6.5 C5.1 8 4 6.9 4 7.5" />

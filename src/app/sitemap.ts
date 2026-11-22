@@ -8,6 +8,7 @@ import { getSiteLanguages } from "@/lib/siteLanguages";
 const pages = [
   { path: "/", priority: 1 },
   ...casinoCategories.map(({ slug }) => ({ path: `/casino/${slug}`, priority: 0.8 })),
+  { path: "/providers", priority: 0.6 },
   { path: "/promotions", priority: 0.7 },
   { path: "/sports", priority: 0.5 },
   ...(VIP_ENABLED ? [{ path: "/vip", priority: 0.5 }] : []),

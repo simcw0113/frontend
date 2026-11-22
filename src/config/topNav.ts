@@ -71,3 +71,6 @@ export const sidebarNavItems: TopNavItem[] = pinLastItems(
 );
 export const sidebarNavIds = sidebarNavItems.map((item) => item.id);
 export type SidebarNavId = (typeof sidebarNavItems)[number]["id"];
+
+// Sidebar-only, right under All Games (end of the games group): the provider grid page. Label under `lobby`.
+export const sidebarProvidersItem = { id: "providers", labelKey: "providers", path: "/providers" } as const;

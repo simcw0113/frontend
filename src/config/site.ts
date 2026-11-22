@@ -47,8 +47,8 @@ export const apiConfig = {
   categoryGamesPath: "/games/category/{category}",
   // TODO(API): placeholder for the Explore search. Query: q, category, page, pageSize, lang.
   searchGamesPath: "/games/search",
-  // TODO(API): placeholder for the monthly top wins list; lang is sent as a query parameter.
-  topWinsPath: "/wins/top-month",
+  // POST /top_wins. Body: { locale }. Public, cached. Days and count are backend admin settings.
+  topWinsPath: "/top_wins",
   // TODO(API): placeholder for the partner list (id, name, logo URL); lang is sent as a query parameter.
   partnersPath: "/partners",
   // POST /promotion. Body: { locale }. Header: country-id. Text is already localized.

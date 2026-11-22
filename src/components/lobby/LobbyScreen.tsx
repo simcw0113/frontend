@@ -36,7 +36,7 @@ import { ProfilePage, ProfileSkeleton } from "@/components/lobby/ProfilePage";
 import { ComingSoonHeader, TopNav } from "@/components/lobby/TopNav";
 import { MissionsHeader, MissionsPage } from "@/components/lobby/Missions";
 import { VipClub, VipHeader } from "@/components/lobby/VipClub";
-import { sidebarAffiliateItem, sidebarNavItems, sidebarPlayerItems, sidebarPromoItems } from "@/config/topNav";
+import { sidebarAffiliateItem, sidebarNavItems, sidebarPlayerItems, sidebarPromoItems, sidebarProvidersItem } from "@/config/topNav";
 import { PlayerGameList } from "@/components/lobby/HomeGameContent";
 import { TopWins, TopWinsSkeleton } from "@/components/lobby/TopWins";
 import { VIP_ENABLED } from "@/config/vip";
@@ -65,7 +65,7 @@ const TOGGLE =
   "grid size-11 shrink-0 place-items-center rounded-lg text-brand hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 
-export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites" | "missions" | "affiliate" | "game" | "deposit" | "withdraw" | "profile";
+export type LobbyFocus = "home" | "casino" | "promotions" | "sports" | "vip" | "z-ai" | "recent" | "favourites" | "missions" | "affiliate" | "game" | "deposit" | "withdraw" | "profile" | "providers";
 
 // `games` holds one promise per category slug, started on the server (lib/games.ts)
 // and read here with use() inside <Suspense>, so the page shell shows at once.
@@ -290,7 +290,8 @@ export function LobbyScreen({
   // Leaving the casino page forgets an "All" click, so the next visit does the same.
   if (casinoSlug && trackedSlug !== casinoSlug) {
     setTrackedSlug(casinoSlug);
-    setProvider(null);
+    // /providers cards open /casino/all-games?provider={public_code} on that provider.
+    setProvider(typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("provider"));
     setAllSlug(null);
     setGameQuery("");
     setProductCategoryId(LOBBY_ALL_CATEGORY);
@@ -333,7 +334,10 @@ export function LobbyScreen({
       ...sidebarPlayerItems.map((item) => ({ path: item.path, label: t.menu[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
     ],
     sidebarPromoItems.map((item) => ({ path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
-    sidebarNavItems.map((item) => ({ path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
+    [
+      ...sidebarNavItems.map((item) => ({ path: item.path, label: t.topNav[item.labelKey], Icon: SIDEBAR_ICONS[item.id] })),
+      { path: sidebarProvidersItem.path, label: t.lobby[sidebarProvidersItem.labelKey], Icon: SIDEBAR_ICONS[sidebarProvidersItem.id] },
+    ],
     // Affiliate sits with the language selector at the bottom (sidebar only, not in the top bar).
     [{ path: sidebarAffiliateItem.path, label: t.menu[sidebarAffiliateItem.labelKey], Icon: SIDEBAR_ICONS[sidebarAffiliateItem.id] }],
   ];
@@ -386,7 +390,8 @@ export function LobbyScreen({
             <MenuIcon />
           </button>
         </div>
-        <div className="lobby-aside-body flex flex-col p-3">
+        {/* pb-24: room below the language selector so the floating button doesn't cover it. */}
+        <div className="lobby-aside-body flex flex-col p-3 pb-24">
           {/* Groups (config/topNav.ts): Home + the player's pages (+ Missions) | Promotions, VIP |
               games | Affiliate | the language selector. The shown page's link is aria-current="page". */}
           {sideGroups.map((group, groupIndex) => (
@@ -503,6 +508,7 @@ export function LobbyScreen({
         </h1>
         <TopNav route={navRoute} />
         <div className="ml-auto flex h-16 shrink-0 items-center gap-2">
+          {user?.username ? <WalletPill wallet={wallet} className="md:min-w-48" /> : null}
           {/* PC only; phones search from the bottom tab bar (MobileTabBar). */}
           <button
             type="button"
@@ -514,8 +520,6 @@ export function LobbyScreen({
           </button>
           {user?.username ? (
             <>
-            {/* PC: centred in the 64px main row of the header (sticky, so it is the containing block). */}
-            <WalletPill wallet={wallet} className="md:absolute md:left-1/2 md:top-8 md:-translate-x-1/2 md:-translate-y-1/2" />
             {VIP_ENABLED ? (
               <LobbyLink
                 href="/vip"
@@ -655,6 +659,15 @@ export function LobbyScreen({
               <WithdrawHeader />
             ) : focus === "missions" ? (
               <MissionsHeader />
+            ) : focus === "providers" ? (
+              <div className="promo-header">
+                <h2 id="providers-title" className="text-xl font-bold">
+                  {t.lobby.providers}
+                </h2>
+                <span className="promo-header-art grid place-items-center [&>svg]:size-full">
+                  <ProvidersIcon />
+                </span>
+              </div>
             ) : focus === "z-ai" ? (
               <ComingSoonHeader title={t.topNav.zAi} />
             ) : focus === "game" || focus === "sports" || focus === "profile" ? null : (
@@ -823,6 +836,8 @@ export function LobbyScreen({
                 </>
               )}
             </>
+          ) : focus === "providers" ? (
+            <ProvidersGrid providers={providers} status={providersStatus} />
           ) : focus === "vip" ? (
             <VipClub />
           ) : focus === "missions" ? (
@@ -1221,11 +1236,65 @@ function AffiliateIcon() {
   );
 }
 
+function ProvidersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 9.5 L5.5 4.5 H18.5 L20 9.5" />
+      <path d="M4 9.5 C4 11 5.2 12 6.7 12 C8.2 12 9.3 11 9.3 9.5 C9.3 11 10.5 12 12 12 C13.5 12 14.7 11 14.7 9.5 C14.7 11 15.8 12 17.3 12 C18.8 12 20 11 20 9.5 Z" />
+      <path d="M5.5 12 V19.5 H18.5 V12 M10 19.5 V15.5 H14 V19.5" />
+    </svg>
+  );
+}
+
+// /providers: every product from GET /config as a logo card; a card opens All Games on it.
+function ProvidersGrid({ providers, status }: { providers: Provider[]; status: "loading" | "ready" | "error" }) {
+  const { t } = useI18n();
+  const grid = "mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6";
+  if (status === "loading") {
+    return (
+      <div className={grid} aria-hidden="true" data-skeleton="">
+        {Array.from({ length: 12 }, (_, index) => (
+          <div key={index} className="h-28 rounded-xl bg-white/5 motion-safe:animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+  if (status === "error") return <p className="mt-6 text-sm text-muted">{t.lobby.loadError}</p>;
+  if (providers.length === 0) return <p className="mt-6 text-sm text-muted">{t.lobby.empty}</p>;
+  return (
+    <ul className={grid} aria-labelledby="providers-title">
+      {providers.map((provider) => (
+        <li key={provider.id}>
+          <LobbyLink
+            href={`/casino/all-games?provider=${encodeURIComponent(provider.id)}`}
+            className="flex h-28 flex-col items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-3 text-center text-sm font-semibold transition-colors hover:border-brand/60 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            {provider.image ? (
+              // eslint-disable-next-line @next/next/no-img-element -- provider logos come from any API host
+              <img src={provider.image} alt="" className="h-12 w-full max-w-[120px] object-contain" />
+            ) : (
+              <span
+                aria-hidden="true"
+                className="grid size-12 place-items-center rounded-full text-sm font-black"
+                style={{ color: provider.accent, backgroundColor: `color-mix(in srgb, ${provider.accent} 20%, #081a1f)` }}
+              >
+                {provider.mark}
+              </span>
+            )}
+            <span className="line-clamp-1">{provider.name}</span>
+          </LobbyLink>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 const SIDEBAR_ICONS: Record<
   | (typeof sidebarNavItems)[number]["id"]
   | (typeof sidebarPlayerItems)[number]["id"]
   | (typeof sidebarPromoItems)[number]["id"]
-  | typeof sidebarAffiliateItem.id,
+  | typeof sidebarAffiliateItem.id
+  | typeof sidebarProvidersItem.id,
   () => ReactNode
 > = {
   recent: RecentIcon,
@@ -1234,6 +1303,7 @@ const SIDEBAR_ICONS: Record<
   missions: MissionsIcon,
   vip: CrownIcon,
   affiliate: AffiliateIcon,
+  providers: ProvidersIcon,
   "hot-games": HotGamesIcon,
   "new-release": NewReleaseIcon,
   "all-games": AllGamesIcon,
