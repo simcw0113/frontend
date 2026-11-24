@@ -32,10 +32,11 @@ import { useFavourites } from "@/lib/useFavourites";
 import { loadBalance, type WalletBalance } from "@/lib/walletBalance";
 
 // Game page body (/casino/{category}/game/{id}, LobbyScreen focus "game").
-// Layout (styles: .gp-* in globals.css):
+// Layout (styles: .gp-* in globals.css, plus GameLayoutStyles below for the desktop dock):
 //   - stage: a soft cyan glow behind the 16:9 game frame (gradient border) and
-//     a floating glass dock overlapping its bottom edge (title | favourite, theatre, fullscreen,
-//     close);
+//     a glass dock (title | favourite, theatre, fullscreen, close). On desktop the dock
+//     sits under the frame with a small gap (not overlapping the iframe). On phones the
+//     dock is a compact top bar (unchanged).
 //   - side panel (>= 1280px: sticky right column; below: under the stage): info card with stat
 //     tiles (RTP, house edge, category) and "Recommended" (a vertical list on the side, a
 //     horizontal snap carousel below 1280px).
@@ -47,6 +48,57 @@ import { loadBalance, type WalletBalance } from "@/lib/walletBalance";
 // see .gp-* in globals.css).
 // Stops the game. An about:blank page has a light canvas, which would flash white inside the
 // dark page, so the frame is hidden first.
+// Desktop only: sit the dock below the frame (globals.css pulls it up with a
+// negative margin, which covers the game's own controls). The frame's max
+// height leaves room for the header, main padding, stage padding, a 0.75rem
+// gap and the dock so the play area fits the viewport. Fullscreen clears the
+// cap. Left alone on the phone layout (including landscape coarse pointers).
+const GAME_LAYOUT_CSS = `
+@media (min-width: 768px) {
+  .gp .gp-dock {
+    margin: 0.75rem auto 0;
+  }
+  .gp .gp-shell {
+    width: min(100%, calc((100dvh - var(--lobby-header-h) - 7.875rem) * 16 / 9 + 2px));
+    max-width: 100%;
+    margin-inline: auto;
+  }
+  .gp .gp-frame {
+    width: 100%;
+    height: auto;
+    max-height: calc(100dvh - var(--lobby-header-h) - 7.875rem);
+    aspect-ratio: 16 / 9;
+  }
+  .gp .gp-frame:fullscreen {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    aspect-ratio: auto;
+    margin: 0;
+  }
+}
+@media (min-width: 768px) and (max-height: 500px) and (pointer: coarse) {
+  .gp .gp-dock {
+    margin: 0;
+  }
+  .gp .gp-shell {
+    width: auto;
+    max-width: none;
+    margin-inline: 0;
+  }
+  .gp .gp-frame {
+    width: auto;
+    height: 100%;
+    max-height: none;
+    aspect-ratio: auto;
+  }
+}
+`;
+
+function GameLayoutStyles() {
+  return <style>{GAME_LAYOUT_CSS}</style>;
+}
+
 function blankFrame(frame: HTMLIFrameElement | null) {
   if (!frame) return;
   frame.style.visibility = "hidden";
@@ -254,6 +306,7 @@ function GameBody({ data, onSignIn }: { data: NonNullable<GamePageData>; onSignI
 
   return (
     <div className={`gp${theatre ? " is-theatre" : ""}`}>
+      <GameLayoutStyles />
       <section aria-label={game.title} className="gp-stage" data-playing={"url" in launch && phase !== "failed" ? "" : undefined}>
         <div className="gp-ambient" aria-hidden="true" />
         <div className="gp-shell">
@@ -683,6 +736,7 @@ function Recommended({ games }: { games: NonNullable<GamePageData>["recommended"
 export function GameViewSkeleton() {
   return (
     <div className="gp" aria-hidden="true" data-skeleton="">
+      <GameLayoutStyles />
       <div className="gp-stage">
         <div className="gp-shell">
           <div className="gp-frame">
