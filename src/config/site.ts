@@ -1,12 +1,15 @@
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const siteConfig = {
-  name: "Zenwick",
+  name: "Game Lobby",
   description: "Casino games and sports markets together in one lobby.",
   url: siteUrl.replace(/\/$/, ""),
-  // Top bar logo (public/brand/). Width/height = file pixel size; CSS scales with h-9 / object-contain.
-  // Branch mark: lion + Z shield + ZENWICK wordmark (transparent PNG from WhatsApp source).
-  logo: { src: "/brand/logo-zenwick.png", width: 848, height: 837 },
+  // Top bar logo (an image in public/). To change it, replace the file or point `src` at a new
+  // one and update width/height (the file's pixel size); the alt text is the translated site name.
+  // TEMPORARY test logo: the white LV monogram (public/brand/logo-lv.png, made from
+  // lv-source.png; logo-lv-full.png also has the wordmark). To switch back to the previous neon
+  // placeholder: { src: "/brand/logo.png", width: 288, height: 168 }.
+  logo: { src: "/brand/logo-lv.png", width: 225, height: 219 },
 };
 
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");

@@ -17,11 +17,6 @@
 /.next/
 /out/
 
-# OpenNext / Cloudflare Workers build output
-/.open-next/
-/.wrangler/
-
-
 # Build stamp. Rewritten by npm run build and kept out of the page.
 src/lib/buildMeta.generated.ts
 

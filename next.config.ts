@@ -4,7 +4,6 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
@@ -56,6 +55,3 @@ export default function config(phase: string): NextConfig {
     },
   };
 }
-
-// Lets `next dev` talk to local Cloudflare bindings when previewing Workers.
-initOpenNextCloudflareForDev();
